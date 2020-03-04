@@ -72,7 +72,10 @@ public class MainActivity extends Activity {
                 t2.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
             }
         });
+
+        startService(new Intent(this,NotificationService.class));
     }
+
 
     /*public void onPause(){
         if(t1 !=null){
