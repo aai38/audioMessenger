@@ -18,6 +18,7 @@ import com.robj.notificationhelperlibrary.utils.NotificationUtils;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.zip.Inflater;
 
@@ -46,7 +47,7 @@ import static android.content.ContentValues.TAG;
  */
 public class NotificationListenerExampleService extends NotificationListenerService {
 
-
+    public ArrayList<ReceivedMessage> messages = new ArrayList<ReceivedMessage>();
     /*
         These are the package names of the apps. for which we want to
         listen the notifications
@@ -80,7 +81,10 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         Notification not =  sbn.getNotification();
         String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
         String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
-        MainActivity.updateOurText("Du hast von "+person+" diese Nachricht bekommen " +message);
+        //String person = not.extras.getCharSequence(Notification.).toString();
+        ReceivedMessage rec = new ReceivedMessage(message,person);
+        messages.add(rec);
+        MainActivity.updateOurText(person+", " +message);
 
 
 

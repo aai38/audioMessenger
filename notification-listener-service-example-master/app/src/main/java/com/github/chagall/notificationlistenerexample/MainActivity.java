@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.Locale;
 
 /**
@@ -89,6 +90,10 @@ public class MainActivity extends AppCompatActivity {
     public static void updateOurText(String text) {
 
         view.setText("Test: "+ text);
+        File file = new File("../../res/audio/Earcon1.mp3");
+        t1.addEarcon("earcon", file);
+        t1.playEarcon("earcon",TextToSpeech.QUEUE_ADD,null);
+
         t1.speak(text,TextToSpeech.QUEUE_FLUSH,null);
     }
 
