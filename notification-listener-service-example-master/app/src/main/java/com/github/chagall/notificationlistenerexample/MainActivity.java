@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     public MicrophoneListener micro;
     public boolean hasRecorded;
     public String fileName;
+    public static SoundPool sp;
+    private static int earcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        sp = new SoundPool(2, STREAM_MUSIC, 0);
+        earcon = sp.load(this, R.raw.earcon1, 1);
     }
 
     @Override
@@ -176,6 +180,20 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("Success: "+succ1+ " " + succ);
 
         t1.speak(text,TextToSpeech.QUEUE_ADD,null);
+        t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId){
+                sp.play(earcon, 1,1,0,0,1);
+            }
+            @Override
+            public void onDone(String utteranceId) {
+                // Speaking stopped.
+            }
+            @Override
+            public void onError(String utteranceId) {
+                // There was an error.
+            }
+        });
 
     }
 
