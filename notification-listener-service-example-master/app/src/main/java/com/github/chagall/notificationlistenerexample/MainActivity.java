@@ -11,9 +11,11 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.SoundPool;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +39,11 @@ import com.ibm.watson.speech_to_text.v1.websocket.BaseRecognizeCallback;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.Locale;
+
+import static android.media.AudioManager.*;
+import static java.lang.String.valueOf;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -109,12 +115,13 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(imageChangeBroadcastReceiver,intentFilter);
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        am.setStreamVolume(am.STREAM_MUSIC, 15, 0);
+        am.setStreamVolume(STREAM_MUSIC, 15, 0);
         t1 = new TextToSpeech(getApplicationContext(), (status) -> {
             if(status != TextToSpeech.ERROR) {
                 t1.setLanguage(Locale.GERMAN);
             }
         });
+
     }
 
     @Override
@@ -158,11 +165,18 @@ public class MainActivity extends AppCompatActivity {
     public static void updateOurText(String text) {
 
         view.setText("Test: "+ text);
-        File file = new File("../../res/audio/Earcon1.mp3");
-        t1.addEarcon("earcon", file);
-        t1.playEarcon("earcon",TextToSpeech.QUEUE_ADD,null);
+        File file = new File("../../../../../res/raw/earcon1.mp3");
+        ///Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/app/src/main/java/com/github/chagall/notificationlistenerexample/MainActivity.java
+        int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
+        Bundle param = new android.os.Bundle();
+        param.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
+        param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
+        //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
+        int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
+        System.out.println("Success: "+succ1+ " " + succ);
 
-        t1.speak(text,TextToSpeech.QUEUE_FLUSH,null);
+        t1.speak(text,TextToSpeech.QUEUE_ADD,null);
+
     }
 
     /**
