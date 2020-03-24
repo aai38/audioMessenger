@@ -57,6 +57,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         public static final String FACEBOOK_MESSENGER_PACK_NAME = "com.facebook.orca";
         public static final String WHATSAPP_PACK_NAME = "com.whatsapp";
         public static final String INSTAGRAM_PACK_NAME = "com.instagram.android";
+        public static final String TELEGRAM_PACK_NAME = "org.telegram.messenger";
     }
 
     /*
@@ -79,12 +80,19 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     public void onNotificationPosted(StatusBarNotification sbn){
         int notificationCode = matchNotificationCode(sbn);
         Notification not =  sbn.getNotification();
-        String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
-        String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
-        //String person = not.extras.getCharSequence(Notification.).toString();
-        ReceivedMessage rec = new ReceivedMessage(message,person);
-        messages.add(rec);
-        MainActivity.updateOurText(person+", " +message);
+        if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
+            String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+            String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
+            String[] splitted = new String[3];
+            if (person.contains(" (")) {
+                splitted = person.split("\\(.*^\\)");
+            }
+            //String person = not.extras.getCharSequence(Notification.).toString();
+            ReceivedMessage rec = new ReceivedMessage(message,splitted[0]);
+            messages.add(rec);
+            MainActivity.updateOurText(person+", " +message);
+        }
+
 
 
 
@@ -111,6 +119,8 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
         }
     }
+
+
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn){
@@ -149,5 +159,33 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         else{
             return(InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE);
         }
+    }
+
+    public String getMessageToRead (ArrayList<ReceivedMessage> messages) {
+        String persons = "";
+        String totalMessage = "";
+
+        if (messages.size() == 0) {
+            return "Du hast keine neuen Nachrichten";
+        } else if (messages.size() == 1) {
+            persons = messages.get(0).getPerson();
+            totalMessage = "Du hast eine Nachricht von " + persons + ", " + messages.get(0).getMessageText();
+        } else {
+            for (ReceivedMessage message: messages) {
+                persons+= " " + message.getPerson();
+                totalMessage = "Du hast Nachrichten von" + persons;
+            }
+        }
+        return totalMessage;
+    }
+
+    public String getMessageFromPerson (String person, ArrayList<ReceivedMessage> messages) {
+        for (ReceivedMessage message: messages) {
+            if (message.getPerson().equals(person)) {
+                return message.getMessageText();
+
+            }
+        }
+        return "Keine Nachricht von dieser Person vorhanden";
     }
 }

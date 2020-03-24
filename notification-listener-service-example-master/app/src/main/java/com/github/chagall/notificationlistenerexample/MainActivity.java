@@ -39,6 +39,7 @@ import com.ibm.watson.speech_to_text.v1.websocket.BaseRecognizeCallback;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -283,4 +284,8 @@ public class MainActivity extends AppCompatActivity {
                 });
         return(alertDialogBuilder.create());
     }
+
+
+
+
 }
