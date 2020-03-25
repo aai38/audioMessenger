@@ -73,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Record to the external cache directory for visibility
-        fileName = getExternalCacheDir().getAbsolutePath();
-        fileName += "/audiorecordtest.mp4";
+        // Record to the external cache directory for visibility
+        fileName = getFilesDir()+"/speak.pcm";
         micro = new MicrophoneListener(fileName);
 
 
@@ -87,13 +87,9 @@ public class MainActivity extends AppCompatActivity {
                     hasRecorded = true;
                 } else {
                     if(hasRecorded) {
-                        micro.stopRecording();
-                        //micro.startPlaying();
-                        try {
-                            parseSpeechToText();
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
+                        micro.stopRecording(view);
+                        view.setText(micro.result);
+                        micro.result = "";
                     }
                     // The toggle is disabled
                 }
@@ -133,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(imageChangeBroadcastReceiver);
-        micro.stopRecording();
+
     }
 
     // Requesting permission to RECORD_AUDIO
@@ -152,20 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void parseSpeechToText() throws FileNotFoundException {
-        IamAuthenticator authenticator = new IamAuthenticator("N2UJ-ncPfcdKPi71q8ESL1yapZWy5Qh6FkbEZmsQTnr3");
-        SpeechToText speechToText = new SpeechToText(authenticator);
-        speechToText.setServiceUrl("https://api.eu-gb.speech-to-text.watson.cloud.ibm.com/instances/a0d543a7-e42e-45d9-b28f-ffaa0922d3c7");
-        SpeechToText service = new SpeechToText(authenticator);
 
-        File audio = new File(fileName);
-        RecognizeOptions options = new RecognizeOptions.Builder()
-                .audio(audio)
-                .contentType(HttpMediaType.AUDIO_BASIC)
-                .build();
-        SpeechRecognitionResults transcript = service.recognize(options).execute().getResult();
-        view.setText(transcript.toString());
-    }
 
     public static void updateOurText(String text) {
 
