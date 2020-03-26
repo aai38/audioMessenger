@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private static TextView view;
     private ImageChangeBroadcastReceiver imageChangeBroadcastReceiver;
     private AlertDialog enableNotificationListenerAlertDialog;
+    private Button play;
 
     public static TextToSpeech t1;
     public MicrophoneListener micro;
@@ -76,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
         // Record to the external cache directory for visibility
         fileName = getFilesDir()+"/speak.pcm";
         micro = new MicrophoneListener(fileName);
+
+        Button button = (Button) findViewById(R.id.buttonEverything);
+        button.setOnClickListener( (View view) -> {
+            updateOurText( NotificationListenerExampleService.getMessageToRead());
+
+        });
 
 
         //Button zum Testen von Spracheingabe (später entfernen)

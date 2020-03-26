@@ -47,7 +47,7 @@ import static android.content.ContentValues.TAG;
  */
 public class NotificationListenerExampleService extends NotificationListenerService {
 
-    public ArrayList<ReceivedMessage> messages = new ArrayList<ReceivedMessage>();
+    public static ArrayList<ReceivedMessage> messages = new ArrayList<ReceivedMessage>();
     /*
         These are the package names of the apps. for which we want to
         listen the notifications
@@ -170,7 +170,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         }
     }
 
-    public String getMessageToRead (ArrayList<ReceivedMessage> messages) {
+    public static String getMessageToRead () {
         String persons = "";
         String totalMessage = "";
 
@@ -188,7 +188,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         return totalMessage;
     }
 
-    public String getMessageFromPerson (String person, ArrayList<ReceivedMessage> messages) {
+    public String getMessageFromPerson (String person) {
         for (ReceivedMessage message: messages) {
             if (message.getPerson().equals(person)) {
                 return message.getMessageText();

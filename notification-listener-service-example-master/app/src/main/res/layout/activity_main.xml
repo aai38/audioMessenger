@@ -54,5 +54,12 @@
             android:layout_width="153dp"
             android:layout_height="79dp"
             android:text="ToggleButton" />
+
     </FrameLayout>
+
+    <Button
+        android:id="@+id/buttonEverything"
+        android:layout_width="149dp"
+        android:layout_height="63dp"
+        android:text="Play All" />
 </LinearLayout>
