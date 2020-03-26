@@ -87,9 +87,18 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             if (person.contains(" (")) {
                 splitted = person.split("\\(.*^\\)");
             }
+            for(int i = 0; i < messages.size(); i++) {
+                if(messages.get(i).getPerson().equals(person)) {
+                    ReceivedMessage received = new ReceivedMessage(messages.get(i).getMessageText()+message,splitted[0]);
+                    messages.set(i, received);
+
+                } else {
+                    ReceivedMessage rec = new ReceivedMessage(message,splitted[0]);
+                    messages.add(rec);
+                }
+            }
             //String person = not.extras.getCharSequence(Notification.).toString();
-            ReceivedMessage rec = new ReceivedMessage(message,splitted[0]);
-            messages.add(rec);
+
             MainActivity.updateOurText(person+", " +message);
         }
 
