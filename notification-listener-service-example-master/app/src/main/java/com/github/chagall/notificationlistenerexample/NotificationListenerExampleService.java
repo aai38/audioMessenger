@@ -99,7 +99,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             }
             //String person = not.extras.getCharSequence(Notification.).toString();
 
-            MainActivity.updateOurText(person+", " +message);
+            MainActivity.updateOurText(splitted[0]+", " +message);
         }
 
 
