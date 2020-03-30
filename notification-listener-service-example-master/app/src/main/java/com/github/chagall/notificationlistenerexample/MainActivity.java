@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private Button play;
 
     public static TextToSpeech t1;
-    public MicrophoneListener micro;
+    public static MicrophoneListener micro;
     public boolean hasRecorded;
     public String fileName;
     public static SoundPool sp;
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
 
-        // Record to the external cache directory for visibility
+
         // Record to the external cache directory for visibility
         fileName = getFilesDir()+"/speak.pcm";
         micro = new MicrophoneListener(fileName);
@@ -92,10 +92,11 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     micro.startRecording();
+
                     hasRecorded = true;
                 } else {
                     if(hasRecorded) {
-                        micro.stopRecording(view);
+                        micro.stopRecording();
                         view.setText(micro.result);
                         micro.result = "";
                     }
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static void updateOurText(String text) {
 
-        view.setText("Test: "+ text);
+        view.setText(text);
         File file = new File("../../../../../res/raw/earcon1.mp3");
         ///Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/app/src/main/java/com/github/chagall/notificationlistenerexample/MainActivity.java
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
@@ -180,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDone(String utteranceId) {
                 // Speaking stopped.
+
             }
             @Override
             public void onError(String utteranceId) {
@@ -187,6 +189,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        //wait until the answer keyword has been spoken or timeout has been reached
+        /*micro.startRecording();
+        while(t1.isSpeaking()) {
+            if(micro.result.equals("antworte")) {
+                break;
+            }
+        }
+        long currentTime = 0;
+        long time = System.currentTimeMillis();
+        while(currentTime < 3000) {
+            currentTime = System.currentTimeMillis() - time;
+            if(micro.result.equals("antworte")) {
+                micro.stopRecording();
+                break;
+            }
+        }
+        micro.startRecording();
+        while(micro.result.equals("")) {
+
+        }*/
     }
 
     /**
