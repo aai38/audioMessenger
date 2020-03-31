@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     hasRecorded = true;
                 } else {
                     if(hasRecorded) {
-                        micro.stopRecording();
+
                         view.setText(micro.result);
                         micro.result = "";
                     }

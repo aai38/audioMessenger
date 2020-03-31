@@ -13,6 +13,7 @@ import com.ibm.cloud.sdk.core.security.BasicAuthenticator;
 import com.ibm.cloud.sdk.core.security.IamAuthenticator;
 import com.ibm.watson.speech_to_text.v1.SpeechToText;
 import com.ibm.watson.speech_to_text.v1.model.RecognizeOptions;
+import com.ibm.watson.speech_to_text.v1.model.SpeechRecognitionResult;
 import com.ibm.watson.speech_to_text.v1.model.SpeechRecognitionResults;
 
 import java.io.BufferedInputStream;
@@ -23,10 +24,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+
 public class MicrophoneListener {
+
+    private String[] keywords = {"antworten"};
 
     private static final int RECORDER_SAMPLERATE = 16000;
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
@@ -38,24 +44,21 @@ public class MicrophoneListener {
     int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
     int BytesPerElement = 2; // 2 bytes in 16bit format
     public IamAuthenticator authenticator;
-
     public SpeechToText speechToText;
-
-
     public File audio;
     public String result = "";
 
+
     private static String fileName = null;
+
+
+
 
     public MicrophoneListener(String fileName){
         this.fileName = fileName;
         authenticator = new IamAuthenticator("N2UJ-ncPfcdKPi71q8ESL1yapZWy5Qh6FkbEZmsQTnr3");
-
         speechToText = new SpeechToText(authenticator);
         speechToText.setServiceUrl("https://api.eu-gb.speech-to-text.watson.cloud.ibm.com/instances/a0d543a7-e42e-45d9-b28f-ffaa0922d3c7");
-
-
-
         audio = new File(fileName);
     }
 
@@ -125,9 +128,6 @@ public class MicrophoneListener {
                 // // writes the data to file from buffer
                 // // stores the voice buffer
 
-
-
-
                 bData = short2byte(sData);
                 os.write(bData);
                 if(System.currentTimeMillis() - time > 3000){
@@ -155,30 +155,17 @@ public class MicrophoneListener {
             recorder.release();
             recorder = null;
             recordingThread = null;
-            /*recordingThread = new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        parseSpeechToText();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, "SpeechToText Thread");
-            recordingThread.start();
-            while(recordingThread.isAlive()) {
+            parseThread = null;
 
-            }
-            recordingThread = null;*/
         }
     }
 
 
-    boolean send = false;
+    private boolean waitForAnswer = false;
+    private boolean send = false;
     public void parseSpeechToText() throws FileNotFoundException {
-
         RecognizeOptions options;
-
-        SpeechRecognitionResults transcript;
+        List<SpeechRecognitionResult> transcript;
         String res = "";
         Pattern pattern = Pattern.compile("\"transcript\": \"(.*)\"");
         Matcher matcher;
@@ -188,30 +175,50 @@ public class MicrophoneListener {
                 //.contentType(HttpMediaType.createAudioRaw(16000))
                 .model("de-DE_BroadbandModel")
                 .build();
+        boolean done;
+
         while(isRecording) {
             if(bData != null) {
 
                 if(send) {
+
                     transcript = speechToText
                             .recognize(options)
                             .execute()
-                            .getResult();
+                            .getResult().getResults();
+                    done = true;
+                    for (SpeechRecognitionResult s : transcript) {
+                        res = s.toString();
 
+                        matcher = pattern.matcher(res);
 
-                    res = transcript.toString();
-
-                    matcher = pattern.matcher(res);
-
-                    while (matcher.find()) {
-                        result = matcher.group(1);
+                        while (matcher.find()) {
+                            result += matcher.group(1);
+                        }
+                        System.out.println(result);
+                        done = false;
                     }
-                    System.out.println(res);
+
                     send = false;
+                    if(done) {
+                        stopRecording();
+                        return;
+                    }
                 }
             }
         }
 
 
+    }
+
+    public boolean checkKeyword(String phrase, int keywordIndex) {
+
+            for (String s : phrase.split(" ")) {
+                if(s.equals(keywords[keywordIndex])) {
+                    return true;
+                }
+            }
+        return false;
     }
 
 }
