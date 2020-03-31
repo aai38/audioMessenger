@@ -48,7 +48,8 @@ public class MicrophoneListener {
     public File audio;
     public String result = "";
 
-
+    private boolean waitForAnswer = false;
+    private boolean send = false;
     private static String fileName = null;
 
 
@@ -62,7 +63,19 @@ public class MicrophoneListener {
         audio = new File(fileName);
     }
 
-    public void startRecording() {
+    private void setKeyword(int keywordIndex) {
+        switch (keywordIndex) {
+            case -1:
+                waitForAnswer = false;
+                break;
+            case 0:
+                waitForAnswer = true;
+                break;
+        }
+    }
+
+    public void startRecording(int keywordIndex) {
+        setKeyword(keywordIndex);
         result = "";
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 RECORDER_SAMPLERATE, RECORDER_CHANNELS,
@@ -105,13 +118,7 @@ public class MicrophoneListener {
     byte[] bData = null;
     private void writeAudioDataToFile() {
         // Write the output audio in byte
-
-
-
         short sData[] = new short[BufferElements2Rec];
-
-
-
         FileOutputStream os = null;
         try {
             os = new FileOutputStream(fileName);
@@ -161,8 +168,7 @@ public class MicrophoneListener {
     }
 
 
-    private boolean waitForAnswer = false;
-    private boolean send = false;
+
     public void parseSpeechToText() throws FileNotFoundException {
         RecognizeOptions options;
         List<SpeechRecognitionResult> transcript;
@@ -179,9 +185,7 @@ public class MicrophoneListener {
 
         while(isRecording) {
             if(bData != null) {
-
                 if(send) {
-
                     transcript = speechToText
                             .recognize(options)
                             .execute()
@@ -197,6 +201,17 @@ public class MicrophoneListener {
                         }
                         System.out.println(result);
                         done = false;
+
+                    }
+                    if(waitForAnswer) {
+                        if(checkKeyword(result,0)) {
+                            //TODO: continue recording + send answer after timeout
+                        } else {
+                            stopRecording();
+                            //TODO: play next message
+                            return;
+                        }
+
                     }
 
                     send = false;

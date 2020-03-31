@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    micro.startRecording();
+                    micro.startRecording(0);
 
                     hasRecorded = true;
                 } else {
