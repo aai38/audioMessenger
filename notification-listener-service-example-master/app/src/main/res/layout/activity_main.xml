@@ -24,7 +24,7 @@
     <FrameLayout
         android:id="@+id/intercepted_notification_logo_container"
         android:layout_width="match_parent"
-        android:layout_height="448dp">
+        android:layout_height="298dp">
 
         <ImageView
             android:id="@+id/intercepted_notification_logo"

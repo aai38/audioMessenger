@@ -187,11 +187,11 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             return "Du hast keine neuen Nachrichten";
         } else if (messages.size() == 1) {
             persons = messages.get(0).getPerson();
-            totalMessage = "Du hast eine Nachricht von " + persons + ", " + messages.get(0).getMessageText();
+            totalMessage = persons + ", " + messages.get(0).getMessageText();
         } else {
             for (ReceivedMessage message: messages) {
                 persons+= " " + message.getPerson();
-                totalMessage = "Du hast Nachrichten von" + persons;
+                totalMessage = persons;
             }
         }
         return totalMessage;
