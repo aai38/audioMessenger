@@ -161,9 +161,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static void updateOurText(String text) {
 
-        view.setText("Du hast eine Nachricht von " + text);
+        view.setText("Nachricht von " + text);
         File file = new File("../../../../../res/raw/earcon1.mp3");
-        ///Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/app/src/main/java/com/github/chagall/notificationlistenerexample/MainActivity.java
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
         Bundle param = new android.os.Bundle();
         param.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
@@ -172,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
         System.out.println("Success: "+succ1+ " " + succ);
 
-        t1.speak("Du hast eine Nachricht von " + text,TextToSpeech.QUEUE_ADD,null);
+        t1.speak("Nachricht von " + text,TextToSpeech.QUEUE_ADD,null);
         t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId){
