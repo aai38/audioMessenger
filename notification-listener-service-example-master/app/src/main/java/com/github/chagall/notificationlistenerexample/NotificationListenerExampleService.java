@@ -84,8 +84,9 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
             String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
             String[] splitted = new String[3];
+            //regex evtl in " \\(" ändern
             if (person.contains(" (")) {
-                splitted = person.split("\\(.*^\\)");
+                splitted = person.split(" \\(");
             } else {
                 splitted[0] = person;
             }
