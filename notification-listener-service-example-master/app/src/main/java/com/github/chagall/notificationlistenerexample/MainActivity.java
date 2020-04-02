@@ -180,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDone(String utteranceId) {
                 // Speaking stopped.
-
             }
             @Override
             public void onError(String utteranceId) {

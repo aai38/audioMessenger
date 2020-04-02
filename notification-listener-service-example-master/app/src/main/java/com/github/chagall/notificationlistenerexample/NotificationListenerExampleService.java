@@ -18,6 +18,7 @@ import com.robj.notificationhelperlibrary.utils.NotificationUtils;
 
 import org.w3c.dom.Text;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.zip.Inflater;
@@ -87,18 +88,22 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             //regex evtl in " \\(" ändern
             if (person.contains(" (")) {
                 splitted = person.split(" \\(");
+                Log.i("test splitted", splitted[0]);
             } else {
                 splitted[0] = person;
+
             }
 
             if (messages.size() == 0) {
                 ReceivedMessage rec = new ReceivedMessage(message,splitted[0]);
                 messages.add(rec);
+
             } else {
                 boolean newPerson = true;
                 for (int i = 0; i < messages.size(); i++) {
-
-                    if (messages.get(i).getPerson().equals(person)) {
+                    Log.i("test", messages.get(i).getPerson());
+                    Log.i("test", splitted[0]);
+                    if (messages.get(i).getPerson().equals(splitted[0])) {
                         ReceivedMessage received = new ReceivedMessage(messages.get(i).getMessageText() + ", "+ message, splitted[0]);
                         messages.set(i, received);
                         newPerson = false;
