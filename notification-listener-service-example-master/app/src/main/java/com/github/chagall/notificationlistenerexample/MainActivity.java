@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
         System.out.println("Success: "+succ1+ " " + succ);
 
-        t1.speak("Nachricht von " + text,TextToSpeech.QUEUE_ADD,null);
+        t1.speak(text,TextToSpeech.QUEUE_ADD,null);
         t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId){
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateOurText(String text) {
-        view.setText("Nachricht von " + text);
+        view.setText(text);
         messageThread = new Thread(new Runnable() {
             public void run() {
                 playMessage(text);

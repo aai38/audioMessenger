@@ -78,16 +78,18 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn){
+        Log.d("HIER", "nachricht kommt");
         int notificationCode = matchNotificationCode(sbn);
         Notification not =  sbn.getNotification();
         if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+            Log.d("MESSAGE", message);
             String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
             String[] splitted = new String[3];
             //regex evtl in " \\(" ändern
             if (person.contains(" (")) {
                 splitted = person.split(" \\(");
-                Log.i("test splitted", splitted[0]);
+                //Log.i("test splitted", splitted[0]);
             } else {
                 splitted[0] = person;
 
@@ -100,11 +102,17 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             } else {
                 boolean newPerson = true;
                 for (int i = 0; i < messages.size(); i++) {
-                    Log.i("test", messages.get(i).getPerson());
-                    Log.i("test", splitted[0]);
+                    //Log.i("test", messages.get(i).getPerson());
+                    //Log.i("test", splitted[0]);
                     if (messages.get(i).getPerson().equals(splitted[0])) {
-                        ReceivedMessage received = new ReceivedMessage(messages.get(i).getMessageText() + ", "+ message, splitted[0]);
-                        messages.set(i, received);
+                        if (!(messages.get(i).getMessageText().equals(message))){
+                            Log.d("before message", messages.get(i).getMessageText());
+                            ReceivedMessage received = new ReceivedMessage(messages.get(i).getMessageText() +message, splitted[0]);
+                            messages.remove(i);
+                            messages.add(i, received);
+                            Log.d("after message", messages.get(i).getMessageText());
+
+                        }
                         newPerson = false;
                     }
                 }
@@ -195,17 +203,18 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         String totalMessage = "";
 
         if (messages.size() == 0) {
-            return "Du hast keine neuen Nachrichten";
+            return "Keine neuen Nachrichten";
         } else if (messages.size() == 1) {
             persons = messages.get(0).getPerson();
-            totalMessage = persons + ", " + messages.get(0).getMessageText();
+            totalMessage = persons + ": " + messages.get(0).getMessageText();
+            return "Nachricht von "+totalMessage;
         } else {
             for (ReceivedMessage message: messages) {
                 persons+= " " + message.getPerson();
                 totalMessage = persons;
             }
+            return "Nachrichten von "+totalMessage;
         }
-        return totalMessage;
     }
 
     public String getMessageFromPerson (String person) {
