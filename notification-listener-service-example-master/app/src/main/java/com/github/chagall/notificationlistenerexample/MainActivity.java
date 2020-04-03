@@ -163,18 +163,6 @@ public class MainActivity extends AppCompatActivity {
             public void onStart(String utteranceId){
                 sp.play(earcon, 1,1,0,0,1);
 
-                /*micro.startRecording(0);
-                while(micro.isRecording) {
-                    //Do nothing while waiting for user input
-                }
-                if(!micro.result.equals("")) {
-                    broadcastReceiver.isAnswer = true;
-                    Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-                    intent.putExtra("Answer", micro.result);
-
-                    sendBroadcast(intent);
-                }*/
-
             }
             @Override
             public void onDone(String utteranceId) {
@@ -188,6 +176,18 @@ public class MainActivity extends AppCompatActivity {
                 // There was an error.
             }
         });
+
+        /*micro.startRecording(0);
+                while(micro.isRecording) {
+                    //Do nothing while waiting for user input
+                }
+                if(!micro.result.equals("")) {
+                    broadcastReceiver.isAnswer = true;
+                    Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
+                    intent.putExtra("Answer", micro.result);
+
+                    sendBroadcast(intent);
+                }*/
     }
 
     public void updateOurText(String text) {

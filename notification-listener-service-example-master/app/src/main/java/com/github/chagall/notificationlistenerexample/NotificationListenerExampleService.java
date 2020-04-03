@@ -40,6 +40,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
     public static ArrayList<ReceivedMessage> messages = new ArrayList<ReceivedMessage>();
     public static StatusBarNotification currentSBN;
+    String lastMessage = "";
 
     /*
         These are the package names of the apps. for which we want to
@@ -83,6 +84,10 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         Notification not =  sbn.getNotification();
         if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+            if(message.equals(lastMessage)) {
+                return;
+            }
+            lastMessage = message;
             //Log.d("MESSAGE", message);
             String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
             String[] splitted = new String[3];
