@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView interceptedNotificationImageView;
     private static TextView view;
-    public static NotificationBroadcastReceiver broadcastReceiver;
+    //public static NotificationBroadcastReceiver broadcastReceiver;
     private AlertDialog enableNotificationListenerAlertDialog;
     private Button play;
 
@@ -106,10 +106,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Finally we register a receiver to tell the MainActivity when a notification has been received
-        broadcastReceiver = new NotificationBroadcastReceiver(this);
+        /*broadcastReceiver = new NotificationBroadcastReceiver(this);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.github.chagall.notificationlistenerexample");
-        registerReceiver(broadcastReceiver,intentFilter);
+        registerReceiver(broadcastReceiver,intentFilter);*/
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.setStreamVolume(STREAM_MUSIC, 15, 0);
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(broadcastReceiver);
+        //unregisterReceiver(broadcastReceiver);
 
     }
 
@@ -146,7 +146,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void playMessage(String text) {
+    public static void playMessage(String text) {
+        view.setText(text);
         File file = new File("../../../../../res/raw/earcon1.mp3");
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
         Bundle param = new android.os.Bundle();
@@ -190,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateOurText(String text) {
-        view.setText(text);
+
         messageThread = new Thread(new Runnable() {
             public void run() {
                 playMessage(text);

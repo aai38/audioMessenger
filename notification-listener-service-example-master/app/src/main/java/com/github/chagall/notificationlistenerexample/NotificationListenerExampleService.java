@@ -67,7 +67,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     @Override
     public void onCreate() {
         super.onCreate();
-        MainActivity.broadcastReceiver.setNotificationListener(this);
+        //MainActivity.broadcastReceiver.setNotificationListener(this);
 
     }
 
@@ -83,7 +83,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         Notification not =  sbn.getNotification();
         if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
-            Log.d("MESSAGE", message);
+            //Log.d("MESSAGE", message);
             String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
             String[] splitted = new String[3];
             //regex evtl in " \\(" ändern
@@ -123,12 +123,12 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             }
             //String person = not.extras.getCharSequence(Notification.).toString();
 
-            //MainActivity.updateOurText(splitted[0]+", " +message);
-            currentSBN = sbn;
+            MainActivity.playMessage(splitted[0]+", " +message);
+            /*currentSBN = sbn;
             MainActivity.broadcastReceiver.isAnswer = false;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
             intent.putExtra("Message", splitted[0]+", " +message);
-            sendBroadcast(intent);
+            sendBroadcast(intent);*/
         }
 
 
