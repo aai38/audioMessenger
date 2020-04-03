@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/audiomessenger-notification-listener-service-example-master.iml" filepath="$PROJECT_DIR$/audiomessenger-notification-listener-service-example-master.iml" group="notification-listener-service-example-master" />
       <module fileurl="file://$PROJECT_DIR$/notification-listener-service-example-master.iml" filepath="$PROJECT_DIR$/notification-listener-service-example-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/notification-listener-service-example-master-app.iml" filepath="$PROJECT_DIR$/app/notification-listener-service-example-master-app.iml" group="notification-listener-service-example-master/app" />
     </modules>
   </component>
 </project>

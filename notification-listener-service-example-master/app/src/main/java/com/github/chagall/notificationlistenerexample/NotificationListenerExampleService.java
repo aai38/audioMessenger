@@ -127,7 +127,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             currentSBN = sbn;
             MainActivity.broadcastReceiver.isAnswer = false;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-            intent.putExtra("Message", splitted[0]+", " +message);
+            intent.putExtra("Message", "Nachricht von "+splitted[0]+": " +message);
             sendBroadcast(intent);
         }
 
