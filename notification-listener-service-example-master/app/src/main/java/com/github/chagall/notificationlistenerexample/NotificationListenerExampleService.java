@@ -39,7 +39,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
 
     public static ArrayList<ReceivedMessage> messages = new ArrayList<ReceivedMessage>();
-    public StatusBarNotification currentSBN;
+    public static StatusBarNotification currentSBN;
 
     /*
         These are the package names of the apps. for which we want to
@@ -123,12 +123,12 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             }
             //String person = not.extras.getCharSequence(Notification.).toString();
 
-            MainActivity.playMessage(splitted[0]+", " +message);
-            /*currentSBN = sbn;
+            //MainActivity.updateText(splitted[0]+", " +message);
+            currentSBN = sbn;
             MainActivity.broadcastReceiver.isAnswer = false;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
             intent.putExtra("Message", splitted[0]+", " +message);
-            sendBroadcast(intent);*/
+            sendBroadcast(intent);
         }
 
 
