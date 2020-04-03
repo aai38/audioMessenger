@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
             public void onStart(String utteranceId){
                 sp.play(earcon, 1,1,0,0,1);
 
-                micro.startRecording(0);
+                /*micro.startRecording(0);
                 while(micro.isRecording) {
                     //Do nothing while waiting for user input
                 }
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("Answer", micro.result);
 
                     sendBroadcast(intent);
-                }
+                }*/
 
             }
             @Override
