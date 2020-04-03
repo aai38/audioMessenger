@@ -1,31 +1,20 @@
 package com.github.chagall.notificationlistenerexample;
 
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.media.AudioManager;
-import android.nfc.Tag;
 import android.os.IBinder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import com.robj.notificationhelperlibrary.utils.NotificationUtils;
 
-import org.w3c.dom.Text;
-
-import java.io.Console;
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.zip.Inflater;
 
+import HelperClasses.NotificationBroadcastReceiver;
 import models.Action;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * MIT License
@@ -48,7 +37,10 @@ import static android.content.ContentValues.TAG;
  */
 public class NotificationListenerExampleService extends NotificationListenerService {
 
+
     public static ArrayList<ReceivedMessage> messages = new ArrayList<ReceivedMessage>();
+    public StatusBarNotification currentSBN;
+
     /*
         These are the package names of the apps. for which we want to
         listen the notifications
@@ -70,6 +62,13 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         public static final int WHATSAPP_CODE = 2;
         public static final int INSTAGRAM_CODE = 3;
         public static final int OTHER_NOTIFICATIONS_CODE = 4; // We ignore all notification with code == 4
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        MainActivity.broadcastReceiver.setNotificationListener(this);
+
     }
 
     @Override
@@ -116,30 +115,27 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             }
             //String person = not.extras.getCharSequence(Notification.).toString();
 
-            MainActivity.updateOurText(splitted[0]+", " +message);
-        }
-
-
-
-
-
-
-        if(notificationCode != InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE){
+            //MainActivity.updateOurText(splitted[0]+", " +message);
+            currentSBN = sbn;
+            MainActivity.broadcastReceiver.isAnswer = false;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-            intent.putExtra("Notification Code", notificationCode);
+            intent.putExtra("Message", splitted[0]+", " +message);
             sendBroadcast(intent);
         }
+
+
+
     }
 
-    public void answerOnNotification(StatusBarNotification sbn, Notification not) {
-        Action action = NotificationUtils.getQuickReplyAction(not,sbn.getPackageName());
+    public void answerOnNotification(String answer) {
+        Action action = NotificationUtils.getQuickReplyAction(currentSBN.getNotification(),currentSBN.getPackageName());
         if(action == null) {
             return;
         }
         try{
             action.sendReply(
                     getApplicationContext(),
-                    "something");
+                    answer);
 
         }catch(PendingIntent.CanceledException e){
 
@@ -169,6 +165,12 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+    }
+
     private int matchNotificationCode(StatusBarNotification sbn) {
         String packageName = sbn.getPackageName();
 
@@ -188,6 +190,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     }
 
     public static String getMessageToRead () {
+
         String persons = "";
         String totalMessage = "";
 

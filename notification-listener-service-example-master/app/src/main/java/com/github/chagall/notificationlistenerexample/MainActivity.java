@@ -2,18 +2,15 @@ package com.github.chagall.notificationlistenerexample;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.provider.Settings;
-import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.NonNull;
@@ -26,23 +23,13 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
-import com.ibm.cloud.sdk.core.security.Authenticator;
-import com.ibm.cloud.sdk.core.security.IamAuthenticator;
-import com.ibm.cloud.sdk.core.http.HttpMediaType;
-import com.ibm.watson.speech_to_text.v1.SpeechToText;
-import com.ibm.watson.speech_to_text.v1.model.RecognizeOptions;
-import com.ibm.watson.speech_to_text.v1.model.SpeechRecognitionResults;
-import com.ibm.watson.speech_to_text.v1.websocket.BaseRecognizeCallback;
-
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Locale;
+
+import HelperClasses.NotificationBroadcastReceiver;
 
 import static android.media.AudioManager.*;
 import static java.lang.String.valueOf;
@@ -55,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView interceptedNotificationImageView;
     private static TextView view;
-    private ImageChangeBroadcastReceiver imageChangeBroadcastReceiver;
+    public static NotificationBroadcastReceiver broadcastReceiver;
     private AlertDialog enableNotificationListenerAlertDialog;
     private Button play;
 
@@ -65,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     public String fileName;
     public static SoundPool sp;
     private static int earcon;
+    public Thread messageThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
                         view.setText(micro.result);
                         micro.result = "";
+                        hasRecorded = false;
                     }
                     // The toggle is disabled
                 }
@@ -117,10 +106,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Finally we register a receiver to tell the MainActivity when a notification has been received
-        imageChangeBroadcastReceiver = new ImageChangeBroadcastReceiver();
+        broadcastReceiver = new NotificationBroadcastReceiver(this);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.github.chagall.notificationlistenerexample");
-        registerReceiver(imageChangeBroadcastReceiver,intentFilter);
+        registerReceiver(broadcastReceiver,intentFilter);
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         am.setStreamVolume(STREAM_MUSIC, 15, 0);
@@ -137,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(imageChangeBroadcastReceiver);
+        unregisterReceiver(broadcastReceiver);
 
     }
 
@@ -157,11 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
-    public static void updateOurText(String text) {
-
-        view.setText("Nachricht von " + text);
+    private void playMessage(String text) {
         File file = new File("../../../../../res/raw/earcon1.mp3");
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
         Bundle param = new android.os.Bundle();
@@ -176,9 +161,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStart(String utteranceId){
                 sp.play(earcon, 1,1,0,0,1);
+
+                micro.startRecording(0);
+                while(micro.isRecording) {
+                    //Do nothing while waiting for user input
+                }
+                if(!micro.result.equals("")) {
+                    broadcastReceiver.isAnswer = true;
+                    Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
+                    intent.putExtra("Answer", micro.result);
+
+                    sendBroadcast(intent);
+                }
+
             }
             @Override
             public void onDone(String utteranceId) {
+                //listen if user wants to answer
+
+
                 // Speaking stopped.
             }
             @Override
@@ -186,28 +187,22 @@ public class MainActivity extends AppCompatActivity {
                 // There was an error.
             }
         });
+    }
 
-
-        //wait until the answer keyword has been spoken or timeout has been reached
-        /*micro.startRecording();
-        while(t1.isSpeaking()) {
-            if(micro.result.equals("antworte")) {
-                break;
+    public void updateOurText(String text) {
+        view.setText("Nachricht von " + text);
+        messageThread = new Thread(new Runnable() {
+            public void run() {
+                playMessage(text);
+                Thread.currentThread().interrupt();
             }
-        }
-        long currentTime = 0;
-        long time = System.currentTimeMillis();
-        while(currentTime < 3000) {
-            currentTime = System.currentTimeMillis() - time;
-            if(micro.result.equals("antworte")) {
-                micro.stopRecording();
-                break;
-            }
-        }
-        micro.startRecording();
-        while(micro.result.equals("")) {
+        }, "Message Thread");
+        messageThread.start();
 
-        }*/
+
+
+
+
     }
 
     /**
@@ -256,19 +251,7 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    /**
-     * Image Change Broadcast Receiver.
-     * We use this Broadcast Receiver to notify the Main Activity when
-     * a new notification has arrived, so it can properly change the
-     * notification image
-     * */
-    public class ImageChangeBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int receivedNotificationCode = intent.getIntExtra("Notification Code",-1);
-            changeInterceptedNotificationImage(receivedNotificationCode);
-        }
-    }
+
 
 
     /**

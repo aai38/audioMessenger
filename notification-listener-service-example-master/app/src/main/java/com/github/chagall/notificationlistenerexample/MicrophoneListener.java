@@ -40,7 +40,7 @@ public class MicrophoneListener {
     private AudioRecord recorder = null;
     private Thread recordingThread = null;
     private Thread parseThread = null;
-    private boolean isRecording = false;
+    public boolean isRecording = false;
     int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
     int BytesPerElement = 2; // 2 bytes in 16bit format
     public IamAuthenticator authenticator;
@@ -51,8 +51,7 @@ public class MicrophoneListener {
     private boolean waitForAnswer = false;
     private boolean send = false;
     private static String fileName = null;
-
-
+    private boolean playNextMsg = false;
 
 
     public MicrophoneListener(String fileName){
@@ -87,6 +86,7 @@ public class MicrophoneListener {
         recordingThread = new Thread(new Runnable() {
             public void run() {
                 writeAudioDataToFile();
+                Thread.currentThread().interrupt();
             }
         }, "AudioRecorder Thread");
         recordingThread.start();
@@ -95,6 +95,7 @@ public class MicrophoneListener {
             public void run() {
                 try {
                     parseSpeechToText();
+                    Thread.currentThread().interrupt();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -203,18 +204,25 @@ public class MicrophoneListener {
                         done = false;
 
                     }
+                    send = false;
                     if(waitForAnswer) {
+                        waitForAnswer = false;
+
                         if(checkKeyword(result,0)) {
-                            //TODO: continue recording + send answer after timeout
+
+                            result = "";
+                            //TODO: play earcon to notice user that his keyword worked
                         } else {
+                            result = "";
                             stopRecording();
-                            //TODO: play next message
                             return;
                         }
 
+
+
                     }
 
-                    send = false;
+
                     if(done) {
                         stopRecording();
                         return;
@@ -225,6 +233,8 @@ public class MicrophoneListener {
 
 
     }
+
+
 
     public boolean checkKeyword(String phrase, int keywordIndex) {
 
