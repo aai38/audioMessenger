@@ -37,6 +37,7 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity {
 
+    private String[] keywords = {"antworten"};
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
@@ -52,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
     public String fileName;
     public static SoundPool sp;
     private static int earcon;
-    public Thread messageThread;
+    public static Thread messageThread;
+    public boolean waitForAnswer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    micro.startRecording(0);
-
+                    micro.startRecording(3000);
                     hasRecorded = true;
                 } else {
                     if(hasRecorded) {
@@ -176,18 +177,46 @@ public class MainActivity extends AppCompatActivity {
                 // There was an error.
             }
         });
+        while(t1.isSpeaking()) {
+            //wait until message was played
+        }
 
-        /*micro.startRecording(0);
-                while(micro.isRecording) {
-                    //Do nothing while waiting for user input
-                }
-                if(!micro.result.equals("")) {
-                    broadcastReceiver.isAnswer = true;
-                    Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-                    intent.putExtra("Answer", micro.result);
+        reactOnMessage();
 
-                    sendBroadcast(intent);
-                }*/
+    }
+
+    public void reactOnMessage() {
+        micro.startRecording(3000);
+        boolean answer = false;
+        while(micro.isRecording) {
+            //wait until a keyword was spoken
+
+            //the answer keyword was spoken
+            if(checkKeyword(micro.result,0)) {
+                answer = true;
+                //TODO: play earcon to notice user that his keyword worked
+                break;
+            }
+        }
+        micro.stopRecording();
+
+        if(answer) {
+            micro.startRecording(5000);
+            while(micro.isRecording){
+                //wait until user has spoken his answer
+
+            }
+            System.out.println("teste");
+            micro.stopRecording();
+            //if(!micro.result.equals("")) {
+            broadcastReceiver.isAnswer = true;
+            Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
+            intent.putExtra("Answer", micro.result);
+
+            sendBroadcast(intent);
+            //}
+        }
+
     }
 
     public void updateOurText(String text) {
@@ -279,6 +308,16 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         return(alertDialogBuilder.create());
+    }
+
+    public boolean checkKeyword(String phrase, int keywordIndex) {
+
+        for (String s : phrase.split(" ")) {
+            if(s.equals(keywords[keywordIndex])) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

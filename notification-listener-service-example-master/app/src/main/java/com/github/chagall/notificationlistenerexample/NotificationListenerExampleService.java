@@ -68,7 +68,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     @Override
     public void onCreate() {
         super.onCreate();
-        //MainActivity.broadcastReceiver.setNotificationListener(this);
+
 
     }
 
@@ -79,9 +79,11 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn){
+        MainActivity.broadcastReceiver.setNotificationListener(this);
         Log.d("HIER", "nachricht kommt");
         int notificationCode = matchNotificationCode(sbn);
         Notification not =  sbn.getNotification();
+        currentSBN = sbn;
         if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
             if(message.equals(lastMessage)) {
@@ -128,7 +130,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             //String person = not.extras.getCharSequence(Notification.).toString();
 
             //MainActivity.updateText(splitted[0]+", " +message);
-            currentSBN = sbn;
+
             MainActivity.broadcastReceiver.isAnswer = false;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
             intent.putExtra("Message", "Nachricht von "+splitted[0]+": " +message);
@@ -140,11 +142,13 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     }
 
     public void answerOnNotification(String answer) {
+        MainActivity.messageThread = null;
         Action action = NotificationUtils.getQuickReplyAction(currentSBN.getNotification(),currentSBN.getPackageName());
         if(action == null) {
             return;
         }
         try{
+
             action.sendReply(
                     getApplicationContext(),
                     answer);

@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class MicrophoneListener {
 
-    private String[] keywords = {"antworten"};
+
 
     private static final int RECORDER_SAMPLERATE = 16000;
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
@@ -48,11 +48,11 @@ public class MicrophoneListener {
     public File audio;
     public String result = "";
 
-    private boolean waitForAnswer = false;
+
     private boolean send = false;
     private static String fileName = null;
     private boolean playNextMsg = false;
-
+    private int minTimeout = 3000;
 
     public MicrophoneListener(String fileName){
         this.fileName = fileName;
@@ -62,19 +62,10 @@ public class MicrophoneListener {
         audio = new File(fileName);
     }
 
-    private void setKeyword(int keywordIndex) {
-        switch (keywordIndex) {
-            case -1:
-                waitForAnswer = false;
-                break;
-            case 0:
-                waitForAnswer = true;
-                break;
-        }
-    }
 
-    public void startRecording(int keywordIndex) {
-        setKeyword(keywordIndex);
+
+    public void startRecording(int t) {
+        minTimeout = t;
         result = "";
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 RECORDER_SAMPLERATE, RECORDER_CHANNELS,
@@ -86,7 +77,7 @@ public class MicrophoneListener {
         recordingThread = new Thread(new Runnable() {
             public void run() {
                 writeAudioDataToFile();
-                Thread.currentThread().interrupt();
+
             }
         }, "AudioRecorder Thread");
         recordingThread.start();
@@ -95,7 +86,7 @@ public class MicrophoneListener {
             public void run() {
                 try {
                     parseSpeechToText();
-                    Thread.currentThread().interrupt();
+
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -157,15 +148,17 @@ public class MicrophoneListener {
 
     public void stopRecording() {
         // stops the recording activity
+        isRecording = false;
+        recordingThread = null;
+        parseThread = null;
+
         if (null != recorder) {
-            isRecording = false;
             recorder.stop();
             recorder.release();
             recorder = null;
-            recordingThread = null;
-            parseThread = null;
-
         }
+
+
     }
 
 
@@ -184,6 +177,8 @@ public class MicrophoneListener {
                 .build();
         boolean done;
 
+        long startTime = System.currentTimeMillis();
+
         while(isRecording) {
             if(bData != null) {
                 if(send) {
@@ -200,30 +195,19 @@ public class MicrophoneListener {
                         while (matcher.find()) {
                             result += matcher.group(1);
                         }
-                        System.out.println(result);
+
                         done = false;
 
                     }
+                    /*if(System.currentTimeMillis() - startTime < minTimeout) {
+                        done = false;
+                    }*/
                     send = false;
-                    if(waitForAnswer) {
-                        waitForAnswer = false;
 
-                        if(checkKeyword(result,0)) {
-
-                            result = "";
-                            //TODO: play earcon to notice user that his keyword worked
-                        } else {
-                            result = "";
-                            stopRecording();
-                            return;
-                        }
-
-
-
-                    }
-
+                    System.out.println(result);
 
                     if(done) {
+                        System.out.println("parser closed");
                         stopRecording();
                         return;
                     }
@@ -236,14 +220,6 @@ public class MicrophoneListener {
 
 
 
-    public boolean checkKeyword(String phrase, int keywordIndex) {
 
-            for (String s : phrase.split(" ")) {
-                if(s.equals(keywords[keywordIndex])) {
-                    return true;
-                }
-            }
-        return false;
-    }
 
 }
