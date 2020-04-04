@@ -52,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean hasRecorded;
     public String fileName;
     public static SoundPool sp;
-    private static int earcon;
+    private static int messageReceivedEarcon;
+    private static int answerModeActiveEarcon;
     public static Thread messageThread;
     public boolean waitForAnswer;
 
@@ -121,7 +122,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         sp = new SoundPool(2, STREAM_MUSIC, 0);
-        earcon = sp.load(this, R.raw.earcon1, 1);
+        messageReceivedEarcon = sp.load(this, R.raw.earcon1, 1);
+        answerModeActiveEarcon = sp.load(this, R.raw.earcon1, 1);
     }
 
     @Override
@@ -162,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId){
-                sp.play(earcon, 1,1,0,0,1);
+                sp.play(messageReceivedEarcon, 1,1,0,0,1);
 
             }
             @Override
@@ -194,19 +196,25 @@ public class MainActivity extends AppCompatActivity {
             //the answer keyword was spoken
             if(checkKeyword(micro.result,0)) {
                 answer = true;
-                //TODO: play earcon to notice user that his keyword worked
+                sp.play(answerModeActiveEarcon, 1,1,0,0,1);
+                //TODO: play earcon to notify user that his keyword worked
                 break;
             }
         }
         micro.stopRecording();
 
         if(answer) {
+
             micro.startRecording(5000);
             while(micro.isRecording){
                 //wait until user has spoken his answer
-
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            System.out.println("teste");
+
             micro.stopRecording();
             //if(!micro.result.equals("")) {
             broadcastReceiver.isAnswer = true;

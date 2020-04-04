@@ -149,6 +149,7 @@ public class MicrophoneListener {
     public void stopRecording() {
         // stops the recording activity
         isRecording = false;
+
         recordingThread = null;
         parseThread = null;
 
@@ -207,7 +208,7 @@ public class MicrophoneListener {
                     System.out.println(result);
 
                     if(done) {
-                        System.out.println("parser closed");
+
                         stopRecording();
                         return;
                     }
