@@ -163,24 +163,27 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn){
         //int notificationCode = matchNotificationCode(sbn);
-        Log.d("REMOVED", sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString());
-        String message = sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString();
-        String person = sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TITLE).toString();
-        String[] splitted = new String[3];
-        //regex evtl in " \\(" ändern
-        if (person.contains(" (")) {
-            splitted = person.split(" \\(");
-        } else {
-            splitted[0] = person;
-        }
-        if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
-            //search for the right notification in messages
-            for(ReceivedMessage m: messages){
-                if(m.getPerson().equals(splitted[0]) && m.getMessageText().contains(message)){
-                    messages.remove(m);
+        //Log.d("REMOVED", sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString());
+        if(!(sbn.equals(null))){
+            String message = sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+            String person = sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TITLE).toString();
+            String[] splitted = new String[3];
+            //regex evtl in " \\(" ändern
+            if (person.contains(" (")) {
+                splitted = person.split(" \\(");
+            } else {
+                splitted[0] = person;
+            }
+            if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
+                //search for the right notification in messages
+                for(ReceivedMessage m: messages){
+                    if(m.getPerson().equals(splitted[0]) && m.getMessageText().contains(message)){
+                        messages.remove(m);
+                    }
                 }
             }
         }
+
         /*if(notificationCode != InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE) {
 
             StatusBarNotification[] activeNotifications = this.getActiveNotifications();

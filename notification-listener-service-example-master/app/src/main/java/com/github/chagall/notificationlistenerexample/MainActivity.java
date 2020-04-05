@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            micro.stopRecording();
+            //micro.stopRecording();
             setTextFromOtherThread("Sende Antwort: "+micro.result);
             broadcastReceiver.isAnswer = true;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
