@@ -110,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        finish();
+        System.exit(0);
         super.onDestroy();
         //unregisterReceiver(broadcastReceiver);
 
@@ -224,11 +226,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateOurText(String text, boolean isSingleMsgMode) {
+        messageThread = null;
         view.setText(text);
         messageThread = new Thread(new Runnable() {
             public void run() {
                 playMessage(text, isSingleMsgMode);
-                Thread.currentThread().interrupt();
+                return;
             }
         }, "Message Thread");
         messageThread.start();

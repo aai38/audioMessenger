@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.ibm.cloud.sdk.core.http.HttpMediaType;
 import com.ibm.cloud.sdk.core.security.BasicAuthenticator;
 import com.ibm.cloud.sdk.core.security.IamAuthenticator;
+import com.ibm.cloud.sdk.core.service.exception.BadRequestException;
 import com.ibm.watson.speech_to_text.v1.SpeechToText;
 import com.ibm.watson.speech_to_text.v1.model.RecognizeOptions;
 import com.ibm.watson.speech_to_text.v1.model.SpeechRecognitionResult;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import okhttp3.internal.http2.StreamResetException;
 
 
 public class MicrophoneListener {
@@ -77,7 +79,7 @@ public class MicrophoneListener {
         recordingThread = new Thread(new Runnable() {
             public void run() {
                 writeAudioDataToFile();
-
+                return;
             }
         }, "AudioRecorder Thread");
         recordingThread.start();
@@ -86,7 +88,7 @@ public class MicrophoneListener {
             public void run() {
                 try {
                     parseSpeechToText();
-
+                    return;
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -180,38 +182,47 @@ public class MicrophoneListener {
 
         long startTime = System.currentTimeMillis();
 
+
         while(isRecording) {
             if(bData != null && bData.length >= 100) {
                 if(send) {
-                    transcript = speechToText
-                            .recognize(options)
-                            .execute()
-                            .getResult().getResults();
-                    done = true;
-                    for (SpeechRecognitionResult s : transcript) {
-                        res = s.toString();
+                    try {
+                        transcript = speechToText
+                                .recognize(options)
+                                .execute()
+                                .getResult().getResults();
 
-                        matcher = pattern.matcher(res);
+                        done = true;
+                        for (SpeechRecognitionResult s : transcript) {
+                            res = s.toString();
 
-                        while (matcher.find()) {
-                            result += matcher.group(1);
+                            matcher = pattern.matcher(res);
+
+                            while (matcher.find()) {
+                                result += matcher.group(1);
+                            }
+
+                            done = false;
+
                         }
-
-                        done = false;
-
-                    }
                     /*if(System.currentTimeMillis() - startTime < minTimeout) {
                         done = false;
                     }*/
-                    send = false;
+                        send = false;
 
-                    System.out.println(result);
+                        System.out.println(result);
 
-                    if(done) {
+                        if (done) {
 
-                        stopRecording();
-                        return;
+                            stopRecording();
+                            return;
+                        }
+                    } catch (BadRequestException e) {
+                        System.out.println("bad request");
+                    } catch (RuntimeException e) {
+                        System.out.println("internal error");
                     }
+
                 }
             }
         }
