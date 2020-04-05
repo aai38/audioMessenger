@@ -191,11 +191,11 @@ public class MainActivity extends AppCompatActivity {
             if(checkKeyword(micro.result,0)) {
                 answer = true;
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-
+                micro.stopRecording();
                 break;
             }
         }
-        micro.stopRecording();
+
 
         if(answer) {
             setTextFromOtherThread("Antworten-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
