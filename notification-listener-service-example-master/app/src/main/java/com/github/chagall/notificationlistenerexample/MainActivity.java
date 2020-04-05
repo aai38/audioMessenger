@@ -111,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         finish();
-        System.exit(0);
         super.onDestroy();
         //unregisterReceiver(broadcastReceiver);
 
