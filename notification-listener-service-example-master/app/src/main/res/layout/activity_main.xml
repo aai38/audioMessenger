@@ -49,12 +49,6 @@
         android:layout_width="match_parent"
         android:layout_height="148dp">
 
-        <ToggleButton
-            android:id="@+id/toggleButton"
-            android:layout_width="153dp"
-            android:layout_height="79dp"
-            android:text="ToggleButton" />
-
         <Button
             android:id="@+id/buttonEverything"
             android:layout_width="149dp"

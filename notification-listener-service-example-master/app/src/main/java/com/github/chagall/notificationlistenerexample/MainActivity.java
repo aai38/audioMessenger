@@ -72,29 +72,11 @@ public class MainActivity extends AppCompatActivity {
 
         Button button = (Button) findViewById(R.id.buttonEverything);
         button.setOnClickListener( (View view) -> {
-            updateOurText( NotificationListenerExampleService.getMessageToRead());
+            updateOurText( NotificationListenerExampleService.getMessageToRead(), false);
 
         });
 
 
-        //Button zum Testen von Spracheingabe (später entfernen)
-        ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    micro.startRecording(3000);
-                    hasRecorded = true;
-                } else {
-                    if(hasRecorded) {
-
-                        view.setText(micro.result);
-                        micro.result = "";
-                        hasRecorded = false;
-                    }
-                    // The toggle is disabled
-                }
-            }
-        });
 
 
         // Here we get a reference to the image we will modify when a notification is received
@@ -149,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void playMessage(String text) {
+    public void playMessage(String text, boolean isSingleMsgMode) {
 
         File file = new File("../../../../../res/raw/earcon1.mp3");
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
@@ -183,13 +165,25 @@ public class MainActivity extends AppCompatActivity {
             //wait until message was played
         }
 
-        reactOnMessage();
+        if(isSingleMsgMode) {
+            reactOnMessage();
+        }
 
+
+    }
+
+    private void setTextFromOtherThread(String s) {
+        view.post(new Runnable() {
+            public void run() {
+                view.setText(s);
+            }
+        });
     }
 
     public void reactOnMessage() {
         micro.startRecording(3000);
         boolean answer = false;
+        setTextFromOtherThread("Warte 3s auf Schlüsselwort (\"Antworten\")...");
         while(micro.isRecording) {
             //wait until a keyword was spoken
 
@@ -204,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
         micro.stopRecording();
 
         if(answer) {
-
+            setTextFromOtherThread("Antworten-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
             micro.startRecording(5000);
             while(micro.isRecording){
                 //wait until user has spoken his answer
@@ -216,22 +210,24 @@ public class MainActivity extends AppCompatActivity {
             }
 
             micro.stopRecording();
-            //if(!micro.result.equals("")) {
+            setTextFromOtherThread("Sende Antwort: "+micro.result);
             broadcastReceiver.isAnswer = true;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
             intent.putExtra("Answer", micro.result);
 
             sendBroadcast(intent);
-            //}
+
+        } else {
+            setTextFromOtherThread("Kein Schlüsselwort erkannt.");
         }
 
     }
 
-    public void updateOurText(String text) {
+    public void updateOurText(String text, boolean isSingleMsgMode) {
         view.setText(text);
         messageThread = new Thread(new Runnable() {
             public void run() {
-                playMessage(text);
+                playMessage(text, isSingleMsgMode);
                 Thread.currentThread().interrupt();
             }
         }, "Message Thread");
