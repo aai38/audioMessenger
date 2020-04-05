@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
         sp = new SoundPool(2, STREAM_MUSIC, 0);
         messageReceivedEarcon = sp.load(this, R.raw.earcon1, 1);
-        answerModeActiveEarcon = sp.load(this, R.raw.earcon1, 1);
+        answerModeActiveEarcon = sp.load(this, R.raw.earcon_answer_mode, 1);
     }
 
     @Override
@@ -196,8 +196,8 @@ public class MainActivity extends AppCompatActivity {
             //the answer keyword was spoken
             if(checkKeyword(micro.result,0)) {
                 answer = true;
-                sp.play(answerModeActiveEarcon, 1,1,0,0,1);
-                //TODO: play earcon to notify user that his keyword worked
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+
                 break;
             }
         }

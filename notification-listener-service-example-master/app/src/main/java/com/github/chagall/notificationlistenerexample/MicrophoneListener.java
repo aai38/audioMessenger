@@ -181,7 +181,7 @@ public class MicrophoneListener {
         long startTime = System.currentTimeMillis();
 
         while(isRecording) {
-            if(bData != null) {
+            if(bData != null && bData.length >= 100) {
                 if(send) {
                     transcript = speechToText
                             .recognize(options)
