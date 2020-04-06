@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -133,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playMessage(String text, boolean isSingleMsgMode) {
-
+        Log.d("OUTPUT", text);
         File file = new File("../../../../../res/raw/earcon1.mp3");
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
         Bundle param = new android.os.Bundle();

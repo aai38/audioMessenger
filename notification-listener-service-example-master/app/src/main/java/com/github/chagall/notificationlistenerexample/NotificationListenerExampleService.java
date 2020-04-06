@@ -86,30 +86,30 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         currentSBN = sbn;
         if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+            if(message.contains(":")){
+                return;
+            }
             if(message.equals(lastMessage)) {
                 return;
             }
             lastMessage = message;
-            //Log.d("MESSAGE", message);
+            Log.d("MESSAGE", message);
             String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
+            Log.d("person", person);
             String[] splitted = new String[3];
             //regex evtl in " \\(" ändern
             if (person.contains(" (")) {
                 splitted = person.split(" \\(");
-                //Log.i("test splitted", splitted[0]);
             } else {
                 splitted[0] = person;
-
             }
 
             if (messages.size() == 0) {
-                ReceivedMessage rec = new ReceivedMessage(message,splitted[0]);
+                ReceivedMessage rec = new ReceivedMessage(message,person);
                 messages.add(rec);
             } else {
                 boolean newPerson = true;
                 for (int i = 0; i < messages.size(); i++) {
-                    //Log.i("test", messages.get(i).getPerson());
-                    //Log.i("test", splitted[0]);
                     if (messages.get(i).getPerson().equals(splitted[0])) {
                         if (!(messages.get(i).getMessageText().equals(message))){
                             Log.d("before message", messages.get(i).getMessageText());
@@ -133,7 +133,16 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
             MainActivity.broadcastReceiver.isAnswer = false;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-            intent.putExtra("Message", "Nachricht von "+splitted[0]+": " +message);
+            Log.d("SPLIT",splitted[0]);
+            if(splitted[0].contains(":")){ //group message
+                String[] groupContact = splitted[0].split(":");
+                //Log.d("GROUPCONTACT", groupContact[1]);
+                Log.d("MESSAGE", messages.get(0).getMessageText());
+                intent.putExtra("Message", "Nachricht von"+groupContact[1]+" in "+groupContact[0]+": "+messages.get(0).getMessageText());
+            } else { //single person
+                intent.putExtra("Message", "Nachricht von "+splitted[0]+": " +message);
+            }
+
             sendBroadcast(intent);
         }
 
@@ -235,15 +244,34 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         if (messages.size() == 0) {
             return "Keine neuen Nachrichten";
         } else if (messages.size() == 1) {
-            persons = messages.get(0).getPerson();
-            totalMessage = persons + ": " + messages.get(0).getMessageText();
-            return "Nachricht von "+totalMessage;
+            //group message
+            if(messages.get(0).getPerson().contains(":")){
+                String[] splitted = messages.get(0).getPerson().split(":");
+                totalMessage = "Nachricht von "+splitted[1]+" in "+splitted[0]+": "+messages.get(0).getMessageText();
+                return totalMessage;
+            } else { //single person
+                persons = messages.get(0).getPerson();
+                totalMessage = persons + ": " + messages.get(0).getMessageText();
+                return "Nachricht von "+totalMessage;
+            }
         } else {
             for (ReceivedMessage message: messages) {
-                persons+= " " + message.getPerson();
-                totalMessage = persons;
+                if(message.getPerson().contains("Telegram")){
+                    //messages.remove(message);
+                    continue;
+                }
+                if(message.getPerson().contains(":")){ //group message
+                    String[] splitted = message.getPerson().split(":");
+                    persons+= splitted[1]+" in "+splitted[0] +",";
+                } else {
+                    persons+= message.getPerson()+",";
+                }
             }
-            return "Nachrichten von "+totalMessage;
+            //remove last ,
+            if (persons != null && persons.length() > 0 && persons.charAt(persons.length() - 1) == ',') {
+                persons = persons.substring(0, persons.length() - 1);
+            }
+            return "Nachrichten von"+persons;
         }
     }
 
