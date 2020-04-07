@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     private Button play;
 
     public static TextToSpeech t1;
+    public static TextToSpeech t2;
+    public static TextToSpeech t3;
     public static MicrophoneListener micro;
     public boolean hasRecorded;
     public String fileName;
@@ -57,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
     private static int answerModeActiveEarcon;
     public static Thread messageThread;
     public boolean waitForAnswer;
+    private SeekBar speechSpeed;
+    private SeekBar contactSpeed;
+    private int speechSpeedValue = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +82,6 @@ public class MainActivity extends AppCompatActivity {
             updateOurText( NotificationListenerExampleService.getMessageToRead(), false);
 
         });
-
-
 
 
         // Here we get a reference to the image we will modify when a notification is received
@@ -104,9 +108,66 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        t2 = new TextToSpeech(getApplicationContext(), (status) -> {
+            if(status != TextToSpeech.ERROR) {
+                t2.setLanguage(Locale.GERMAN);
+            }
+        });
+
+        t3 = new TextToSpeech(getApplicationContext(), (status) -> {
+            if(status != TextToSpeech.ERROR) {
+                t3.setLanguage(Locale.GERMAN);
+            }
+        });
         sp = new SoundPool(2, STREAM_MUSIC, 0);
         messageReceivedEarcon = sp.load(this, R.raw.earcon1, 1);
         answerModeActiveEarcon = sp.load(this, R.raw.earcon_answer_mode, 1);
+
+        this.speechSpeed = (SeekBar)findViewById(R.id.speechSpeed);
+        this.speechSpeed.setMax(10);
+        this.speechSpeed.setProgress(0);
+        this.speechSpeed.incrementProgressBy(1);
+        this.speechSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                speechSpeedValue = progress;
+                //1.0 normal, 0.5 half the normal speed
+                t1.setSpeechRate(progress);
+                Log.d("SPEECH speed", "value:"+progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        this.contactSpeed = (SeekBar)findViewById(R.id.contactSpeed);
+        this.contactSpeed.setMax(10);
+        this.contactSpeed.setProgress(0);
+        this.contactSpeed.incrementProgressBy(1);
+        this.contactSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                t2.setSpeechRate(progress);
+                Log.d("CONTACT speed", "value:"+progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     @Override
@@ -144,11 +205,25 @@ public class MainActivity extends AppCompatActivity {
         int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
         System.out.println("Success: "+succ1+ " " + succ);
 
-        t1.speak(text,TextToSpeech.QUEUE_ADD,null);
+        if(text.contains("Keine neuen Nachrichten")){
+            t1.speak(text,TextToSpeech.QUEUE_ADD,null);
+        } else { //split text in three pieces
+            String[] output = new String[3]; //nachricht von, contact, message
+            output[0] = text.split("(?<=von)(?s)(.*$)")[0];
+            output[1] = text.split("von")[1].split(":")[0];
+            output[2] = text.split(":")[1];
+            Log.d("0", output[0]);
+            Log.d("1", output[1]);
+            Log.d("2", output[2]);
+            t1.speak(output[0],TextToSpeech.QUEUE_ADD,null);
+            t2.speak(output[1], TextToSpeech.QUEUE_ADD, null);
+            t3.speak(output[2], TextToSpeech.QUEUE_ADD, null);
+        }
+
         t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId){
-                sp.play(messageReceivedEarcon, 1,1,0,0,1);
+                sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
 
             }
             @Override
