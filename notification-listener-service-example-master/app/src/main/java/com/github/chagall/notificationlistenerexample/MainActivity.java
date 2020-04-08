@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar speechSpeed;
     private SeekBar contactSpeed;
     private int speechSpeedValue = 1;
+    public static boolean notificationActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playMessage(String text, boolean isSingleMsgMode) {
-        Log.d("OUTPUT", text);
+        //Log.d("OUTPUT", text);
         File file = new File("../../../../../res/raw/earcon1.mp3");
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
         Bundle param = new android.os.Bundle();
@@ -204,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
         //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
         int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
         System.out.println("Success: "+succ1+ " " + succ);
-
+        //t1.speak(text,TextToSpeech.QUEUE_ADD,null);
         if(text.contains("Keine neuen Nachrichten")){
             t1.speak(text,TextToSpeech.QUEUE_ADD,null);
         } else { //split text in three pieces
@@ -294,9 +295,15 @@ public class MainActivity extends AppCompatActivity {
 
             sendBroadcast(intent);
 
+
         } else {
             setTextFromOtherThread("Kein Schlüsselwort erkannt.");
+            Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
+            intent.putExtra("Answer", "");
+
+            sendBroadcast(intent);
         }
+        notificationActive = false;
 
     }
 
