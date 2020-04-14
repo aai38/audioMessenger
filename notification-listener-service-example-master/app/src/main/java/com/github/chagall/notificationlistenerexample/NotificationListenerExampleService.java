@@ -81,14 +81,15 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     }
 
     public boolean isFirst = true;
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
             Notification not = sbn.getNotification();
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
-
-            if (isFirst) {
-                isFirst = false;
+            System.out.println("Notification received: "+message);
+            if (lastMessage.equals(message) || message.equals("")) {
+                System.out.println("duplicate");
                 return;
             }
             currentSBN = sbn;
@@ -157,6 +158,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
                 sendBroadcast(intent);
             } else {
                 System.out.println("notification buffered");
+
                 notifications.add(sbn);
 
             }
@@ -167,6 +169,8 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     }
 
     public void answerOnNotification(String answer) {
+        System.out.println("kk");
+        lastMessage = "";
         MainActivity.messageThread = null;
         Action action = NotificationUtils.getQuickReplyAction(currentSBN.getNotification(), currentSBN.getPackageName());
         if (action != null) {
@@ -181,10 +185,23 @@ public class NotificationListenerExampleService extends NotificationListenerServ
             }
         }
 
-        if (!notifications.isEmpty()) {
 
-            onNotificationPosted(notifications.remove());
-        }
+            while (true){
+                if (!notifications.isEmpty()) {
+                    StatusBarNotification n = notifications.remove();
+                    Notification not = n.getNotification();
+                    String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+                    if(!message.equals("")) {
+                        System.out.println("test");
+                        onNotificationPosted(n);
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+
     }
 
 

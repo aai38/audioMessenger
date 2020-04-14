@@ -298,25 +298,30 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
             setTextFromOtherThread("Kein Schlüsselwort erkannt.");
+            broadcastReceiver.isAnswer = true;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
             intent.putExtra("Answer", "");
 
             sendBroadcast(intent);
+            System.out.println("Kein Schlüsselwort");
         }
         notificationActive = false;
 
     }
 
     public void updateOurText(String text, boolean isSingleMsgMode) {
-        messageThread = null;
-        view.setText(text);
-        messageThread = new Thread(new Runnable() {
-            public void run() {
-                playMessage(text, isSingleMsgMode);
-                return;
-            }
-        }, "Message Thread");
-        messageThread.start();
+        if(text != null) {
+            messageThread = null;
+            view.setText(text);
+            messageThread = new Thread(new Runnable() {
+                public void run() {
+                    playMessage(text, isSingleMsgMode);
+                    return;
+                }
+            }, "Message Thread");
+            messageThread.start();
+        }
+
 
 
 
