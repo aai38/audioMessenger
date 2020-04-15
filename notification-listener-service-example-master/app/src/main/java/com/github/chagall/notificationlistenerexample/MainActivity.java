@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -64,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar contactSpeed;
     private int speechSpeedValue = 1;
     public static boolean notificationActive = false;
+
+    private SharedPreferences shared;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +173,16 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        shared = getPreferences(Context.MODE_PRIVATE);
+        editor = shared.edit();
+
+        int calls_before = shared.getInt("calls", 0);
+        int answers_before = shared.getInt("answers", 0);
+
+
+        editor.putInt("calls", calls_before+1);
+        editor.putInt("answers", answers_before+1);
+        editor.apply();
     }
 
     @Override
@@ -267,6 +281,12 @@ public class MainActivity extends AppCompatActivity {
 
             //the answer keyword was spoken
             if(checkKeyword(micro.result,0)) {
+
+                editor = shared.edit();
+                int answers_before = shared.getInt("answers", 0);
+                editor.putInt("answers", answers_before+1);
+                editor.apply();
+
                 answer = true;
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
