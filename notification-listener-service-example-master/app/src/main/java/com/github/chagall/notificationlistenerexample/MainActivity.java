@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 t2.setSpeechRate(progress);
-                Log.d("CONTACT speed", "value:"+progress);
+                //Log.d("CONTACT speed", "value:"+progress);
             }
 
             @Override
@@ -213,9 +213,9 @@ public class MainActivity extends AppCompatActivity {
             output[0] = text.split("(?<=von)(?s)(.*$)")[0];
             output[1] = text.split("von")[1].split(":")[0];
             output[2] = text.split(":")[1];
-            Log.d("0", output[0]);
-            Log.d("1", output[1]);
-            Log.d("2", output[2]);
+            //Log.d("0", output[0]);
+            //Log.d("1", output[1]);
+            //Log.d("2", output[2]);
             t1.speak(output[0],TextToSpeech.QUEUE_ADD,null);
             t2.speak(output[1], TextToSpeech.QUEUE_ADD, null);
             t3.speak(output[2], TextToSpeech.QUEUE_ADD, null);
@@ -288,6 +288,11 @@ public class MainActivity extends AppCompatActivity {
             }
 
             //micro.stopRecording();
+            String point = micro.result.replaceAll("punkt", ".");
+            String comma = point.replaceAll("komma", ",");
+            String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
+            String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
+            micro.result = questionMark;
             setTextFromOtherThread("Sende Antwort: "+micro.result);
             broadcastReceiver.isAnswer = true;
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
@@ -413,8 +418,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
-
-
 
 
 }
