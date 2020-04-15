@@ -40,7 +40,7 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String[] keywords = {"antworten"};
+    private String[] keywords = {"antworten", "abhören"};
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
@@ -275,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
     public void reactOnMessage() {
         micro.startRecording(3000);
         boolean answer = false;
+        boolean name = false;
         setTextFromOtherThread("Warte 3s auf Schlüsselwort (\"Antworten\")...");
         while(micro.isRecording) {
             //wait until a keyword was spoken
@@ -288,6 +289,12 @@ public class MainActivity extends AppCompatActivity {
                 editor.apply();
 
                 answer = true;
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                micro.stopRecording();
+                break;
+            } else if(checkKeyword(micro.result, 1)) {
+
+                name = true;
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 break;
@@ -307,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+
             //micro.stopRecording();
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
@@ -320,6 +328,16 @@ public class MainActivity extends AppCompatActivity {
 
             sendBroadcast(intent);
 
+
+        } else if (name) {
+            setTextFromOtherThread("Abhören-Schlüsselwort erkannt!\nSpreche nun den Namen ein...");
+            micro.startRecording(3000);
+            while(micro.isRecording){
+
+            }
+            String message = NotificationListenerExampleService.getMessageFromPerson(micro.result);
+
+            t1.speak(message,TextToSpeech.QUEUE_ADD,null);
 
         } else {
             setTextFromOtherThread("Kein Schlüsselwort erkannt.");

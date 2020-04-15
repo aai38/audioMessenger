@@ -308,7 +308,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         }
     }
 
-    public String getMessageFromPerson(String person) {
+    public static String getMessageFromPerson(String person) {
         for (ReceivedMessage message : messages) {
             if (message.getPerson().equals(person)) {
                 return message.getMessageText();
