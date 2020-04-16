@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar contactSpeed;
     private int speechSpeedValue = 1;
     public static boolean notificationActive = false;
+    public static boolean isSamePerson = false;
+    public String bufferedAnswer = "";
 
     private SharedPreferences shared;
     private SharedPreferences.Editor editor;
@@ -224,15 +226,21 @@ public class MainActivity extends AppCompatActivity {
             t1.speak(text,TextToSpeech.QUEUE_ADD,null);
         } else { //split text in three pieces
             String[] output = new String[3]; //nachricht von, contact, message
-            output[0] = text.split("(?<=von)(?s)(.*$)")[0];
-            output[1] = text.split("von")[1].split(":")[0];
-            output[2] = text.split(":")[1];
-            //Log.d("0", output[0]);
-            //Log.d("1", output[1]);
-            //Log.d("2", output[2]);
-            t1.speak(output[0],TextToSpeech.QUEUE_ADD,null);
-            t2.speak(output[1], TextToSpeech.QUEUE_ADD, null);
-            t3.speak(output[2], TextToSpeech.QUEUE_ADD, null);
+            if(text.contains("Nachricht")) {
+                output[0] = text.split("(?<=von)(?s)(.*$)")[0];
+                output[1] = text.split("von")[1].split(":")[0];
+                output[2] = text.split(":")[1];
+
+                //Log.d("0", output[0]);
+                //Log.d("1", output[1]);
+                //Log.d("2", output[2]);
+                t1.speak(output[0],TextToSpeech.QUEUE_ADD,null);
+                t2.speak(output[1], TextToSpeech.QUEUE_ADD, null);
+                t3.speak(output[2], TextToSpeech.QUEUE_ADD, null);
+            } else {
+                t1.speak(text,TextToSpeech.QUEUE_ADD,null);
+            }
+
         }
 
         t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
@@ -257,10 +265,17 @@ public class MainActivity extends AppCompatActivity {
             //wait until message was played
         }
 
-        if(isSingleMsgMode) {
+        if(isSingleMsgMode && !isSamePerson) {
             reactOnMessage();
         }
+        if(isSamePerson) {
+            broadcastReceiver.isAnswer = true;
+            Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
+            intent.putExtra("Answer", "");
 
+            sendBroadcast(intent);
+        }
+        notificationActive = false;
 
     }
 
@@ -316,16 +331,27 @@ public class MainActivity extends AppCompatActivity {
 
 
             //micro.stopRecording();
+            Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
             String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
             micro.result = questionMark;
-            setTextFromOtherThread("Sende Antwort: "+micro.result);
-            broadcastReceiver.isAnswer = true;
-            Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-            intent.putExtra("Answer", micro.result);
+            if(isSamePerson) {
+                bufferedAnswer +=" "+ micro.result;
+                intent.putExtra("Answer", "");
+            } else {
+                if(!bufferedAnswer.equals("")) {
+                    intent.putExtra("Answer", bufferedAnswer + " " +micro.result);
+                    setTextFromOtherThread("Sende Antwort: "+bufferedAnswer + " " +micro.result);
+                    bufferedAnswer = "";
+                } else {
+                    intent.putExtra("Answer", micro.result);
+                    setTextFromOtherThread("Sende Antwort: "+micro.result);
+                }
+            }
 
+            broadcastReceiver.isAnswer = true;
             sendBroadcast(intent);
 
 
@@ -346,9 +372,9 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("Answer", "");
 
             sendBroadcast(intent);
-            System.out.println("Kein Schlüsselwort");
+
         }
-        notificationActive = false;
+
 
     }
 

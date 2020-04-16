@@ -44,6 +44,8 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     public static StatusBarNotification currentSBN;
     public static Queue<StatusBarNotification> notifications = new LinkedList<>();
     String lastMessage = "";
+    String currentPerson = "";
+    String lastPerson = "";
 
     /*
         These are the package names of the apps. for which we want to
@@ -87,103 +89,146 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
             Notification not = sbn.getNotification();
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+
+
+
             System.out.println("Notification received: "+message);
-            if (lastMessage.equals(message) || message.equals("")) {
-                System.out.println("duplicate");
-                return;
-            }
-            currentSBN = sbn;
-            lastMessage = message;
-            if (!MainActivity.notificationActive) {
-                MainActivity.notificationActive = true;
-                MainActivity.broadcastReceiver.setNotificationListener(this);
-                Log.d("HIER", "nachricht kommt");
-                int notificationCode = matchNotificationCode(sbn);
+            if (lastMessage.equals(message)) {
 
-
-                if (message.contains(":")) {
+                if(message.equals("")) {
                     return;
                 }
+                currentSBN = sbn;
+                return;
+            }
 
-                Log.d("MESSAGE", message);
-                String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
-                Log.d("person", person);
-                String[] splitted = new String[3];
-                //regex evtl in " \\(" ändern
-                if (person.contains(" (")) {
-                    splitted = person.split(" \\(");
-                } else {
-                    splitted[0] = person;
-                }
+            String person = not.extras.getCharSequence(Notification.EXTRA_TITLE).toString();
+            String[] splitted = new String[3];
+            if (message.contains(":")) {
+                return;
+            }
 
-                if (messages.size() == 0) {
-                    ReceivedMessage rec = new ReceivedMessage(message, person);
-                    messages.add(rec);
-                } else {
-                    boolean newPerson = true;
-                    for (int i = 0; i < messages.size(); i++) {
-                        if (messages.get(i).getPerson().equals(splitted[0])) {
-                            if (!(messages.get(i).getMessageText().equals(message))) {
-                                Log.d("before message", messages.get(i).getMessageText());
-                                ReceivedMessage received = new ReceivedMessage(messages.get(i).getMessageText() + message, splitted[0]);
-                                messages.remove(i);
-                                messages.add(i, received);
-                                Log.d("after message", messages.get(i).getMessageText());
+            Log.d("MESSAGE", message);
 
-                            }
-                            newPerson = false;
+            Log.d("person", person);
+
+            //regex evtl in " \\(" ändern
+            if (person.contains(" (")) {
+                splitted = person.split(" \\(");
+            } else {
+                splitted[0] = person;
+            }
+
+            if (messages.size() == 0) {
+                ReceivedMessage rec = new ReceivedMessage(message, person);
+                messages.add(rec);
+            } else {
+                boolean newPerson = true;
+                for (int i = 0; i < messages.size(); i++) {
+                    if (messages.get(i).getPerson().equals(splitted[0])) {
+                        if (!(messages.get(i).getMessageText().equals(message))) {
+                            Log.d("before message", messages.get(i).getMessageText());
+                            ReceivedMessage received = new ReceivedMessage(messages.get(i).getMessageText() + message, splitted[0]);
+                            messages.remove(i);
+                            messages.add(i, received);
+                            Log.d("after message", messages.get(i).getMessageText());
+
                         }
-                    }
-                    if (newPerson) {
-                        ReceivedMessage rec = new ReceivedMessage(message, splitted[0]);
-                        messages.add(rec);
+                        newPerson = false;
                     }
                 }
-                //String person = not.extras.getCharSequence(Notification.).toString();
+                if (newPerson) {
+                    ReceivedMessage rec = new ReceivedMessage(message, splitted[0]);
+                    messages.add(rec);
+                }
+            }
+            //String person = not.extras.getCharSequence(Notification.).toString();
 
-                //MainActivity.updateText(splitted[0]+", " +message);
+            //MainActivity.updateText(splitted[0]+", " +message);
+            currentPerson = splitted[0];
+            String[] groupContact = null;
+            Log.d("SPLIT", splitted[0]);
+            if (splitted[0].contains(":")) {
+                groupContact = splitted[0].split(":");
+                //Log.d("GROUPCONTACT", groupContact[1]);
+                currentPerson = groupContact[0];
+            }
+
+
+            lastMessage = message;
+            if (!MainActivity.notificationActive) {
+                currentSBN = sbn;
+                MainActivity.notificationActive = true;
+                MainActivity.broadcastReceiver.setNotificationListener(this);
+
+                Intent intent = new Intent("com.github.chagall.notificationlistenerexample");
+                if(splitted[0].contains(":")){//group message
+                    Log.d("MESSAGE", messages.get(0).getMessageText());
+                    if(MainActivity.isSamePerson) {
+                        intent.putExtra("Message", groupContact[1] + " schreibt: " + messages.get(0).getMessageText());
+                    } else {
+                        intent.putExtra("Message", "Nachricht von" + groupContact[1] + " in " + groupContact[0] + ": " + messages.get(0).getMessageText());
+                    }
+
+                } else {//single person
+                    if(MainActivity.isSamePerson) {
+                        intent.putExtra("Message", message);
+
+                    } else {
+
+                        intent.putExtra("Message", "Nachricht von " + splitted[0] + ": " + message);
+                    }
+                }
+                if(notifications.isEmpty()){
+                    MainActivity.isSamePerson = false;
+                }
 
                 MainActivity.broadcastReceiver.isAnswer = false;
-                Intent intent = new Intent("com.github.chagall.notificationlistenerexample");
-                Log.d("SPLIT", splitted[0]);
-                if (splitted[0].contains(":")) { //group message
-                    String[] groupContact = splitted[0].split(":");
-                    //Log.d("GROUPCONTACT", groupContact[1]);
-                    Log.d("MESSAGE", messages.get(0).getMessageText());
-                    intent.putExtra("Message", "Nachricht von" + groupContact[1] + " in " + groupContact[0] + ": " + messages.get(0).getMessageText());
-                } else { //single person
-                    intent.putExtra("Message", "Nachricht von " + splitted[0] + ": " + message);
-                }
-
                 sendBroadcast(intent);
             } else {
                 System.out.println("notification buffered");
 
+                if(currentPerson.equals(lastPerson)) {
+                    MainActivity.isSamePerson = true;
+                } else {
+                    MainActivity.isSamePerson = false;
+                }
+
+
                 notifications.add(sbn);
 
             }
-            isFirst = true;
+            if(splitted[0].contains(":")) {
+                lastPerson = groupContact[0];
+            } else {
+                lastPerson = splitted[0];
+            }
+
+
         }
 
 
     }
 
     public void answerOnNotification(String answer) {
-        System.out.println("kk");
+
         lastMessage = "";
         MainActivity.messageThread = null;
-        Action action = NotificationUtils.getQuickReplyAction(currentSBN.getNotification(), currentSBN.getPackageName());
-        if (action != null) {
-            try {
 
-                action.sendReply(
-                        getApplicationContext(),
-                        answer);
+        if(!MainActivity.isSamePerson) {
+            Action action = NotificationUtils.getQuickReplyAction(currentSBN.getNotification(), currentSBN.getPackageName());
+            if (action != null) {
+                try {
+                    action.sendReply(
+                            getApplicationContext(),
+                            answer);
 
-            } catch (PendingIntent.CanceledException e) {
+                } catch (PendingIntent.CanceledException e) {
 
+                }
             }
         }
+
 
 
             while (true){
@@ -192,7 +237,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
                     Notification not = n.getNotification();
                     String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
                     if(!message.equals("")) {
-                        System.out.println("test");
+
                         onNotificationPosted(n);
                         break;
                     }
