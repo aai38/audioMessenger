@@ -1,6 +1,7 @@
 package com.github.chagall.notificationlistenerexample;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
@@ -40,7 +42,7 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String[] keywords = {"antworten", "abhören"};
+    private String[] keywords = {"antworten", "abhören", "schreibe"};
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
@@ -140,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 speechSpeedValue = progress;
                 //1.0 normal, 0.5 half the normal speed
                 t1.setSpeechRate(progress);
-                Log.d("SPEECH speed", "value:"+progress);
+                //Log.d("SPEECH speed", "value:"+progress);
             }
 
             @Override
@@ -296,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
         micro.startRecording(3000);
         boolean answer = false;
         boolean name = false;
+        boolean write = false;
         setTextFromOtherThread("Warte 3s auf Schlüsselwort (\"Antworten\")...");
         while(micro.isRecording) {
             //wait until a keyword was spoken
@@ -315,6 +318,11 @@ public class MainActivity extends AppCompatActivity {
             } else if(checkKeyword(micro.result, 1)) {
 
                 name = true;
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                micro.stopRecording();
+                break;
+            } else if(checkKeyword(micro.result, 2)){ //"schreibe"
+                write = true;
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 break;
@@ -363,12 +371,49 @@ public class MainActivity extends AppCompatActivity {
         } else if (name) {
             setTextFromOtherThread("Abhören-Schlüsselwort erkannt!\nSpreche nun den Namen ein...");
             micro.startRecording(3000);
-            while(micro.isRecording){
+            while (micro.isRecording) {
 
             }
             String message = NotificationListenerExampleService.getMessageFromPerson(micro.result);
 
-            t1.speak(message,TextToSpeech.QUEUE_ADD,null);
+            t1.speak(message, TextToSpeech.QUEUE_ADD, null);
+        } else if(write) {
+            setTextFromOtherThread("Schreibe-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
+            micro.startRecording(5000);
+            while(micro.isRecording){
+                //wait until user has spoken his answer
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+            //micro.stopRecording();
+            //Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
+            String point = micro.result.replaceAll("punkt", ".");
+            String comma = point.replaceAll("komma", ",");
+            String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
+            String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
+            micro.result = questionMark;
+            if(isSamePerson) {
+                bufferedAnswer +=" "+ micro.result;
+                //intent.putExtra("Answer", "");
+            } else {
+                if(!bufferedAnswer.equals("")) {
+                    //intent.putExtra("Answer", bufferedAnswer + " " +micro.result);
+                    setTextFromOtherThread("Sende Nachricht: "+bufferedAnswer + " " +micro.result);
+                    bufferedAnswer = "";
+                } else {
+                    //intent.putExtra("Answer", micro.result);
+                    setTextFromOtherThread("Sende Nachricht: "+micro.result);
+                }
+            }
+
+            sendMessage(micro.result);
+            //broadcastReceiver.isAnswer = true;
+            //sendBroadcast(intent);
 
         } else {
             setTextFromOtherThread("Kein Schlüsselwort erkannt.");
@@ -486,6 +531,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    //send text message with given string
+    public void sendMessage (String message){
+        Intent waIntent = new Intent(Intent.ACTION_SEND);
+        waIntent.setType("text/plain");
+        waIntent.setPackage("org.telegram.messenger");
+        if (waIntent != null) {
+            waIntent.putExtra(Intent.EXTRA_TEXT, message);//
+            startActivity(Intent.createChooser(waIntent, "Share with"));
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "Telegram is not installed", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 
