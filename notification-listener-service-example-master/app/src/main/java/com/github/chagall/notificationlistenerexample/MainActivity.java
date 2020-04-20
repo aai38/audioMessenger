@@ -227,8 +227,13 @@ public class MainActivity extends AppCompatActivity {
         } else { //split text in three pieces
             String[] output = new String[3]; //nachricht von, contact, message
             if(text.contains("Nachricht")) {
-                output[0] = text.split("(?<=von)(?s)(.*$)")[0];
-                output[1] = text.split("von")[1].split(":")[0];
+                //output[0] = text.split("(?<=von)(?s)(.*$)")[0];
+                String m = text.split(" ")[0]; //Nachricht(en)
+                String f = text.split(" ")[1]; //von
+                output[0] = m+" "+f;
+                //output[1] = text.split("von")[1].split(":")[0];
+                String contact = text.split(":")[0];
+                output[1] = contact.substring(contact.lastIndexOf(" ")+1);
                 output[2] = text.split(":")[1];
 
                 //Log.d("0", output[0]);
