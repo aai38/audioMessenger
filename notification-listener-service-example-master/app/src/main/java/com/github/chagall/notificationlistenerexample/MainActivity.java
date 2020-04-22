@@ -42,7 +42,7 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String[] keywords = {"antworten", "abhören", "schreibe"};
+    private String[] keywords = {"antworten", "abhören", "schreibe", "alle abhören"};
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private static int messageReceivedEarcon;
     private static int answerModeActiveEarcon;
     public static Thread messageThread;
+    public static Thread activeListeningThread;
     public boolean waitForAnswer;
     private SeekBar speechSpeed;
     private SeekBar contactSpeed;
@@ -86,16 +87,20 @@ public class MainActivity extends AppCompatActivity {
         fileName = getFilesDir()+"/speak.pcm";
         micro = new MicrophoneListener(fileName);
 
-        Button button = (Button) findViewById(R.id.buttonEverything);
+        ImageView button = (ImageView) findViewById(R.id.recordBtn);
         button.setOnClickListener( (View view) -> {
-            updateOurText( NotificationListenerExampleService.getMessageToRead(), false);
+
+            activeListeningThread = null;
+            activeListeningThread = new Thread(new Runnable() {
+                public void run() {
+                    handleUserCommands(false);
+                    return;
+                }
+            }, "Message Thread");
+            activeListeningThread.start();
 
         });
 
-
-        // Here we get a reference to the image we will modify when a notification is received
-        interceptedNotificationImageView
-                = (ImageView) this.findViewById(R.id.intercepted_notification_logo);
         view = (TextView) this.findViewById(R.id.image_change_explanation);
         // If the user did not turn the notification listener service on we prompt him to do so
         if(!isNotificationServiceEnabled()){
@@ -258,8 +263,6 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onDone(String utteranceId) {
-                //listen if user wants to answer
-
 
                 // Speaking stopped.
             }
@@ -273,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(isSingleMsgMode && !isSamePerson) {
-            reactOnMessage();
+            handleUserCommands(true);
         }
         if(isSamePerson) {
             broadcastReceiver.isAnswer = true;
@@ -294,12 +297,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void reactOnMessage() {
+    public int listenToKeyword() {
         micro.startRecording(3000);
-        boolean answer = false;
-        boolean name = false;
-        boolean write = false;
-        setTextFromOtherThread("Warte 3s auf Schlüsselwort (\"Antworten\")...");
+        setTextFromOtherThread("Warte 3s auf Schlüsselwort ...");
         while(micro.isRecording) {
             //wait until a keyword was spoken
 
@@ -310,27 +310,36 @@ public class MainActivity extends AppCompatActivity {
                 int answers_before = shared.getInt("answers", 0);
                 editor.putInt("answers", answers_before+1);
                 editor.apply();
-
-                answer = true;
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
-                break;
-            } else if(checkKeyword(micro.result, 1)) {
-
-                name = true;
+                return 0;
+            } else if(checkKeyword(micro.result, 1)) { // eine Nachricht abhören
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
-                break;
+                return 1;
             } else if(checkKeyword(micro.result, 2)){ //"schreibe"
-                write = true;
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
-                break;
+                return 2;
+            } else if(checkKeyword(micro.result, 2)){ //alle Nachrichten abhören
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                micro.stopRecording();
+                return 3;
             }
         }
+        //no keyword
+        return -1;
+    }
 
 
-        if(answer) {
+
+
+
+    public void handleUserCommands(boolean isReactionToNotification) {
+
+        int keyword = listenToKeyword();
+
+        if(keyword == 0 && isReactionToNotification) {
             setTextFromOtherThread("Antworten-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
             micro.startRecording(5000);
             while(micro.isRecording){
@@ -342,8 +351,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-
-            //micro.stopRecording();
             Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
@@ -368,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
             sendBroadcast(intent);
 
 
-        } else if (name) {
+        } else if (keyword == 1) {
             setTextFromOtherThread("Abhören-Schlüsselwort erkannt!\nSpreche nun den Namen ein...");
             micro.startRecording(3000);
             while (micro.isRecording) {
@@ -377,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
             String message = NotificationListenerExampleService.getMessageFromPerson(micro.result);
 
             t1.speak(message, TextToSpeech.QUEUE_ADD, null);
-        } else if(write) {
+        } else if(keyword == 2) {
             setTextFromOtherThread("Schreibe-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
             micro.startRecording(5000);
             while(micro.isRecording){
@@ -390,8 +397,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-            //micro.stopRecording();
-            //Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
@@ -399,31 +404,36 @@ public class MainActivity extends AppCompatActivity {
             micro.result = questionMark;
             if(isSamePerson) {
                 bufferedAnswer +=" "+ micro.result;
-                //intent.putExtra("Answer", "");
             } else {
                 if(!bufferedAnswer.equals("")) {
-                    //intent.putExtra("Answer", bufferedAnswer + " " +micro.result);
+
                     setTextFromOtherThread("Sende Nachricht: "+bufferedAnswer + " " +micro.result);
                     bufferedAnswer = "";
                 } else {
-                    //intent.putExtra("Answer", micro.result);
+
                     setTextFromOtherThread("Sende Nachricht: "+micro.result);
                 }
             }
 
             sendMessage(micro.result);
-            //broadcastReceiver.isAnswer = true;
-            //sendBroadcast(intent);
 
-        } else {
+
+        } else if(keyword == 3) {
+            updateOurText( NotificationListenerExampleService.getMessageToRead(), false);
+        }
+        else {
             setTextFromOtherThread("Kein Schlüsselwort erkannt.");
-            broadcastReceiver.isAnswer = true;
-            Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-            intent.putExtra("Answer", "");
-
-            sendBroadcast(intent);
+            if(isReactionToNotification) {
+                broadcastReceiver.isAnswer = true;
+                Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
+                intent.putExtra("Answer", "");
+                sendBroadcast(intent);
+            }
 
         }
+
+
+
 
 
     }
@@ -442,11 +452,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-
-
-
-
     }
+
+
 
     /**
      * Change Intercepted Notification Image
