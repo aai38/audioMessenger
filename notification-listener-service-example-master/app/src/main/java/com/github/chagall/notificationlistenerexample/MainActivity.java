@@ -42,7 +42,7 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String[] keywords = {"antworten", "abhören", "schreibe", "alle abhören"};
+    private String[] keywords = {"antworten", "abhören", "schreibe", "alle"};
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
@@ -321,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 2;
-            } else if(checkKeyword(micro.result, 2)){ //alle Nachrichten abhören
+            } else if(checkKeyword(micro.result, 3)){ //alle Nachrichten abhören
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 3;
