@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences shared;
     private SharedPreferences.Editor editor;
+    private ImageButton favorite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +83,11 @@ public class MainActivity extends AppCompatActivity {
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
-
+        favorite = findViewById(R.id.imageButton);
+        favorite.setOnClickListener((View view) -> {
+            Intent activityIntent = new Intent(this, FavoritesActivity.class);
+            startActivity(activityIntent);
+        });
 
         // Record to the external cache directory for visibility
         fileName = getFilesDir()+"/speak.pcm";
