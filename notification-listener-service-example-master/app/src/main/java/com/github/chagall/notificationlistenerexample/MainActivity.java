@@ -27,6 +27,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -75,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences shared;
     private SharedPreferences.Editor editor;
     private ImageButton favorite;
+    private boolean isBusy = false;
+    public static boolean isActiveMode = true;
+    private static Switch isActiveModeSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,17 +99,28 @@ public class MainActivity extends AppCompatActivity {
 
         ImageView button = (ImageView) findViewById(R.id.recordBtn);
         button.setOnClickListener( (View view) -> {
+            if(!isBusy) {
+                activeListeningThread = null;
+                activeListeningThread = new Thread(new Runnable() {
+                    public void run() {
+                        isBusy = true;
+                        handleUserCommands(false);
+                        isBusy = false;
+                        return;
+                    }
+                }, "Message Thread");
+                activeListeningThread.start();
+            }
 
-            activeListeningThread = null;
-            activeListeningThread = new Thread(new Runnable() {
-                public void run() {
-                    handleUserCommands(false);
-                    return;
-                }
-            }, "Message Thread");
-            activeListeningThread.start();
 
         });
+
+        // initiate a Switch
+        isActiveModeSwitch = (Switch) findViewById(R.id.switch1);
+
+        // check current state of a Switch (true or false).
+        isActiveMode = isActiveModeSwitch.isChecked();
+
 
         view = (TextView) this.findViewById(R.id.image_change_explanation);
         // If the user did not turn the notification listener service on we prompt him to do so
@@ -198,6 +213,10 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("calls", calls_before+1);
         editor.putInt("answers", answers_before+1);
         editor.apply();
+    }
+
+    public static void updateSwitchStatus() {
+        isActiveMode = isActiveModeSwitch.isChecked();
     }
 
     @Override
@@ -425,6 +444,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         } else if(keyword == 3) {
+
             updateOurText( NotificationListenerExampleService.getMessageToRead(), false);
         }
         else {
@@ -447,10 +467,12 @@ public class MainActivity extends AppCompatActivity {
     public void updateOurText(String text, boolean isSingleMsgMode) {
         if(text != null) {
             messageThread = null;
-            view.setText(text);
+            setTextFromOtherThread(text);
             messageThread = new Thread(new Runnable() {
                 public void run() {
+                    isBusy = true;
                     playMessage(text, isSingleMsgMode);
+                    isBusy = false;
                     return;
                 }
             }, "Message Thread");
