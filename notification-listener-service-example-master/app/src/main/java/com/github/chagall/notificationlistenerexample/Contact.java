@@ -1,9 +1,8 @@
 package com.github.chagall.notificationlistenerexample;
 
-public class Contact {
+public class Contact implements java.io.Serializable{
 
     private String name;
-    private String number;
     private boolean favorite;
 
     public String getName() {
@@ -14,13 +13,6 @@ public class Contact {
         this.name = name;
     }
 
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
 
     public boolean isFavorite() {
         return favorite;
@@ -30,13 +22,8 @@ public class Contact {
         this.favorite = favorite;
     }
 
-    public Contact(String name, String number) {
-        this.name = name;
-        this.number = number;
-        favorite = false;
-    }
 
-    public Contact () {
+    public Contact() {
 
     }
 }

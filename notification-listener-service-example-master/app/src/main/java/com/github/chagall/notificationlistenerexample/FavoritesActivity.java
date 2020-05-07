@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
+import android.os.Parcelable;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -59,6 +60,7 @@ public class FavoritesActivity extends AppCompatActivity {
                     displayName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 
                     contactsInfo.setName(displayName);
+                    contactsInfo.setFavorite(false);
 
                     /*Cursor phoneCursor = getContentResolver().query(
                             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -81,8 +83,11 @@ public class FavoritesActivity extends AppCompatActivity {
         }
         cursor.close();
 
+        Parcelable state = listView.onSaveInstanceState();
         dataAdapter = new CustomAdapter(FavoritesActivity.this, contacts);
+        listView.onRestoreInstanceState(state);
         listView.setAdapter(dataAdapter);
+
     }
 
     public void requestContactPermission() {
