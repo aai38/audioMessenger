@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.net.Uri;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -86,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
+        //handle headset input
+        startService(new Intent(this, HeadsetService.class));
 
         favorite = findViewById(R.id.imageButton);
         favorite.setOnClickListener((View view) -> {
@@ -582,6 +586,25 @@ public class MainActivity extends AppCompatActivity {
         {
             Toast.makeText(getApplicationContext(), "Telegram is not installed", Toast.LENGTH_SHORT).show();
         }
+        /*Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        //String url = "https://t.me/Naiggoo";
+        //sendIntent.setData(Uri.parse(url));
+        //sendIntent.putExtra(Intent.EXTRA_TEXT, message);
+        sendIntent.setPackage("org.telegram.messenger");
+        sendIntent.putExtra(Intent.EXTRA_EMAIL, "https://t.me/Naiggoo");
+        //sendIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+        sendIntent.putExtra(Intent.EXTRA_STREAM, message);
+        startActivity(sendIntent);*/
+        /*try {
+            Intent telegram = new Intent(Intent.ACTION_SEND);
+            telegram.setData(Uri.parse("https://t.me/Naiggoo"));
+                    telegram.setPackage("org.telegram.messenger");
+                    telegram.putExtra(Intent.EXTRA_TEXT, message);
+            startActivity(telegram);
+        } catch (Exception e) {
+            Toast.makeText(this, "Telegram app is not installed", Toast.LENGTH_LONG).show();
+        }*/
 
     }
 
