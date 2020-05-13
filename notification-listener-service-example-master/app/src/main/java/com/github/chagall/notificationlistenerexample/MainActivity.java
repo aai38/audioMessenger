@@ -98,6 +98,12 @@ public class MainActivity extends AppCompatActivity {
     private static Switch isActiveModeSwitch;
     private File testAudio;
 
+    private ImageButton mailButton;
+    private int answers_before;
+    private int calls_before;
+    private int speech_rate_answers;
+    private int speech_rate_calls;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -194,6 +200,8 @@ public class MainActivity extends AppCompatActivity {
         messageReceivedEarcon = sp.load(this, R.raw.earcon1, 1);
         answerModeActiveEarcon = sp.load(this, R.raw.earcon_answer_mode, 1);
 
+
+        /*
         this.speechSpeed = (SeekBar)findViewById(R.id.speechSpeed);
         this.speechSpeed.setMax(10);
         this.speechSpeed.setProgress(0);
@@ -239,16 +247,39 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+         */
         shared = getPreferences(Context.MODE_PRIVATE);
+
+        calls_before = shared.getInt("calls", 0);
+        answers_before = shared.getInt("answers", 0);
+        speech_rate_answers = shared.getInt("rate_answers", 1);
+        speech_rate_calls = shared.getInt("rate_calls", 1);
+
         editor = shared.edit();
 
-        int calls_before = shared.getInt("calls", 0);
-        int answers_before = shared.getInt("answers", 0);
+
+        t1.setSpeechRate((calls_before/25)+1);
+        editor.putInt("rate_calls", (calls_before/25)+1);
 
 
-        editor.putInt("calls", calls_before+1);
-        editor.putInt("answers", answers_before+1);
+        t2.setSpeechRate(speech_rate_answers);
+
+        t2.setSpeechRate(answers_before/25+1);
+        editor.putInt("rate_answers", answers_before/25+1);
         editor.apply();
+
+
+
+
+        mailButton = findViewById(R.id.mailButton);
+        mailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InformationDialogue informationDialogue = new InformationDialogue();
+                informationDialogue.show(getSupportFragmentManager(), "TAG");
+            }
+        });
     }
 
     public static void updateSwitchStatus() {
@@ -261,6 +292,19 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         //unregisterReceiver(broadcastReceiver);
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        editor = shared.edit();
+
+        calls_before = shared.getInt("calls", 0);
+        answers_before = shared.getInt("answers", 0);
+
+
+        editor.putInt("calls", calls_before+1);
+        editor.apply();
     }
 
     private File resourceToFile(int res) {
@@ -439,7 +483,6 @@ public class MainActivity extends AppCompatActivity {
             if(checkKeyword(micro.result,0)) {
 
                 editor = shared.edit();
-                int answers_before = shared.getInt("answers", 0);
                 editor.putInt("answers", answers_before+1);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
@@ -590,29 +633,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    /**
-     * Change Intercepted Notification Image
-     * Changes the MainActivity image based on which notification was intercepted
-     * @param notificationCode The intercepted notification code
-     */
-    private void changeInterceptedNotificationImage(int notificationCode){
-        switch(notificationCode){
-            case NotificationListenerExampleService.InterceptedNotificationCode.FACEBOOK_CODE:
-                interceptedNotificationImageView.setImageResource(R.drawable.facebook_logo);
-                break;
-            case NotificationListenerExampleService.InterceptedNotificationCode.INSTAGRAM_CODE:
-                interceptedNotificationImageView.setImageResource(R.drawable.instagram_logo);
-                break;
-            case NotificationListenerExampleService.InterceptedNotificationCode.WHATSAPP_CODE:
-                interceptedNotificationImageView.setImageResource(R.drawable.whatsapp_logo);
-                break;
-            case NotificationListenerExampleService.InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE:
-                interceptedNotificationImageView.setImageResource(R.drawable.other_notification_logo);
-                break;
-        }
-    }
-
     /**
      * Is Notification Service Enabled.
      * Verifies if the notification listener service is enabled.
@@ -647,6 +667,8 @@ public class MainActivity extends AppCompatActivity {
      * @return An alert dialog which leads to the notification enabling screen
      */
     private AlertDialog buildNotificationServiceAlertDialog(){
+
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(R.string.notification_listener_service);
         alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
@@ -710,6 +732,8 @@ public class MainActivity extends AppCompatActivity {
         }*/
 
     }
+
+
 
 
 }
