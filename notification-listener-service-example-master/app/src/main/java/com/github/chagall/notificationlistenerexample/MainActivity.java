@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.Uri;
+import android.os.FileObserver;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -34,8 +35,23 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
+import com.ibm.cloud.sdk.core.http.HttpMediaType;
+import com.ibm.cloud.sdk.core.security.IamAuthenticator;
+import com.ibm.cloud.sdk.core.service.exception.BadRequestException;
+import com.ibm.watson.speech_to_text.v1.SpeechToText;
+import com.ibm.watson.speech_to_text.v1.model.RecognizeOptions;
+import com.ibm.watson.speech_to_text.v1.model.SpeechRecognitionResult;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import HelperClasses.NotificationBroadcastReceiver;
 
@@ -80,13 +96,29 @@ public class MainActivity extends AppCompatActivity {
     private boolean isBusy = false;
     public static boolean isActiveMode = true;
     private static Switch isActiveModeSwitch;
+    private File testAudio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
+        //initialization test
+        Thread iniThread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    initializationTest();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
+        }, "Initialization Thread");
+        iniThread.start();
 
         //handle headset input
         startService(new Intent(this, HeadsetService.class));
@@ -228,6 +260,77 @@ public class MainActivity extends AppCompatActivity {
         finish();
         super.onDestroy();
         //unregisterReceiver(broadcastReceiver);
+
+    }
+
+    private File resourceToFile(int res) {
+        File tempFile = null;
+        try{
+            InputStream inputStream = getResources().openRawResource(res);
+            tempFile = File.createTempFile("pre", "suf");
+            copyFile(inputStream, new FileOutputStream(tempFile));
+
+        } catch (IOException e) {
+            throw new RuntimeException("Can't create temp file ", e);
+        }
+
+       return tempFile;
+    }
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while((read = in.read(buffer)) != -1){
+            out.write(buffer, 0, read);
+        }
+    }
+
+    private void initializationTest() throws FileNotFoundException {
+        testAudio = resourceToFile(R.raw.testvoice);
+        SpeechToText speechToText;
+        IamAuthenticator authenticator;
+        authenticator = new IamAuthenticator("N2UJ-ncPfcdKPi71q8ESL1yapZWy5Qh6FkbEZmsQTnr3");
+        speechToText = new SpeechToText(authenticator);
+        speechToText.setServiceUrl("https://api.eu-gb.speech-to-text.watson.cloud.ibm.com/instances/a0d543a7-e42e-45d9-b28f-ffaa0922d3c7");
+        RecognizeOptions options;
+        List<SpeechRecognitionResult> transcript;
+        String res = "";
+        Pattern pattern = Pattern.compile("\"transcript\": \"(.*)\"");
+        Matcher matcher;
+        options = new RecognizeOptions.Builder()
+                .audio(testAudio)
+                //.contentType("audio/l16;rate=16000;endianness=little-endian")
+                .contentType(HttpMediaType.AUDIO_WAV)
+                .model("de-DE_BroadbandModel")
+                .build();
+        String result = "";
+
+        while(result.equals("")) {
+            try{
+                transcript = speechToText
+                        .recognize(options)
+                        .execute()
+                        .getResult().getResults();
+
+                for (SpeechRecognitionResult s : transcript) {
+                    res = s.toString();
+                    matcher = pattern.matcher(res);
+
+                    while (matcher.find()) {
+                        result += matcher.group(1);
+                    }
+
+                }
+
+            }catch (BadRequestException e) {
+                System.out.println("bad request");
+            } catch (RuntimeException e) {
+                System.out.println("internal error");
+            }
+
+        }
+
+
+
 
     }
 
