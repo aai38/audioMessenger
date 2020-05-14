@@ -67,13 +67,7 @@
             android:layout_width="243dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="30dp"
-            android:orientation="vertical"/>
-
-        <LinearLayout android:layout_width="138dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="273dp"
             android:orientation="vertical">
-
 
             <Switch
                 android:id="@+id/switch1"
@@ -81,7 +75,15 @@
                 android:layout_height="wrap_content"
                 android:checked="true"
                 android:text="Aktiv Modus"
-                android:textColor="#FFFFFF"/>
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="138dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="273dp"
+            android:orientation="vertical">
+
+
         </LinearLayout>
 
 
