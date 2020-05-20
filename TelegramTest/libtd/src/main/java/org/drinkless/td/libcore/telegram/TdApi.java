@@ -47874,8 +47874,13 @@ public class TdApi {
          * Default constructor for a function, which sends a message. Returns the sent message.
          *
          * <p> Returns {@link Message Message} </p>
+         * @param chatId
+         * @param replyToMessageId
+         * @param options
+         * @param b
+         * @param content
          */
-        public SendMessage() {
+        public SendMessage(int chatId, int replyToMessageId, SendMessageOptions options, boolean b, InputMessageContent content) {
         }
 
         /**

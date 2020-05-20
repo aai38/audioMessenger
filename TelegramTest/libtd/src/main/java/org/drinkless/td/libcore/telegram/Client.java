@@ -372,7 +372,7 @@ public final class Client implements Runnable {
         }
     }
 
-    private Client(ResultHandler updatesHandler, ExceptionHandler updateExceptionHandler, ExceptionHandler defaultExceptionHandler) {
+    public Client(ResultHandler updatesHandler, ExceptionHandler updateExceptionHandler, ExceptionHandler defaultExceptionHandler) {
         clientCount.incrementAndGet();
         nativeClientId = NativeClient.createClient();
         handlers.put(0L, new Handler(updatesHandler, updateExceptionHandler));
