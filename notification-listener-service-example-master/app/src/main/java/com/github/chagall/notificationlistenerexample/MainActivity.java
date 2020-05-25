@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         isActiveMode = isActiveModeSwitch.isChecked();
 
 
-        view = (TextView) this.findViewById(R.id.image_change_explanation);
+        //view = (TextView) this.findViewById(R.id.image_change_explanation);
         // If the user did not turn the notification listener service on we prompt him to do so
         if(!isNotificationServiceEnabled()){
             enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
@@ -475,7 +475,8 @@ public class MainActivity extends AppCompatActivity {
 
     public int listenToKeyword() {
         micro.startRecording(3000);
-        setTextFromOtherThread("Warte 3s auf Schlüsselwort ...");
+        //
+        //setTextFromOtherThread("Warte 3s auf Schlüsselwort ...");
         while(micro.isRecording) {
             //wait until a keyword was spoken
 
@@ -515,7 +516,7 @@ public class MainActivity extends AppCompatActivity {
         int keyword = listenToKeyword();
 
         if(keyword == 0 && isReactionToNotification) {
-            setTextFromOtherThread("Antworten-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
+            //setTextFromOtherThread("Antworten-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
             micro.startRecording(5000);
             while(micro.isRecording){
                 //wait until user has spoken his answer
@@ -538,11 +539,11 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 if(!bufferedAnswer.equals("")) {
                     intent.putExtra("Answer", bufferedAnswer + " " +micro.result);
-                    setTextFromOtherThread("Sende Antwort: "+bufferedAnswer + " " +micro.result);
+                    //setTextFromOtherThread("Sende Antwort: "+bufferedAnswer + " " +micro.result);
                     bufferedAnswer = "";
                 } else {
                     intent.putExtra("Answer", micro.result);
-                    setTextFromOtherThread("Sende Antwort: "+micro.result);
+                    //setTextFromOtherThread("Sende Antwort: "+micro.result);
                 }
             }
 
@@ -551,7 +552,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         } else if (keyword == 1) {
-            setTextFromOtherThread("Abhören-Schlüsselwort erkannt!\nSpreche nun den Namen ein...");
+            //
+            // xtFromOtherThread("Abhören-Schlüsselwort erkannt!\nSpreche nun den Namen ein...");
             micro.startRecording(3000);
             while (micro.isRecording) {
 
@@ -560,7 +562,7 @@ public class MainActivity extends AppCompatActivity {
 
             t1.speak(message, TextToSpeech.QUEUE_ADD, null);
         } else if(keyword == 2) {
-            setTextFromOtherThread("Schreibe-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
+            //setTextFromOtherThread("Schreibe-Schlüsselwort erkannt!\nSpreche nun deine Nachricht ein...");
             micro.startRecording(5000);
             while(micro.isRecording){
                 //wait until user has spoken his answer
@@ -582,11 +584,11 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 if(!bufferedAnswer.equals("")) {
 
-                    setTextFromOtherThread("Sende Nachricht: "+bufferedAnswer + " " +micro.result);
+                    //setTextFromOtherThread("Sende Nachricht: "+bufferedAnswer + " " +micro.result);
                     bufferedAnswer = "";
                 } else {
 
-                    setTextFromOtherThread("Sende Nachricht: "+micro.result);
+                    //setTextFromOtherThread("Sende Nachricht: "+micro.result);
                 }
             }
 
@@ -598,7 +600,7 @@ public class MainActivity extends AppCompatActivity {
             updateOurText( NotificationListenerExampleService.getMessageToRead(), false);
         }
         else {
-            setTextFromOtherThread("Kein Schlüsselwort erkannt.");
+            //setTextFromOtherThread("Kein Schlüsselwort erkannt.");
             if(isReactionToNotification) {
                 broadcastReceiver.isAnswer = true;
                 Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
@@ -617,7 +619,7 @@ public class MainActivity extends AppCompatActivity {
     public void updateOurText(String text, boolean isSingleMsgMode) {
         if(text != null) {
             messageThread = null;
-            setTextFromOtherThread(text);
+            //setTextFromOtherThread(text);
             messageThread = new Thread(new Runnable() {
                 public void run() {
                     isBusy = true;
