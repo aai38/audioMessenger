@@ -20,8 +20,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class MainActivity extends AppCompatActivity {
     //TODO: change this to yours
-    private static String phoneNumber = "+4915231056901";
-    private static String code = "34595";
+    private static String phoneNumber = "+4915123967305";
+    private static String code = "92275";
 
     private Button sendButton;
     private static Client client = null;
@@ -53,14 +53,18 @@ public class MainActivity extends AppCompatActivity {
             {
                 Log.d("SEND", "send message");
                 String message = "Hello from the other side";
-
-                sendMessage(1290791514,message);
+                client.send(new TdApi.GetContacts(),new UpdatesHandler());
+                sendMessage(232491485,message);
 
             }
         });
 
 
     }
+
+
+
+
     private static void sendMessage(long chatId, String message) {
         // initialize reply markup just for testing
         TdApi.InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
@@ -270,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                     //supergroupsFullInfo.put(updateSupergroupFullInfo.supergroupId, updateSupergroupFullInfo.supergroupFullInfo);
                     break;
                 default:
-                    // print("Unsupported update:" + newLine + object);*/
+                    //System.out.println("Unsupported update:" + object);
             }
         }
     }
@@ -370,6 +374,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static String promptString(String prompt) {
+
+
+
         System.out.print(prompt);
         currentPrompt = prompt;
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
