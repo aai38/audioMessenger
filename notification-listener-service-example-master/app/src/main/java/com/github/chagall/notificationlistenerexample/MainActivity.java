@@ -42,12 +42,18 @@ import com.ibm.watson.speech_to_text.v1.SpeechToText;
 import com.ibm.watson.speech_to_text.v1.model.RecognizeOptions;
 import com.ibm.watson.speech_to_text.v1.model.SpeechRecognitionResult;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -78,8 +84,15 @@ public class MainActivity extends AppCompatActivity {
     public boolean hasRecorded;
     public String fileName;
     public static SoundPool sp;
+    private SoundPool spFavoriteOne;
+    private SoundPool spFavoriteTwo;
+    private SoundPool spFavoriteThree;
+
     private static int messageReceivedEarcon;
     private static int answerModeActiveEarcon;
+    private int favoriteOneEarcon;
+    private int favoriteTwoEarcon;
+    private int favoriteThreeEarcon;
     public static Thread messageThread;
     public static Thread activeListeningThread;
     public boolean waitForAnswer;
@@ -98,14 +111,21 @@ public class MainActivity extends AppCompatActivity {
     private static Switch isActiveModeSwitch;
     private File testAudio;
 
+    private String[] output;
+
     private ImageButton mailButton;
     private int answers_before;
     private int calls_before;
     private int speech_rate_answers;
     private int speech_rate_calls;
 
+    private ArrayList<String> favorites = new ArrayList();
+    private int index;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
 
 
         super.onCreate(savedInstanceState);
@@ -280,6 +300,28 @@ public class MainActivity extends AppCompatActivity {
                 informationDialogue.show(getSupportFragmentManager(), "TAG");
             }
         });
+
+        //Code to get the JSON data
+
+        String resultJSON = CustomAdapter.getData(getApplicationContext());
+
+        if(resultJSON != null) {
+            try {
+                JSONArray jsonArray = new JSONArray(resultJSON);
+                for (int i = 0; i <jsonArray.length(); i++) {
+                    JSONObject jObj = jsonArray.getJSONObject(i);
+                    String name = jObj.getString("name");
+                    favorites.add(name);
+                    Log.e("name", name);
+                }
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Log.e("favorites", favorites.toString());
     }
 
     public static void updateSwitchStatus() {
@@ -305,6 +347,7 @@ public class MainActivity extends AppCompatActivity {
 
         editor.putInt("calls", calls_before+1);
         editor.apply();
+
     }
 
     private File resourceToFile(int res) {
@@ -408,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
         if(text.contains("Keine neuen Nachrichten")){
             t1.speak(text,TextToSpeech.QUEUE_ADD,null);
         } else { //split text in three pieces
-            String[] output = new String[3]; //nachricht von, contact, message
+            output = new String[3]; //nachricht von, contact, message
             if(text.contains("Nachricht")) {
                 //output[0] = text.split("(?<=von)(?s)(.*$)")[0];
                 String m = text.split(" ")[0]; //Nachricht(en)
@@ -422,9 +465,70 @@ public class MainActivity extends AppCompatActivity {
                 //Log.d("0", output[0]);
                 //Log.d("1", output[1]);
                 //Log.d("2", output[2]);
-                t1.speak(output[0],TextToSpeech.QUEUE_ADD,null);
-                t2.speak(output[1], TextToSpeech.QUEUE_ADD, null);
-                t3.speak(output[2], TextToSpeech.QUEUE_ADD, null);
+                if(favorites.contains(output[1])) {
+                    Log.e("favorite in", output[1] + favorites.get(0));
+                    int index = 0;
+                    for (int i = 0; i < favorites.size(); i++) {
+                        if (favorites.get(i).equals(output[1])) {
+                            index = i + 2;
+                        }
+                    }
+
+                    if (index == 2) {
+                        Log.e("index before start", ""+index);
+                        spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
+                        favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon2, 1);
+                    } else if (index == 3) {
+                        spFavoriteTwo = new SoundPool(2, STREAM_MUSIC, 0);
+                        favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon3, 1);
+                    } else if (index == 4) {
+                        spFavoriteThree = new SoundPool(2, STREAM_MUSIC, 0);
+                        favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon4, 1);
+                    }
+                }
+
+                t2.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                    @Override
+                    public void onStart(String s) {
+                        if(favorites.contains(output[1])) {
+                            Log.i("favorite in output", "");
+                            if (index == 2) {
+                                Log.i("index_instart", "" + 2);
+                                spFavoriteOne.play(favoriteOneEarcon, 1, 1, 0 , 0 , speechSpeedValue);
+                            } else if (index == 3) {
+                                spFavoriteTwo.play(favoriteTwoEarcon, 1, 1, 0 , 0 , speechSpeedValue);
+                            } else if (index == 4) {
+                                spFavoriteThree.play(favoriteThreeEarcon, 1, 1, 0 , 0 , speechSpeedValue);
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onDone(String s) {
+
+                    }
+
+                    @Override
+                    public void onError(String s) {
+
+                    }
+                });
+
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
+
+                HashMap<String, String> map2 = new HashMap<String, String>();
+                map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID1");
+
+                HashMap<String, String> map3 = new HashMap<String, String>();
+                map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID2");
+
+
+
+                t1.speak(output[0],TextToSpeech.QUEUE_ADD, map2);
+                t2.speak(output[1], TextToSpeech.QUEUE_ADD, map);
+                t3.speak(output[2], TextToSpeech.QUEUE_ADD, map3);
             } else {
                 t1.speak(text,TextToSpeech.QUEUE_ADD,null);
             }
@@ -447,6 +551,9 @@ public class MainActivity extends AppCompatActivity {
                 // There was an error.
             }
         });
+
+
+
         while(t1.isSpeaking()) {
             //wait until message was played
         }

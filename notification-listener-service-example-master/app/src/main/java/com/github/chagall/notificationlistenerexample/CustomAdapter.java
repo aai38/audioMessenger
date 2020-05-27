@@ -1,7 +1,9 @@
 package com.github.chagall.notificationlistenerexample;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +32,7 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
         private Context context;
         public static ArrayList<Contact> modelArrayList;
 
-        private String fileName = "favorites2.json";
+        private static String fileName = "favorites2.json";
         private Boolean favorite = false;
         private SharedPreferences.Editor editor;
 
@@ -101,40 +104,55 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
 
             holder.name.setText(contact.getName());
 
-            //Code to get the JSON data
-            /*String resultJSON = getData(context);
-            if(resultJSON != null) {
-                try {
-                    JSONArray jsonArray = new JSONArray(resultJSON);
-                    JSONObject jObj = jsonArray.getJSONObject(position);
-                    favorite = jObj.getBoolean("favorite");
-                    Log.e("favorite", favorite.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } */
 
             editor = sharedPrefs.edit();
             holder.checkBox.setChecked(sharedPrefs.getBoolean("CheckValue"+position, false));
-
+            JSONArray jsonArray = new JSONArray();
 
 
             holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    editor.putBoolean("CheckValue"+position, isChecked);
-                    editor.commit();
-                    if(isChecked) {
-                        JSONObject jo = new JSONObject();
-                        try {
-                            jo.put("name", holder.name.getText());
-                            jo.put("favorite", holder.checkBox.isChecked());
-                            StringWriter out = new StringWriter();
+                    int count_favorite = sharedPrefs.getInt("count_favorite", 0);
+                    if(isChecked && count_favorite <3) {
+                        new AlertDialog.Builder(context)
+                                .setTitle("Add Favorite")
+                                .setMessage("You want to add this contact to your favorites?")
 
-                            saveData(context, jo.toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                                // Specifying a listener allows you to take an action before dismissing the dialog.
+                                // The dialog is automatically dismissed when a dialog button is clicked.
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        editor.putBoolean("CheckValue"+position, isChecked);
+                                        editor.putInt("count_favorite", count_favorite+1);
+                                        editor.commit();
+                                        JSONObject jo = new JSONObject();
+                                        try {
+                                            jo.put("name", holder.name.getText());
+                                            jsonArray.put(jo);
+                                            StringWriter out = new StringWriter();
+
+                                            saveData(context, jsonArray.toString());
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                })
+
+                                // A null listener allows the button to dismiss the dialog and take no further action.
+                                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        buttonView.setChecked(false);
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
+
+                    } else if (isChecked && count_favorite >= 3){
+                        Toast.makeText(context, "You have already chosen your favorites", Toast.LENGTH_SHORT).show();
+                        buttonView.setChecked(false);
                     }
                     /*View tempview = (View) holder.checkBox.getTag(R.integer.btnplusview);
                     TextView tv = (TextView) tempview.findViewById(R.id.animal);
@@ -174,7 +192,7 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
         }
     }
 
-    public String getData(Context context) {
+    public static String getData(Context context) {
         try {
             File f = new File(context.getFilesDir().getPath() + "/" + fileName);
             //check whether file exists
