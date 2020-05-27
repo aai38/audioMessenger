@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button sendButton;
     private Button getCLButton;
+
     private TextView cLView;
     private static Client client = null;
     private static TdApi.AuthorizationState authorizationState = null;
@@ -46,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     private static final NavigableSet<OrderedChat> mainChatList = new TreeSet<OrderedChat>();
     private static final ConcurrentMap<Long, TdApi.Chat> chats = new ConcurrentHashMap<Long, TdApi.Chat>();
     private static boolean haveFullMainChatList = false;
+
+
+
 
     private HashMap<Long, String> contactList = new HashMap<>();;
 
@@ -64,21 +68,24 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String message = "Hello from the other side";
                 client.send(new TdApi.GetContacts(), new UpdatesHandler());
-                sendMessage(232491485, message);
+                //sendMessage(232491485, message);
             }
         });
 
-        //get chat list
+        //get chat list and contacts
         getCLButton = (Button) findViewById(R.id.getChatList);
         getCLButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getMainChatList(100);
+                getContacts();
                 try {
-                    TimeUnit.SECONDS.sleep(2);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+
                 System.out.println("huhu danach: "+contactList.toString());
 
                 //show in textview
@@ -88,6 +95,29 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
+
+    }
+
+    private void getContacts() {
+        client.send(new TdApi.GetContacts(), new UpdatesHandler());
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (Integer id : users.keySet()) {
+            boolean alreadyAdded = false;
+            for (Long l : contactList.keySet()){
+                alreadyAdded = id.equals(l.intValue());
+
+            }
+            if(!alreadyAdded) {
+                contactList.put(id.longValue(),users.get(id).firstName);
+            }
+
+        }
     }
 
 
@@ -486,12 +516,15 @@ public class MainActivity extends AppCompatActivity {
             System.out.println();
             System.out.println("First " + limit + " chat(s) out of " + mainChatList.size() + " known chat(s):");
             for (int i = 0; i < limit; i++) {
-                long chatId = iter.next().chatId;
-                TdApi.Chat chat = chats.get(chatId);
-                synchronized (chat) {
-                    currentMap.put(chatId, chat.title);
-                    contactList = currentMap;
+                if(iter.hasNext()) {
+                    long chatId = iter.next().chatId;
+                    TdApi.Chat chat = chats.get(chatId);
+                    synchronized (chat) {
+                        currentMap.put(chatId, chat.title);
+                        contactList = currentMap;
+                    }
                 }
+
             }
             contactList = currentMap;
         }

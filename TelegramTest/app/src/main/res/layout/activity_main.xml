@@ -24,6 +24,8 @@
             android:layout_height="wrap_content"
             android:text="Chatliste zeigen" />
 
+
+
         <TextView
             android:id="@+id/chatListView"
             android:layout_width="match_parent"
