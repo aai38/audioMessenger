@@ -26,8 +26,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class MainActivity extends AppCompatActivity {
     //TODO: change this to yours if you are not yet authorized
-    private static String phoneNumber = "+4915123967305";
-    private static String code = "92275";
+    //private static String phoneNumber = "+4915123967305";
+    private static String phoneNumber = "+4915231056901";
+    private static String code = "37402";
 
     private Button sendButton;
     private Button getCLButton;
@@ -391,8 +392,10 @@ public class MainActivity extends AppCompatActivity {
                 parameters.databaseDirectory = mainActivity.getApplicationContext().getFilesDir().getAbsolutePath();
                 parameters.useMessageDatabase = true;
                 parameters.useSecretChats = true;
-                parameters.apiId = 1216467;
-                parameters.apiHash = "54970baa9768502b0ab38710e109affd";
+                //parameters.apiId = 1216467;
+                parameters.apiId = 94575;
+                //parameters.apiHash = "54970baa9768502b0ab38710e109affd";
+                parameters.apiHash = "a3406de8d171bb422bb6ddf3bbd800e2";
                 parameters.systemLanguageCode = "en";
                 parameters.deviceModel = "Desktop";
                 parameters.systemVersion = "Unknown";
