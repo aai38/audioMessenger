@@ -84,6 +84,14 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <Button
+                android:id="@+id/tutBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Anleitung"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="10dp"/>
+
             <ImageView
                 android:id="@+id/imageView3"
                 android:layout_width="0dp"
@@ -102,6 +110,7 @@
                 android:textColor="#FFFFFF"
                 android:textColorLink="#FFFFFF"
                 android:thumbTint="#3B4477" />
+
         </LinearLayout>
 
     </LinearLayout>

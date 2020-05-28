@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Project-Test_Spearcon.iml" filepath="$PROJECT_DIR$/Project-Test_Spearcon.iml" group="Test_Spearcon" />
+      <module fileurl="file://$PROJECT_DIR$/app/Project-app.iml" filepath="$PROJECT_DIR$/app/Project-app.iml" group="Test_Spearcon/app" />
       <module fileurl="file://$PROJECT_DIR$/Test_Spearcon.iml" filepath="$PROJECT_DIR$/Test_Spearcon.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

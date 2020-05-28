@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.iamrobj:NotificationHelperLibrary:master-SNAPSHOT@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2d53e231a9445a7b749137a27ae2031c/jetified-NotificationHelperLibrary-master-SNAPSHOT/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2d53e231a9445a7b749137a27ae2031c/jetified-NotificationHelperLibrary-master-SNAPSHOT/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/af9763c41cb6db497c8f70c8e45d7b3b/jetified-NotificationHelperLibrary-master-SNAPSHOT/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/af9763c41cb6db497c8f70c8e45d7b3b/jetified-NotificationHelperLibrary-master-SNAPSHOT/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

@@ -122,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> favorites = new ArrayList();
     private int index;
 
+    private Button tutorialBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -130,6 +132,15 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //load tutorial
+        tutorialBtn =(Button) findViewById(R.id.tutBtn);
+        tutorialBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDescription();
+            }
+        });
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
@@ -322,6 +333,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Log.e("favorites", favorites.toString());
+    }
+
+    public void openDescription() {
+        Intent intent = new Intent(this, MyIntro.class);
+        startActivity(intent);
     }
 
     public static void updateSwitchStatus() {
