@@ -64,9 +64,8 @@
     </FrameLayout>
 
     <LinearLayout
-        android:layout_width="380dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="20dp"
         android:orientation="vertical">
 
         <ImageView
@@ -86,11 +85,14 @@
 
             <Button
                 android:id="@+id/tutBtn"
+                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Anleitung"
                 android:layout_marginLeft="10dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="10dp"
+                android:background="#3B4477"
+                android:text="Anleitung"
+                android:textColor="#FFFFFF" />
 
             <ImageView
                 android:id="@+id/imageView3"

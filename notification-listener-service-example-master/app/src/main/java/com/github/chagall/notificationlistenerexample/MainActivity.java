@@ -516,6 +516,12 @@ public class MainActivity extends AppCompatActivity {
                 t2.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(String s) {
+
+
+                    }
+
+                    @Override
+                    public void onDone(String s) {
                         if(favorites.contains(output[1])) {
                             Log.i("favorite in output", "");
                             if (index == 2) {
@@ -527,12 +533,6 @@ public class MainActivity extends AppCompatActivity {
                                 spFavoriteThree.play(favoriteThreeEarcon, 1, 1, 0 , 0 , speechSpeedValue);
                             }
                         }
-
-                    }
-
-                    @Override
-                    public void onDone(String s) {
-
                     }
 
                     @Override
@@ -545,10 +545,10 @@ public class MainActivity extends AppCompatActivity {
                 map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
 
                 HashMap<String, String> map2 = new HashMap<String, String>();
-                map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID1");
+                map2.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID1");
 
                 HashMap<String, String> map3 = new HashMap<String, String>();
-                map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID2");
+                map3.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID2");
 
 
 

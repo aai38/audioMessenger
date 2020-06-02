@@ -10,6 +10,7 @@
       <module fileurl="file://$PROJECT_DIR$/libtd/libtd.iml" filepath="$PROJECT_DIR$/libtd/libtd.iml" group="notification-listener-service-example-master/libtd" />
       <module fileurl="file://$PROJECT_DIR$/notification-listener-service-example-master.iml" filepath="$PROJECT_DIR$/notification-listener-service-example-master.iml" group="notification-listener-service-example-master" />
       <module fileurl="file://$PROJECT_DIR$/app/notification-listener-service-example-master-app.iml" filepath="$PROJECT_DIR$/app/notification-listener-service-example-master-app.iml" group="notification-listener-service-example-master/app" />
+      <module fileurl="file://$PROJECT_DIR$/libtd/notification-listener-service-example-master-libtd.iml" filepath="$PROJECT_DIR$/libtd/notification-listener-service-example-master-libtd.iml" group="notification-listener-service-example-master/libtd" />
     </modules>
   </component>
 </project>
