@@ -35,6 +35,7 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
         private static String fileName = "favorites2.json";
         private Boolean favorite = false;
         private SharedPreferences.Editor editor;
+        private JSONArray jsonArray;
 
 
         public CustomAdapter(Context context, ArrayList<Contact> modelArrayList) {
@@ -107,7 +108,15 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
 
             editor = sharedPrefs.edit();
             holder.checkBox.setChecked(sharedPrefs.getBoolean("CheckValue"+position, false));
-            JSONArray jsonArray = new JSONArray();
+            String resultJSON = getData(context);
+            if(resultJSON != null) {
+                try {
+                    jsonArray = new JSONArray(resultJSON);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
 
 
             holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -154,16 +163,7 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
                         Toast.makeText(context, "You have already chosen your favorites", Toast.LENGTH_SHORT).show();
                         buttonView.setChecked(false);
                     }
-                    /*View tempview = (View) holder.checkBox.getTag(R.integer.btnplusview);
-                    TextView tv = (TextView) tempview.findViewById(R.id.animal);
-                    Integer pos = (Integer)  holder.checkBox.getTag();
-                    Toast.makeText(context, "Checkbox "+pos+" clicked!", Toast.LENGTH_SHORT).show();
 
-                    if(modelArrayList.get(pos).getSelected()){
-                        modelArrayList.get(pos).setSelected(false);
-                    }else {
-                        modelArrayList.get(pos).setSelected(true);
-                    }*/
 
                 }
             });
@@ -175,7 +175,6 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
 
             protected CheckBox checkBox;
             private TextView name;
-            private TextView number;
 
         }
 

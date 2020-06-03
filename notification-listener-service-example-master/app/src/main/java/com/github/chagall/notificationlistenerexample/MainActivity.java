@@ -509,33 +509,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                t2.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                    @Override
-                    public void onStart(String s) {
 
-
-                    }
-
-                    @Override
-                    public void onDone(String s) {
-                        if(favorites.contains(output[1])) {
-                            Log.i("favorite in output", "");
-                            if (index == 2) {
-                                Log.i("index_instart", "" + 2);
-                                spFavoriteOne.play(favoriteOneEarcon, 1, 1, 0 , 0 , speechSpeedValue);
-                            } else if (index == 3) {
-                                spFavoriteTwo.play(favoriteTwoEarcon, 1, 1, 0 , 0 , speechSpeedValue);
-                            } else if (index == 4) {
-                                spFavoriteThree.play(favoriteThreeEarcon, 1, 1, 0 , 0 , speechSpeedValue);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onError(String s) {
-
-                    }
-                });
 
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
@@ -571,6 +545,34 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(String utteranceId) {
                 // There was an error.
+            }
+        });
+
+        t2.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String s) {
+                if(favorites.contains(output[1])) {
+                    Log.i("favorite in output", "");
+                    if (index == 2) {
+                        Log.i("index_instart", "" + 2);
+                        spFavoriteOne.play(favoriteOneEarcon, 1, 1, 0 , 0 , speechSpeedValue);
+                    } else if (index == 3) {
+                        spFavoriteTwo.play(favoriteTwoEarcon, 1, 1, 0 , 0 , speechSpeedValue);
+                    } else if (index == 4) {
+                        spFavoriteThree.play(favoriteThreeEarcon, 1, 1, 0 , 0 , speechSpeedValue);
+                    }
+                }
+
+            }
+
+            @Override
+            public void onDone(String s) {
+
+            }
+
+            @Override
+            public void onError(String s) {
+
             }
         });
 

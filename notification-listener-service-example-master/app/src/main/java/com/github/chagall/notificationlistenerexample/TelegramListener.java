@@ -602,4 +602,8 @@ public class TelegramListener extends Service {
             }
         });
     }
+
+    public static HashMap<Long, String> getContactList () {
+        return contactList;
+    }
 }
