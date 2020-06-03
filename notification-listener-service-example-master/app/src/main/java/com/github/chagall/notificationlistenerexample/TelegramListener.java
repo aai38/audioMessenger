@@ -1,10 +1,14 @@
 package com.github.chagall.notificationlistenerexample;
 
+import android.app.AlertDialog;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.drinkless.td.libcore.telegram.Client;
@@ -24,9 +28,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-public  class TelegramListener extends Service {
-    private static String phoneNumber = "+4915123967305";
-    private static String code = "94347";
+public class TelegramListener extends Service {
+    //private static String phoneNumber = "+4915231056901";
+    //private static String code = "89962";
+    private static String phoneNumber = "";
+    private static String code = "";
 
     private Button sendButton;
     private Button getCLButton;
@@ -41,6 +47,7 @@ public  class TelegramListener extends Service {
     private static final Condition gotAuthorization = authorizationLock.newCondition();
     private static volatile boolean quiting = false;
     public static MainActivity mainActivity;
+    public TelegramListener teleActivity = TelegramListener.this;
 
     private static final ConcurrentMap<Integer, TdApi.User> users = new ConcurrentHashMap<Integer, TdApi.User>();
     private static final NavigableSet<OrderedChat> mainChatList = new TreeSet<OrderedChat>();
@@ -48,9 +55,8 @@ public  class TelegramListener extends Service {
     private static boolean haveFullMainChatList = false;
 
 
-
-
     private static HashMap<Long, String> contactList = new HashMap<>();;
+    private static AlertDialog dialog;
 
     public static void initialize() {
         client = Client.create(new UpdatesHandler(), null, null);
@@ -61,6 +67,7 @@ public  class TelegramListener extends Service {
         }
         getMainChatList(100);
         getContacts();
+        //dialog = new AlertDialog.Builder(mainActivity).create();
     }
 
 
@@ -158,7 +165,6 @@ public  class TelegramListener extends Service {
                 case TdApi.UpdateAuthorizationState.CONSTRUCTOR:
                     onAuthorizationStateUpdated(((TdApi.UpdateAuthorizationState) object).authorizationState);
                     break;
-
                 case TdApi.UpdateUser.CONSTRUCTOR:
                     TdApi.UpdateUser updateUser = (TdApi.UpdateUser) object;
                     users.put(updateUser.user.id, updateUser.user);
@@ -422,8 +428,7 @@ public  class TelegramListener extends Service {
                 client.send(new TdApi.CheckDatabaseEncryptionKey(), new AuthorizationRequestHandler());
                 break;
             case TdApi.AuthorizationStateWaitPhoneNumber.CONSTRUCTOR: {
-                //String phoneNumber = promptString("Please enter phone number: ");
-                client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
+                showAuthorizationView();
                 break;
             }
             case TdApi.AuthorizationStateWaitOtherDeviceConfirmation.CONSTRUCTOR: {
@@ -488,7 +493,6 @@ public  class TelegramListener extends Service {
         currentPrompt = null;
         return str;
     }
-
 
     private static void getMainChatList(final int limit) {
         final HashMap<Long,String> currentMap = new HashMap<>();
@@ -574,5 +578,28 @@ public  class TelegramListener extends Service {
                 }
             }
         }
+    }
+
+    private static void showAuthorizationView(){
+        mainActivity.setContentView(R.layout.authorization_phone_number);
+        EditText input = (EditText) mainActivity.findViewById(R.id.phoneNumber);
+        Button phoneButton = (Button) mainActivity.findViewById(R.id.phoneButton);
+        phoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                phoneNumber = input.getText().toString();
+                client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
+                mainActivity.setContentView(R.layout.authorization_login_code);
+                EditText inputCode = (EditText) mainActivity.findViewById(R.id.loginCode);
+                Button codeButton = (Button) mainActivity.findViewById(R.id.codeButton);
+                codeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        code = inputCode.getText().toString();
+                        mainActivity.setContentView(R.layout.activity_main);
+                    }
+                });
+            }
+        });
     }
 }

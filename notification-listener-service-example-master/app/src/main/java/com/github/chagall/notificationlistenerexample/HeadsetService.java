@@ -10,14 +10,17 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
+import com.github.chagall.notificationlistenerexample.MainActivity;
 
 public final class HeadsetService extends Service {
     String TAG = "HeadsetService";
+    MainActivity m = new MainActivity();
 
     private static MediaSession mediaSession;
 
     @Override
     public void onCreate() {
+        startService(new Intent(this, MainActivity.class));
         // Instantiate new MediaSession object.
         configureMediaSession();
     }
@@ -46,11 +49,25 @@ public final class HeadsetService extends Service {
                 if (ke != null && ke.getAction() == KeyEvent.ACTION_DOWN) {
                     int keyCode = ke.getKeyCode();
                     Log.d(TAG, "onMediaButtonEvent Received command: " + ke);
+                    switch (keyCode){
+                        case KeyEvent.KEYCODE_MEDIA_PLAY:
+                            //alle
+                            m.reactToKeyword(3, false);
+                            return true;
+                        case KeyEvent.KEYCODE_MEDIA_NEXT:
+                            //antworten
+                            //m.reactToKeyword(0, true);
+                            return true;
+                        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                            //schreibe
+                            //m.reactToKeyword(2, false);
+                            return true;
+                    }
                 }
                 return super.onMediaButtonEvent(mediaButtonIntent);
             }
 
-            @Override
+            /*@Override
             public void onSkipToNext() {
                 Log.d(TAG, "onSkipToNext called (media button pressed)");
                 Toast.makeText(getApplicationContext(), "onSkipToNext called", Toast.LENGTH_SHORT).show();
@@ -81,7 +98,7 @@ public final class HeadsetService extends Service {
             public void onStop() {
                 Log.d(TAG, "onStop called (media button pressed)");
                 super.onStop();
-            }
+            }*/
         });
 
         mediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);

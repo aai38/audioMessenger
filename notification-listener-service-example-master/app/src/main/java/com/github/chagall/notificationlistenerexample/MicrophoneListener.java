@@ -72,13 +72,12 @@ public class MicrophoneListener {
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 RECORDER_SAMPLERATE, RECORDER_CHANNELS,
                 RECORDER_AUDIO_ENCODING, BufferElements2Rec * BytesPerElement);
-
         recorder.startRecording();
 
         isRecording = true;
         recordingThread = new Thread(new Runnable() {
             public void run() {
-                writeAudioDataToFile();
+                writeAudioDataToFile(recorder);
                 return;
             }
         }, "AudioRecorder Thread");
@@ -110,7 +109,7 @@ public class MicrophoneListener {
 
     }
     byte[] bData = null;
-    private void writeAudioDataToFile() {
+    private void writeAudioDataToFile(AudioRecord recorder) {
         // Write the output audio in byte
         short sData[] = new short[BufferElements2Rec];
         FileOutputStream os = null;
@@ -229,9 +228,6 @@ public class MicrophoneListener {
 
 
     }
-
-
-
 
 
 }

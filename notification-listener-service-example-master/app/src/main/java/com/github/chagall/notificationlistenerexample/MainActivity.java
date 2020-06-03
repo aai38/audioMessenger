@@ -23,9 +23,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -125,14 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Button tutorialBtn;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -645,9 +641,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void handleUserCommands(boolean isReactionToNotification) {
-
         int keyword = listenToKeyword();
+        reactToKeyword(keyword, isReactionToNotification);
+    }
 
+    public void reactToKeyword(int keyword, boolean isReactionToNotification){
         if(keyword == 0 && isReactionToNotification) {
 
             micro.startRecording(5000);
@@ -660,7 +658,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
+            Intent intent = new Intent("com.github.chagall.notificationlistenerexample");
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
@@ -706,36 +704,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
             String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
             micro.result = questionMark;
 
-
             sendMessage(micro.result);
 
-
         } else if(keyword == 3) {
-
             updateOurText( NotificationListenerExampleService.getMessageToRead(), false);
         }
         else {
-
             if(isReactionToNotification) {
                 broadcastReceiver.isAnswer = true;
                 Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
                 intent.putExtra("Answer", "");
                 sendBroadcast(intent);
             }
-
         }
-
-
-
-
-
     }
 
     public void updateOurText(String text, boolean isSingleMsgMode) {
@@ -791,8 +778,6 @@ public class MainActivity extends AppCompatActivity {
      * @return An alert dialog which leads to the notification enabling screen
      */
     private AlertDialog buildNotificationServiceAlertDialog(){
-
-
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(R.string.notification_listener_service);
         alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
@@ -869,8 +854,4 @@ public class MainActivity extends AppCompatActivity {
         }*/
 
     }
-
-
-
-
 }
