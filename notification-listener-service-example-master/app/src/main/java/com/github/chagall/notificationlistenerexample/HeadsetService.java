@@ -52,7 +52,7 @@ public final class HeadsetService extends Service {
                     switch (keyCode){
                         case KeyEvent.KEYCODE_MEDIA_PLAY:
                             //alle
-                            m.reactToKeyword(3, false);
+                            m.reactToKeyword(3, false,0);
                             return true;
                         case KeyEvent.KEYCODE_MEDIA_NEXT:
                             //antworten

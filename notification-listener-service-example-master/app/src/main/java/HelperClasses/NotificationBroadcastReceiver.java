@@ -25,12 +25,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if(!isAnswer) {
-            main.updateOurText(intent.getStringExtra("Message"),true);
-        } else {
 
-            not.answerOnNotification(intent.getStringExtra("Answer"));
-        }
 
     }
 }

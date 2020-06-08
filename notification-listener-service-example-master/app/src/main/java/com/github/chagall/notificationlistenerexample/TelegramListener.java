@@ -17,6 +17,7 @@ import org.drinkless.td.libcore.telegram.TdApi;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -26,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class TelegramListener extends Service {
@@ -56,6 +59,9 @@ public class TelegramListener extends Service {
 
 
     private static HashMap<Long, String> contactList = new HashMap<>();;
+    public static ArrayList<TdApi.Message> newMessages = new ArrayList<>();
+    public static ArrayList<TdApi.Message> messageStorage = new ArrayList<>();
+    private static TdApi.Message lastMessage = null;
     private static AlertDialog dialog;
 
     public static void initialize() {
@@ -77,14 +83,18 @@ public class TelegramListener extends Service {
         return null;
     }
 
-    public static void sendMessage(String msg, String name) {
+    public static void sendMessage(String msg, String name, long id) {
         getMainChatList(100);
 
         getContacts();
 
-        Long id = checkContacts(name);
+        if(id == 0) {
+            id = checkContacts(name);
+        }
+        System.out.println(msg);
 
-        //sendMessage(id,msg);
+        sendMessage(id,msg);
+        playNextMessage();
     }
 
     private static Long checkContacts(String name) {
@@ -143,6 +153,129 @@ public class TelegramListener extends Service {
     }
 
 
+
+    public static void playNextMessage() {
+        if(!newMessages.isEmpty()){
+            lastMessage = newMessages.get(0);
+            newMessages.remove(0);
+        }
+
+        if(!newMessages.isEmpty()) {
+           getAndPlayMessage(newMessages.get(0),false);
+        }
+    }
+
+    public static void playStoredMessagesFromContact(String name) {
+
+    }
+
+    public static void playAllStoredMessages() {
+        /*ArrayList<ReceivedMessage> summarizedList = new ArrayList<>();
+        for (TdApi.Message msg: messageStorage) {
+            String content = msg.content.toString();
+            Pattern pattern = Pattern.compile("\"(.*)\"");
+            Matcher matcher = pattern.matcher(content);
+            while (matcher.find()) {
+                content = matcher.group(1);
+            }
+            String group = contactList.get(msg.chatId);
+            String person = contactList.get((long)msg.senderUserId);
+            for (ReceivedMessage rec: summarizedList) {
+                if(rec.getGroup().equals(group)) {
+                    rec.addText(person +" sagt: "+content);
+                } else if(rec.getPerson().equals(person)) {
+                    rec.addText(content);
+                }
+            }
+
+            if((long)msg.senderUserId == msg.chatId){
+
+            }
+            summarizedList.add();
+        }
+
+
+        if (messageStorage.size() == 0) {
+            mainActivity.updateOurText("Keine neuen Nachrichten",false,0);
+        } else if (messageStorage.size() == 1) {
+
+
+            TdApi.Message msg = messageStorage.get(0);
+
+            if((long)msg.senderUserId == msg.chatId) { //group message
+                mainActivity.updateOurText("Nachricht von " + contactList.get(msg.senderUserId) + " in " + contactList.get(msg.chatId) + ": " + content,false,0);
+            } else { //single person
+                mainActivity.updateOurText("Nachricht von " + contactList.get(msg.chatId) + ": " + content,false,0);
+
+            }
+        } else {
+            for (ReceivedMessage message : messages) {
+                if (message.getPerson().contains("Telegram")) {
+                    //messages.remove(message);
+                    continue;
+                }
+                if (message.getPerson().contains(":")) { //group message
+                    String[] splitted = message.getPerson().split(":");
+                    persons += splitted[1] + " in " + splitted[0] + ",";
+                } else {
+                    persons += message.getPerson() + ",";
+                }
+            }
+            //remove last ,
+            if (persons != null && persons.length() > 0 && persons.charAt(persons.length() - 1) == ',') {
+                persons = persons.substring(0, persons.length() - 1);
+            }
+            return "Nachrichten von" + persons;
+        }*/
+    }
+
+    private static void getAndPlayMessage(TdApi.Message message, boolean isBusy) {
+        String msg = message.content.toString();
+
+        Pattern pattern = Pattern.compile("\"(.*)\"");
+        Matcher matcher = pattern.matcher(msg);
+        while (matcher.find()) {
+            msg = matcher.group(1);
+        }
+        int id = message.senderUserId;
+        Long chatID = message.chatId;
+        String person = contactList.get((long) message.senderUserId);
+        String chat = contactList.get(message.chatId);
+        System.out.println(msg);
+        boolean isSamePerson = lastMessage != null && lastMessage.chatId == message.chatId;
+        if (!isBusy) {
+            if(id == (int) message.chatId) {
+                //single chat
+                if(isSamePerson) {
+                    mainActivity.updateOurText("Nachricht von " + person + ":" + msg ,true, chatID);
+
+                } else {
+                    mainActivity.updateOurText("Nachricht von " + person + ":" + msg ,true, chatID);
+
+                }
+            } else {
+                //group chat
+                if(isSamePerson) {
+                    mainActivity.updateOurText("Nachricht von " + person + ":" + msg,true, chatID);
+                }  else{
+                    mainActivity.updateOurText("Nachricht von" + person + " in " + chat + ": " + msg,true, chatID);
+                }
+            }
+        }
+    }
+
+    private static void handleNewMessage(TdApi.UpdateNewMessage message) {
+        if(MainActivity.isActiveMode) {
+            boolean isBusy = !newMessages.isEmpty();
+            newMessages.add(message.message);
+            getAndPlayMessage(message.message,isBusy);
+            lastMessage = message.message;
+        } else {
+            messageStorage.add(message.message);
+        }
+    }
+
+
     private static void sendMessage(long chatId, String message) {
         // initialize reply markup just for testing
         TdApi.InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
@@ -162,6 +295,14 @@ public class TelegramListener extends Service {
         @Override
         public void onResult(TdApi.Object object) {
             switch (object.getConstructor()) {
+                case TdApi.UpdateNewMessage.CONSTRUCTOR:
+                    TdApi.UpdateNewMessage updateNewMessage = (TdApi.UpdateNewMessage) object;
+                    if(!updateNewMessage.message.isOutgoing) {
+                        handleNewMessage(updateNewMessage);
+                    }
+
+
+                    break;
                 case TdApi.UpdateAuthorizationState.CONSTRUCTOR:
                     onAuthorizationStateUpdated(((TdApi.UpdateAuthorizationState) object).authorizationState);
                     break;

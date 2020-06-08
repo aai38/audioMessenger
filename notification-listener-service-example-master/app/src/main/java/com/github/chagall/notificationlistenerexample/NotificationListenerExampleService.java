@@ -88,7 +88,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
+        /*if (sbn.getPackageName().equals(ApplicationPackageNames.TELEGRAM_PACK_NAME)) {
             Notification not = sbn.getNotification();
             String message = not.extras.getCharSequence(Notification.EXTRA_TEXT).toString();
 
@@ -177,7 +177,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
 
 
-        }
+        }*/
 
 
     }
@@ -185,7 +185,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
     public void handleMessageList(String message,String person, String splitted) {
         if (messages.size() == 0) {
-            ReceivedMessage rec = new ReceivedMessage(message, person);
+            ReceivedMessage rec = new ReceivedMessage(message, person,"");
             messages.add(rec);
         } else {
             boolean newPerson = true;
@@ -193,7 +193,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
                 if (messages.get(i).getPerson().equals(splitted)) {
                     if (!(messages.get(i).getMessageText().equals(message))) {
                         Log.d("before message", messages.get(i).getMessageText());
-                        ReceivedMessage received = new ReceivedMessage(messages.get(i).getMessageText() +", " + message, splitted);
+                        ReceivedMessage received = new ReceivedMessage(messages.get(i).getMessageText() +", " + message, splitted,"");
                         messages.remove(i);
                         messages.add(i, received);
                         Log.d("after message", messages.get(i).getMessageText());
@@ -202,7 +202,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
                 }
             }
             if (newPerson) {
-                ReceivedMessage rec = new ReceivedMessage(message, splitted);
+                ReceivedMessage rec = new ReceivedMessage(message, splitted,"");
                 messages.add(rec);
             }
         }
@@ -318,6 +318,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
         String totalMessage = "";
 
         if (messages.size() == 0) {
+
             return "Keine neuen Nachrichten";
         } else if (messages.size() == 1) {
             //group message

@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                 activeListeningThread = new Thread(new Runnable() {
                     public void run() {
                         isBusy = true;
-                        handleUserCommands(false);
+                        handleUserCommands(false,0);
                         isBusy = false;
                         return;
                     }
@@ -459,8 +459,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void playMessage(String text, boolean isSingleMsgMode) {
-        //Log.d("OUTPUT", text);
+    public void playMessage(String text, boolean isSingleMsgMode, long chatID) {
         File file = new File("../../../../../res/raw/earcon1.mp3");
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
         Bundle param = new android.os.Bundle();
@@ -582,17 +581,10 @@ public class MainActivity extends AppCompatActivity {
             //wait until message was played
         }
 
-        if(isSingleMsgMode && !isSamePerson) {
-            handleUserCommands(true);
+        if(isSingleMsgMode) {
+            handleUserCommands(true, chatID);
         }
-        if(isSamePerson) {
-            broadcastReceiver.isAnswer = true;
-            Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-            intent.putExtra("Answer", "");
 
-            sendBroadcast(intent);
-        }
-        notificationActive = false;
 
     }
 
@@ -642,12 +634,12 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void handleUserCommands(boolean isReactionToNotification) {
+    public void handleUserCommands(boolean isReactionToNotification, long chatID) {
         int keyword = listenToKeyword();
-        reactToKeyword(keyword, isReactionToNotification);
+        reactToKeyword(keyword, isReactionToNotification, chatID);
     }
 
-    public void reactToKeyword(int keyword, boolean isReactionToNotification){
+    public void reactToKeyword(int keyword, boolean isReactionToNotification, long chatID){
         if(keyword == 0 && isReactionToNotification) {
 
             micro.startRecording(5000);
@@ -660,28 +652,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            Intent intent = new Intent("com.github.chagall.notificationlistenerexample");
+
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
             String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
             micro.result = questionMark;
-            if(isSamePerson) {
-                bufferedAnswer +=" "+ micro.result;
-                intent.putExtra("Answer", "");
-            } else {
-                if(!bufferedAnswer.equals("")) {
-                    intent.putExtra("Answer", bufferedAnswer + " " +micro.result);
 
-                    bufferedAnswer = "";
-                } else {
-                    intent.putExtra("Answer", micro.result);
+            TelegramListener.sendMessage(micro.result,"",chatID);
 
-                }
-            }
-
-            broadcastReceiver.isAnswer = true;
-            sendBroadcast(intent);
 
 
         } else if (keyword == 1) {
@@ -715,27 +694,24 @@ public class MainActivity extends AppCompatActivity {
             sendMessage(micro.result);
 
         } else if(keyword == 3) {
-            updateOurText( NotificationListenerExampleService.getMessageToRead(), false);
+            updateOurText( NotificationListenerExampleService.getMessageToRead(), false, 0);
         }
         else {
             if(isReactionToNotification) {
-                broadcastReceiver.isAnswer = true;
-                Intent intent = new  Intent("com.github.chagall.notificationlistenerexample");
-                intent.putExtra("Answer", "");
-                sendBroadcast(intent);
+                TelegramListener.playNextMessage();
             }
         }
     }
 
-    public void updateOurText(String text, boolean isSingleMsgMode) {
+    public void updateOurText(String text, boolean isSingleMsgMode, long chatID) {
         if(text != null) {
             messageThread = null;
             //setTextFromOtherThread(text);
             messageThread = new Thread(new Runnable() {
                 public void run() {
-                    isBusy = true;
-                    playMessage(text, isSingleMsgMode);
-                    isBusy = false;
+
+                    playMessage(text, isSingleMsgMode, chatID);
+
                     return;
                 }
             }, "Message Thread");
@@ -822,7 +798,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         micro.stopRecording();
-        TelegramListener.sendMessage(message,micro.result);
+        TelegramListener.sendMessage(message,micro.result,0);
 
         /*Intent waIntent = new Intent(Intent.ACTION_SEND);
         waIntent.setType("text/plain");
