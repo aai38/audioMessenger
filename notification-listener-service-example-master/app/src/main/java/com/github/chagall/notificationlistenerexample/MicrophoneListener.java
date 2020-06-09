@@ -67,6 +67,11 @@ public class MicrophoneListener {
 
 
     public void startRecording(int t) {
+        if(recorder!=null){
+            recorder.stop();
+            recorder.release();
+        }
+
         minTimeout = t;
         result = "";
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
@@ -154,11 +159,11 @@ public class MicrophoneListener {
         recordingThread = null;
         parseThread = null;
 
-        if (null != recorder) {
+        /*if (null != recorder) {
             recorder.stop();
             recorder.release();
             recorder = null;
-        }
+        }*/
 
 
     }

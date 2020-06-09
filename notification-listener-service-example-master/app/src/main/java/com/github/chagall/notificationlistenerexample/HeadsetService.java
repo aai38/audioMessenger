@@ -2,6 +2,7 @@ package com.github.chagall.notificationlistenerexample;
 
 import android.app.Service;
 import android.content.Intent;
+import android.media.SoundPool;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.IBinder;
@@ -12,17 +13,25 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 import com.github.chagall.notificationlistenerexample.MainActivity;
 
+import static android.media.AudioManager.STREAM_MUSIC;
+
 public final class HeadsetService extends Service {
     String TAG = "HeadsetService";
     MainActivity m = new MainActivity();
+    private int answerModeActiveEarcon;
+    private SoundPool spool;
 
     private static MediaSession mediaSession;
 
     @Override
     public void onCreate() {
+        spool = new SoundPool(1, STREAM_MUSIC, 0);
+        answerModeActiveEarcon = spool.load(this, R.raw.earcon_answer_mode, 1);
+
         startService(new Intent(this, MainActivity.class));
         // Instantiate new MediaSession object.
         configureMediaSession();
+
     }
 
     @Override
@@ -56,11 +65,13 @@ public final class HeadsetService extends Service {
                             return true;
                         case KeyEvent.KEYCODE_MEDIA_NEXT:
                             //antworten
-                            //m.reactToKeyword(0, true);
+                            spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                            m.reactToKeyword(0, true, 0);
                             return true;
                         case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
                             //schreibe
-                            //m.reactToKeyword(2, false);
+                            spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                            m.reactToKeyword(2, false, 0);
                             return true;
                     }
                 }

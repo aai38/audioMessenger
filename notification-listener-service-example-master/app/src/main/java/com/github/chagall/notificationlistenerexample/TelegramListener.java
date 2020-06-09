@@ -98,7 +98,7 @@ public class TelegramListener extends Service {
     }
 
     private static Long checkContacts(String name) {
-        System.out.println(name);
+        System.out.println("checkContacts name: "+name);
         Long result = 0L;
         int oldHamming = 10000;
         for (Long id: contactList.keySet()) {
