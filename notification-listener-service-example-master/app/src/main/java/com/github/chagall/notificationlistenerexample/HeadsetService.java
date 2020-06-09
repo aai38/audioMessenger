@@ -66,7 +66,7 @@ public final class HeadsetService extends Service {
                         case KeyEvent.KEYCODE_MEDIA_NEXT:
                             //antworten
                             spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-                            m.reactToKeyword(0, true, 0);
+                            m.reactToKeyword(0, true, TelegramListener.lastMessage.chatId);
                             return true;
                         case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
                             //schreibe

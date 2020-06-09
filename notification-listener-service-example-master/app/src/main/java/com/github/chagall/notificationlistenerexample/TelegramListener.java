@@ -61,7 +61,7 @@ public class TelegramListener extends Service {
     private static HashMap<Long, String> contactList = new HashMap<>();;
     public static ArrayList<TdApi.Message> newMessages = new ArrayList<>();
     public static ArrayList<TdApi.Message> messageStorage = new ArrayList<>();
-    private static TdApi.Message lastMessage = null;
+    public static TdApi.Message lastMessage = null;
     private static AlertDialog dialog;
 
     public static void initialize() {

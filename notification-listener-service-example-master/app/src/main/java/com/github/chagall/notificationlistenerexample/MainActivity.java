@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button tutorialBtn;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -658,7 +659,6 @@ public class MainActivity extends AppCompatActivity {
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
             String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
             micro.result = questionMark;
-
             TelegramListener.sendMessage(micro.result,"",chatID);
 
 
@@ -704,6 +704,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateOurText(String text, boolean isSingleMsgMode, long chatID) {
+
         if(text != null) {
             messageThread = null;
             //setTextFromOtherThread(text);
