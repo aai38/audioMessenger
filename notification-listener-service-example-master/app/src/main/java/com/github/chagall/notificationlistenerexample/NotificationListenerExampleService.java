@@ -184,7 +184,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
 
 
     public void handleMessageList(String message,String person, String splitted) {
-        if (messages.size() == 0) {
+        /*if (messages.size() == 0) {
             ReceivedMessage rec = new ReceivedMessage(message, person,"");
             messages.add(rec);
         } else {
@@ -205,7 +205,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
                 ReceivedMessage rec = new ReceivedMessage(message, splitted,"");
                 messages.add(rec);
             }
-        }
+        }*/
     }
 
     public void answerOnNotification(String answer) {
@@ -252,7 +252,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     public void onNotificationRemoved(StatusBarNotification sbn) {
         //int notificationCode = matchNotificationCode(sbn);
         //Log.d("REMOVED", sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString());
-        if (!(sbn.equals(null))) {
+        /*if (!(sbn.equals(null))) {
             String message = sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString();
             String person = sbn.getNotification().extras.getCharSequence(Notification.EXTRA_TITLE).toString();
             String[] splitted = new String[3];
@@ -314,7 +314,7 @@ public class NotificationListenerExampleService extends NotificationListenerServ
     public static String getMessageToRead() {
         //check all active notifications
 
-        String persons = "";
+        /*String persons = "";
         String totalMessage = "";
 
         if (messages.size() == 0) {
@@ -349,16 +349,17 @@ public class NotificationListenerExampleService extends NotificationListenerServ
                 persons = persons.substring(0, persons.length() - 1);
             }
             return "Nachrichten von" + persons;
-        }
+        }*/
+        return "";
     }
 
     public static String getMessageFromPerson(String person) {
-        for (ReceivedMessage message : messages) {
+        /*for (ReceivedMessage message : messages) {
             if (message.getPerson().equals(person)) {
                 return message.getMessageText();
 
             }
-        }
+        }*/
         return "Keine Nachricht von dieser Person vorhanden";
     }
 }

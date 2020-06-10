@@ -60,9 +60,9 @@ public class TelegramListener extends Service {
 
     private static HashMap<Long, String> contactList = new HashMap<>();;
     public static ArrayList<TdApi.Message> newMessages = new ArrayList<>();
-    public static ArrayList<TdApi.Message> messageStorage = new ArrayList<>();
     public static TdApi.Message lastMessage = null;
     private static AlertDialog dialog;
+    private static ArrayList<ReceivedMessage> summarizedList = new ArrayList<>();
 
     public static void initialize() {
         client = Client.create(new UpdatesHandler(), null, null);
@@ -91,6 +91,7 @@ public class TelegramListener extends Service {
         if(id == 0) {
             id = checkContacts(name);
         }
+        System.out.println("SendMsg to:"+id+" "+contactList.get(id));
         System.out.println(msg);
 
         sendMessage(id,msg);
@@ -100,35 +101,66 @@ public class TelegramListener extends Service {
     private static Long checkContacts(String name) {
         System.out.println("checkContacts name: "+name);
         Long result = 0L;
-        int oldHamming = 10000;
+        double oldSimilarity = 0;
         for (Long id: contactList.keySet()) {
             if(name.equals(contactList.get(id))) {
                 return id;
             }
-            int hamming = hammingDist(name,contactList.get(id));
-            if(hamming < 2 && hamming < oldHamming) {
-                oldHamming = hamming;
+            double similarity = similarity(name,contactList.get(id));
+            if(similarity > 0.3 && similarity > oldSimilarity) {
+                oldSimilarity = similarity;
                 result = id;
+
             }
 
 
         }
-        System.out.println("SendMsg to:"+result+" "+contactList.get(result));
+        System.out.println(contactList.get(result));
         return result;
     }
 
-    static int hammingDist(String str1, String str2)
-    {
-        int i = 0, count = 0;
-        int length = Math.min(str1.length(), str2.length());
-        while (i < length)
-        {
-            if (str1.charAt(i) != str2.charAt(i))
-                count++;
-            i++;
+
+
+    private static double similarity(String s1, String s2) {
+        String longer = s1, shorter = s2;
+        if (s1.length() < s2.length()) { // longer should always have greater length
+            longer = s2; shorter = s1;
         }
-        return count;
+        int longerLength = longer.length();
+        if (longerLength == 0) { return 1.0; /* both strings are zero length */ }
+
+        return (longerLength - editDistance(longer, shorter)) / (double) longerLength;
+
     }
+
+
+    private static int editDistance(String s1, String s2) {
+        s1 = s1.toLowerCase();
+        s2 = s2.toLowerCase();
+
+        int[] costs = new int[s2.length() + 1];
+        for (int i = 0; i <= s1.length(); i++) {
+            int lastValue = i;
+            for (int j = 0; j <= s2.length(); j++) {
+                if (i == 0)
+                    costs[j] = j;
+                else {
+                    if (j > 0) {
+                        int newValue = costs[j - 1];
+                        if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                            newValue = Math.min(Math.min(newValue, lastValue),
+                                    costs[j]) + 1;
+                        costs[j - 1] = lastValue;
+                        lastValue = newValue;
+                    }
+                }
+            }
+            if (i > 0)
+                costs[s2.length()] = lastValue;
+        }
+        return costs[s2.length()];
+    }
+
 
 
     private static void getContacts() {
@@ -165,68 +197,103 @@ public class TelegramListener extends Service {
         }
     }
 
+    private static void addElementToSummarizedList(TdApi.Message msg){
+
+
+        String content = msg.content.toString();
+        Pattern pattern = Pattern.compile("\"(.*)\"");
+        Matcher matcher = pattern.matcher(content);
+        boolean isAlreadyInList = false;
+        while (matcher.find()) {
+            content = matcher.group(1);
+        }
+        String group = contactList.get(msg.chatId);
+        String person = contactList.get((long)msg.senderUserId);
+        if(group.contains("Telegram")) {
+            return;
+        }
+        for (ReceivedMessage rec: summarizedList) {
+            if(rec.getPersons().get(0).equals(group)) {
+                rec.addText(content);
+                isAlreadyInList = true;
+            } else if(rec.getGroup().equals(group)) {
+                rec.addText("Und "+ person +" sagt: "+content);
+                rec.addPerson(person);
+                isAlreadyInList = true;
+            }
+        }
+        if(!isAlreadyInList) {
+
+            summarizedList.add(new ReceivedMessage(content,person,group));
+        }
+
+
+    }
+
     public static void playStoredMessagesFromContact(String name) {
+
+        long id = checkContacts(name);
+        String contact = contactList.get(id);
+        ReceivedMessage rm = null;
+        for (ReceivedMessage msg: summarizedList) {
+            if(msg.getGroup().equals(contact)){
+                if(msg.getPersons().get(0).equals(contact)) {
+                    mainActivity.updateOutput("Nachricht von " + msg.getGroup() + ": " + msg.getMessageText(),false,0);
+                } else {
+                    mainActivity.updateOutput("Nachrichten in Gruppe" + msg.getGroup() + ": " + msg.getPersons().get(0) + " sagt " +msg.getMessageText(),false,0);
+                }
+                rm = msg;
+                break;
+            }
+        }
+        if(rm != null) {
+            summarizedList.remove(rm);
+        } else {
+            mainActivity.updateOutput("Keine neuen Nachrichten von dieser Person vorhanden",false,0);
+        }
+
+
 
     }
 
     public static void playAllStoredMessages() {
-        /*ArrayList<ReceivedMessage> summarizedList = new ArrayList<>();
-        for (TdApi.Message msg: messageStorage) {
-            String content = msg.content.toString();
-            Pattern pattern = Pattern.compile("\"(.*)\"");
-            Matcher matcher = pattern.matcher(content);
-            while (matcher.find()) {
-                content = matcher.group(1);
+
+
+        if (summarizedList.size() == 0) {
+            mainActivity.updateOutput("Keine neuen Nachrichten",false,0);
+        } else if (summarizedList.size() == 1) {
+
+
+            ReceivedMessage msg = summarizedList.get(0);
+
+            if(msg.getGroup().equals(msg.getPersons().get(0))) { //single person
+                mainActivity.updateOutput("Nachricht von " + msg.getPersons().get(0) + ": " + msg.getMessageText(),false,0);
+            } else { //group
+                mainActivity.updateOutput("Nachricht von " + msg.getPersons().get(0) + " in " + msg.getGroup() + ": " + msg.getMessageText(),false,0);
             }
-            String group = contactList.get(msg.chatId);
-            String person = contactList.get((long)msg.senderUserId);
-            for (ReceivedMessage rec: summarizedList) {
-                if(rec.getGroup().equals(group)) {
-                    rec.addText(person +" sagt: "+content);
-                } else if(rec.getPerson().equals(person)) {
-                    rec.addText(content);
-                }
-            }
+            summarizedList.remove(msg);
 
-            if((long)msg.senderUserId == msg.chatId){
-
-            }
-            summarizedList.add();
-        }
-
-
-        if (messageStorage.size() == 0) {
-            mainActivity.updateOurText("Keine neuen Nachrichten",false,0);
-        } else if (messageStorage.size() == 1) {
-
-
-            TdApi.Message msg = messageStorage.get(0);
-
-            if((long)msg.senderUserId == msg.chatId) { //group message
-                mainActivity.updateOurText("Nachricht von " + contactList.get(msg.senderUserId) + " in " + contactList.get(msg.chatId) + ": " + content,false,0);
-            } else { //single person
-                mainActivity.updateOurText("Nachricht von " + contactList.get(msg.chatId) + ": " + content,false,0);
-
-            }
         } else {
-            for (ReceivedMessage message : messages) {
-                if (message.getPerson().contains("Telegram")) {
-                    //messages.remove(message);
-                    continue;
-                }
-                if (message.getPerson().contains(":")) { //group message
-                    String[] splitted = message.getPerson().split(":");
-                    persons += splitted[1] + " in " + splitted[0] + ",";
+            String persons ="";
+            for (ReceivedMessage message : summarizedList) {
+
+                if (message.getPersons().size() > 1) { //group message
+                    String groupMembers = "";
+                    for (String p: message.getPersons()) {
+                        groupMembers += p + ", ";
+                    }
+
+                    persons += groupMembers + " in " + message.getGroup() + ",";
                 } else {
-                    persons += message.getPerson() + ",";
+                    persons += message.getPersons().get(0) + ",";
                 }
             }
             //remove last ,
             if (persons != null && persons.length() > 0 && persons.charAt(persons.length() - 1) == ',') {
                 persons = persons.substring(0, persons.length() - 1);
             }
-            return "Nachrichten von" + persons;
-        }*/
+            mainActivity.updateOutput("Nachrichten von" + persons, false, 0);
+        }
     }
 
     private static void getAndPlayMessage(TdApi.Message message, boolean isBusy) {
@@ -247,31 +314,33 @@ public class TelegramListener extends Service {
             if(id == (int) message.chatId) {
                 //single chat
                 if(isSamePerson) {
-                    mainActivity.updateOurText("Nachricht von " + person + ":" + msg ,true, chatID);
+                    mainActivity.updateOutput("Nachricht von " + person + ":" + msg ,true, chatID);
 
                 } else {
-                    mainActivity.updateOurText("Nachricht von " + person + ":" + msg ,true, chatID);
+                    mainActivity.updateOutput("Nachricht von " + person + ":" + msg ,true, chatID);
 
                 }
             } else {
                 //group chat
                 if(isSamePerson) {
-                    mainActivity.updateOurText("Nachricht von " + person + ":" + msg,true, chatID);
+                    mainActivity.updateOutput("Nachricht von " + person + ":" + msg,true, chatID);
                 }  else{
-                    mainActivity.updateOurText("Nachricht von" + person + " in " + chat + ": " + msg,true, chatID);
+                    mainActivity.updateOutput("Nachricht von" + person + " in " + chat + ": " + msg,true, chatID);
                 }
             }
         }
     }
 
     private static void handleNewMessage(TdApi.UpdateNewMessage message) {
+        MainActivity.isActiveMode = MainActivity.isActiveModeSwitch.isChecked();
         if(MainActivity.isActiveMode) {
             boolean isBusy = !newMessages.isEmpty();
             newMessages.add(message.message);
             getAndPlayMessage(message.message,isBusy);
             lastMessage = message.message;
         } else {
-            messageStorage.add(message.message);
+
+            addElementToSummarizedList(message.message);
         }
     }
 

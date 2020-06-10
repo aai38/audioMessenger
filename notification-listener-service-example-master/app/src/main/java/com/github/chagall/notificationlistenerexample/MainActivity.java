@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton favorite;
     private boolean isBusy = false;
     public static boolean isActiveMode = true;
-    private static Switch isActiveModeSwitch;
+    public static Switch isActiveModeSwitch;
     private File testAudio;
 
     private String[] output;
@@ -668,11 +668,16 @@ public class MainActivity extends AppCompatActivity {
 
             micro.startRecording(3000);
             while (micro.isRecording) {
-
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            String message = NotificationListenerExampleService.getMessageFromPerson(micro.result);
+            TelegramListener.playStoredMessagesFromContact(micro.result);
 
-            t1.speak(message, TextToSpeech.QUEUE_ADD, null);
+
+
         } else if(keyword == 2) {
 
             micro.startRecording(5000);
@@ -694,7 +699,7 @@ public class MainActivity extends AppCompatActivity {
             sendMessage(micro.result);
 
         } else if(keyword == 3) {
-            updateOurText( NotificationListenerExampleService.getMessageToRead(), false, 0);
+            TelegramListener.playAllStoredMessages();
         }
         else {
             if(isReactionToNotification) {
@@ -703,7 +708,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void updateOurText(String text, boolean isSingleMsgMode, long chatID) {
+    public void updateOutput(String text, boolean isSingleMsgMode, long chatID) {
 
         if(text != null) {
             messageThread = null;

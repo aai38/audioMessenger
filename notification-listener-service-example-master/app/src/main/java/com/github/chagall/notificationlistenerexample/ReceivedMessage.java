@@ -1,14 +1,17 @@
 package com.github.chagall.notificationlistenerexample;
 
+import java.util.ArrayList;
+
 public class ReceivedMessage {
 
     private String messageText;
-    private String person;
+    private ArrayList<String> persons;
     private String group;
 
     public ReceivedMessage(String messageText, String person, String group) {
         this.messageText = messageText;
-        this.person = person;
+        this.persons = new ArrayList<>();
+        this.persons.add(person);
         this.group = group;
     }
 
@@ -21,12 +24,13 @@ public class ReceivedMessage {
     }
     public void addText(String text) {messageText += ". " + text;}
 
-    public String getPerson() {
-        return person;
+    public ArrayList<String> getPersons() {
+        return persons;
     }
+    public void addPerson(String person){persons.add(person);}
 
-    public void setPerson(String person) {
-        this.person = person;
+    public void setPersons(ArrayList<String> persons) {
+        this.persons = persons;
     }
 
     public String getGroup() {
