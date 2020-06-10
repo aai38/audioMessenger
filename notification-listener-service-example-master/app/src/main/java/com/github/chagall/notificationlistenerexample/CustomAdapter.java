@@ -36,6 +36,7 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
         private Boolean favorite = false;
         private SharedPreferences.Editor editor;
         private JSONArray jsonArray;
+        private String resultJSON;
 
 
         public CustomAdapter(Context context, ArrayList<Contact> modelArrayList) {
@@ -108,15 +109,7 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
 
             editor = sharedPrefs.edit();
             holder.checkBox.setChecked(sharedPrefs.getBoolean("CheckValue"+position, false));
-            String resultJSON = getData(context);
-            if(resultJSON != null) {
-                try {
-                    jsonArray = new JSONArray(resultJSON);
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
 
 
             holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -132,7 +125,7 @@ public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClic
                                 // The dialog is automatically dismissed when a dialog button is clicked.
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
-
+                                        jsonArray = new JSONArray();
                                         editor.putBoolean("CheckValue"+position, isChecked);
                                         editor.putInt("count_favorite", count_favorite+1);
                                         editor.commit();

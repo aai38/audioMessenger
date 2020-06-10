@@ -290,14 +290,14 @@ public class MainActivity extends AppCompatActivity {
         editor = shared.edit();
 
 
-        t1.setSpeechRate((calls_before/25)+1);
-        editor.putInt("rate_calls", (calls_before/25)+1);
+        t1.setSpeechRate(speech_rate_calls);
+        editor.putInt("rate_calls", (calls_before/20)+1);
+
+
 
 
         t2.setSpeechRate(speech_rate_answers);
-
-        t2.setSpeechRate(answers_before/25+1);
-        editor.putInt("rate_answers", answers_before/25+1);
+        editor.putInt("rate_answers", answers_before/20+1);
         editor.apply();
 
 
@@ -487,6 +487,7 @@ public class MainActivity extends AppCompatActivity {
                 //Log.d("0", output[0]);
                 //Log.d("1", output[1]);
                 //Log.d("2", output[2]);
+                Log.e("favorites", favorites.toString());
                 if(favorites.contains(output[1])) {
                     Log.e("favorite in", output[1] + favorites.get(0));
                     int index = 0;
@@ -521,8 +522,12 @@ public class MainActivity extends AppCompatActivity {
                 map3.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID2");
 
 
+                if(speech_rate_calls >= 4) {
+                    sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
+                } else {
+                    t1.speak(output[0],TextToSpeech.QUEUE_ADD, map2);
+                }
 
-                t1.speak(output[0],TextToSpeech.QUEUE_ADD, map2);
                 t2.speak(output[1], TextToSpeech.QUEUE_ADD, map);
                 t3.speak(output[2], TextToSpeech.QUEUE_ADD, map3);
             } else {
@@ -539,18 +544,6 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onDone(String utteranceId) {
-
-                // Speaking stopped.
-            }
-            @Override
-            public void onError(String utteranceId) {
-                // There was an error.
-            }
-        });
-
-        t2.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-            @Override
-            public void onStart(String s) {
                 if(favorites.contains(output[1])) {
                     Log.i("favorite in output", "");
                     if (index == 2) {
@@ -562,6 +555,17 @@ public class MainActivity extends AppCompatActivity {
                         spFavoriteThree.play(favoriteThreeEarcon, 1, 1, 0 , 0 , speechSpeedValue);
                     }
                 }
+            }
+            @Override
+            public void onError(String utteranceId) {
+                // There was an error.
+            }
+        });
+
+        t2.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String s) {
+
 
             }
 
