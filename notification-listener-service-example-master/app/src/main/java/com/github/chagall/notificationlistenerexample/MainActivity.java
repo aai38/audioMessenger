@@ -44,7 +44,7 @@ import com.ibm.watson.speech_to_text.v1.SpeechToText;
 import com.ibm.watson.speech_to_text.v1.model.RecognizeOptions;
 import com.ibm.watson.speech_to_text.v1.model.SpeechRecognitionResult;
 
-import org.drinkless.td.libcore.telegram.Client;
+//import org.drinkless.td.libcore.telegram.Client;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
