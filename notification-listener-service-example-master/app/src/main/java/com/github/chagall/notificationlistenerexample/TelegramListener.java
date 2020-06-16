@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
@@ -91,10 +92,14 @@ public class TelegramListener extends Service {
         if(id == 0) {
             id = checkContacts(name);
         }
+        recheck(id, msg);
         System.out.println("SendMsg to:"+id+" "+contactList.get(id));
         System.out.println(msg);
 
-        sendMessage(id,msg);
+        if(id != 0){
+            sendMessage(id,msg);
+        }
+
         playNextMessage();
     }
 
@@ -115,10 +120,28 @@ public class TelegramListener extends Service {
 
 
         }
+
         System.out.println(contactList.get(result));
         return result;
     }
 
+    private static long recheck(long result, String msg){
+        if(result == 0){
+            MainActivity.t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht.", TextToSpeech.QUEUE_ADD,null);
+            return 0;
+        } else {
+            MainActivity.t1.speak("Die Nachricht, " + msg +  ", wird an "+contactList.get(result)+" gesendet, ist dies richtig?", TextToSpeech.QUEUE_ADD,null);
+            while(MainActivity.t1.isSpeaking()){
+
+            }
+            MainActivity.sp.play(MainActivity.answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+            boolean confirmation = MainActivity.confirmationCheck();
+            if(!confirmation){
+                return 0;
+            }
+        }
+        return result;
+    }
 
 
     private static double similarity(String s1, String s2) {

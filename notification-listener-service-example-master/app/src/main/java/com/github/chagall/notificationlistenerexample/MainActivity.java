@@ -91,8 +91,8 @@ public class MainActivity extends AppCompatActivity {
     private SoundPool spFavoriteTwo;
     private SoundPool spFavoriteThree;
 
-    private static int messageReceivedEarcon;
-    private static int answerModeActiveEarcon;
+    public static int messageReceivedEarcon;
+    public static int answerModeActiveEarcon;
     private int favoriteOneEarcon;
     private int favoriteTwoEarcon;
     private int favoriteThreeEarcon;
@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private ImageButton favorite;
     private boolean isBusy = false;
+
     public static boolean isActiveMode = true;
     public static Switch isActiveModeSwitch;
     private File testAudio;
@@ -731,6 +732,30 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public static boolean confirmationCheck() {
+
+
+        micro.startRecording(3000);
+        while(micro.isRecording){
+            //wait until user has spoken his answer
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(micro.result.equals("ja")) {
+                micro.stopRecording();
+                return true;
+            } else if(micro.result.equals("nein")){
+                micro.stopRecording();
+                return false;
+            }
+        }
+        micro.stopRecording();
+        return false;
+
+
+    }
 
     /**
      * Is Notification Service Enabled.
