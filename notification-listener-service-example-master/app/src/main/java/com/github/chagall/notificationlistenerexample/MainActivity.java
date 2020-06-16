@@ -70,7 +70,7 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String[] keywords = {"antworten", "abhören", "schreibe", "alle"};
+    private String[] keywords = {"antworten", "abhören", "schreibe", "alle", "abbruch"};
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
@@ -630,6 +630,10 @@ public class MainActivity extends AppCompatActivity {
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 3;
+            } else if(checkKeyword(micro.result, 4)) { //"abbruch"
+                sp.play(answerModeActiveEarcon, 0.3f, 0.3f, 0, 0, 1.5f);
+                micro.stopRecording();
+                return 4;
             }
         }
         //no keyword
@@ -642,7 +646,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void handleUserCommands(boolean isReactionToNotification, long chatID) {
         int keyword = listenToKeyword();
-        reactToKeyword(keyword, isReactionToNotification, chatID);
+        if(keyword != 4){ //everything else except "abbruch"
+            reactToKeyword(keyword, isReactionToNotification, chatID);
+        }
     }
 
     public void reactToKeyword(int keyword, boolean isReactionToNotification, long chatID){
@@ -658,15 +664,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
             String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
             micro.result = questionMark;
-            TelegramListener.sendMessage(micro.result,"",chatID);
-
-
+            if(!(containsCancel(micro.result))){
+                TelegramListener.sendMessage(micro.result,"",chatID);
+            }
 
         } else if (keyword == 1) {
             //
@@ -679,9 +684,9 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-            TelegramListener.playStoredMessagesFromContact(micro.result);
-
-
+            if(!(containsCancel(micro.result))){
+                TelegramListener.playStoredMessagesFromContact(micro.result);
+            }
 
         } else if(keyword == 2) {
 
@@ -701,7 +706,9 @@ public class MainActivity extends AppCompatActivity {
             String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
             micro.result = questionMark;
 
-            sendMessage(micro.result);
+            if(!(containsCancel(micro.result))){
+                sendMessage(micro.result);
+            }
 
         } else if(keyword == 3) {
             TelegramListener.playAllStoredMessages();
@@ -866,5 +873,15 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Telegram app is not installed", Toast.LENGTH_LONG).show();
         }*/
 
+    }
+
+
+    private boolean containsCancel(String text){
+        //is "abbruch" in given string?
+        if(text.contains("abbruch")){
+            return true;
+        } else {
+            return false;
+        }
     }
 }
