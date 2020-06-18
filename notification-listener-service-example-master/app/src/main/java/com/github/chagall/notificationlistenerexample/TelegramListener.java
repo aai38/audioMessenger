@@ -355,6 +355,8 @@ public class TelegramListener extends Service {
     }
 
     private static void handleNewMessage(TdApi.UpdateNewMessage message) {
+        getMainChatList(100);
+        getContacts();
         MainActivity.isActiveMode = MainActivity.isActiveModeSwitch.isChecked();
         if(MainActivity.isActiveMode) {
             boolean wait = !newMessages.isEmpty() || MainActivity.isBusy;
