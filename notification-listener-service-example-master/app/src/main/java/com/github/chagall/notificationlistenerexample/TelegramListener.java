@@ -100,7 +100,7 @@ public class TelegramListener extends Service {
             sendMessage(id,msg);
         }
 
-        playNextMessage();
+
     }
 
     private static Long checkContacts(String name) {
@@ -209,8 +209,8 @@ public class TelegramListener extends Service {
 
 
 
-    public static void playNextMessage() {
-        if(!newMessages.isEmpty()){
+    public static void playNextMessage(boolean resumeMessages) {
+        if(!newMessages.isEmpty() && !resumeMessages){
             lastMessage = newMessages.get(0);
             newMessages.remove(0);
         }
@@ -319,7 +319,7 @@ public class TelegramListener extends Service {
         }
     }
 
-    private static void getAndPlayMessage(TdApi.Message message, boolean isBusy) {
+    private static void getAndPlayMessage(TdApi.Message message, boolean wait) {
         String msg = message.content.toString();
 
         Pattern pattern = Pattern.compile("\"(.*)\"");
@@ -333,7 +333,7 @@ public class TelegramListener extends Service {
         String chat = contactList.get(message.chatId);
         System.out.println(msg);
         boolean isSamePerson = lastMessage != null && lastMessage.chatId == message.chatId;
-        if (!isBusy) {
+        if (!wait) {
             if(id == (int) message.chatId) {
                 //single chat
                 if(isSamePerson) {
@@ -357,9 +357,9 @@ public class TelegramListener extends Service {
     private static void handleNewMessage(TdApi.UpdateNewMessage message) {
         MainActivity.isActiveMode = MainActivity.isActiveModeSwitch.isChecked();
         if(MainActivity.isActiveMode) {
-            boolean isBusy = !newMessages.isEmpty();
+            boolean wait = !newMessages.isEmpty() || MainActivity.isBusy;
             newMessages.add(message.message);
-            getAndPlayMessage(message.message,isBusy);
+            getAndPlayMessage(message.message,wait);
             lastMessage = message.message;
         } else {
 

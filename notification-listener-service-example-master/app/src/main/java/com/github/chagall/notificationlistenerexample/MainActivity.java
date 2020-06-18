@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences shared;
     private SharedPreferences.Editor editor;
     private ImageButton favorite;
-    private boolean isBusy = false;
+    public static boolean isBusy = false;
 
     public static boolean isActiveMode = true;
     public static Switch isActiveModeSwitch;
@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
                         isBusy = true;
                         handleUserCommands(false,0);
                         isBusy = false;
+                        TelegramListener.playNextMessage(true);
                         return;
                     }
                 }, "Message Thread");
@@ -461,7 +462,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void playMessage(String text, boolean isSingleMsgMode, long chatID) {
+    public void playMessage(String text, boolean answerAllowed, long chatID) {
         File file = new File("../../../../../res/raw/earcon1.mp3");
         int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
         Bundle param = new android.os.Bundle();
@@ -587,7 +588,7 @@ public class MainActivity extends AppCompatActivity {
             //wait until message was played
         }
 
-        if(isSingleMsgMode) {
+        if(answerAllowed) {
             handleUserCommands(true, chatID);
         }
 
@@ -663,7 +664,10 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-
+            if(micro.result.equals("")) {
+                updateOutput("Du hast keinen Text eingesprochen, Funktion wird abgebrochen.",false,0);
+                return;
+            }
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
@@ -672,6 +676,8 @@ public class MainActivity extends AppCompatActivity {
             if(!(containsCancel(micro.result))){
                 TelegramListener.sendMessage(micro.result,"",chatID);
             }
+            isBusy = false;
+            TelegramListener.playNextMessage(false);
 
         } else if (keyword == 1) {
             //
@@ -699,7 +705,10 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-
+            if(micro.result.equals("")) {
+                updateOutput("Du hast keinen Text eingesprochen, Funktion wird abgebrochen.",false,0);
+                return;
+            }
             String point = micro.result.replaceAll("punkt", ".");
             String comma = point.replaceAll("komma", ",");
             String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
@@ -715,21 +724,22 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             if(isReactionToNotification) {
-                TelegramListener.playNextMessage();
+                isBusy = false;
+                TelegramListener.playNextMessage(false);
             }
         }
     }
 
-    public void updateOutput(String text, boolean isSingleMsgMode, long chatID) {
+    public void updateOutput(String text, boolean answerAllowed, long chatID) {
 
         if(text != null) {
             messageThread = null;
             //setTextFromOtherThread(text);
             messageThread = new Thread(new Runnable() {
                 public void run() {
-
-                    playMessage(text, isSingleMsgMode, chatID);
-
+                    isBusy = true;
+                    playMessage(text, answerAllowed, chatID);
+                    isBusy = false;
                     return;
                 }
             }, "Message Thread");
@@ -840,6 +850,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         micro.stopRecording();
+        if(micro.result.equals("")) {
+            updateOutput("Du hast keinen Kontakt eingesprochen, Funktion wird abgebrochen.",false,0);
+            return;
+        }
+
         TelegramListener.sendMessage(message,micro.result,0);
 
         /*Intent waIntent = new Intent(Intent.ACTION_SEND);

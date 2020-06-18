@@ -58,22 +58,33 @@ public final class HeadsetService extends Service {
                 if (ke != null && ke.getAction() == KeyEvent.ACTION_DOWN) {
                     int keyCode = ke.getKeyCode();
                     Log.d(TAG, "onMediaButtonEvent Received command: " + ke);
-                    switch (keyCode){
-                        case KeyEvent.KEYCODE_MEDIA_PLAY:
-                            //alle
-                            m.reactToKeyword(3, false,0);
-                            return true;
-                        case KeyEvent.KEYCODE_MEDIA_NEXT:
-                            //antworten
-                            spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-                            m.reactToKeyword(0, true, TelegramListener.lastMessage.chatId);
-                            return true;
-                        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                            //schreibe
-                            spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-                            m.reactToKeyword(2, false, 0);
-                            return true;
+                    if(!MainActivity.isBusy) {
+                        MainActivity.isBusy = true;
+                        switch (keyCode){
+                            case KeyEvent.KEYCODE_MEDIA_PLAY:
+                                //alle
+                                m.reactToKeyword(3, false,0);
+                                MainActivity.isBusy = false;
+                                TelegramListener.playNextMessage(true);
+                                return true;
+                            case KeyEvent.KEYCODE_MEDIA_NEXT:
+                                //antworten
+                                spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                                m.reactToKeyword(0, true, TelegramListener.lastMessage.chatId);
+                                MainActivity.isBusy = false;
+                                TelegramListener.playNextMessage(true);
+                                return true;
+                            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                                //schreibe
+                                spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                                m.reactToKeyword(2, false, 0);
+                                MainActivity.isBusy = false;
+                                TelegramListener.playNextMessage(true);
+                                return true;
+                        }
+
                     }
+
                 }
                 return super.onMediaButtonEvent(mediaButtonIntent);
             }
