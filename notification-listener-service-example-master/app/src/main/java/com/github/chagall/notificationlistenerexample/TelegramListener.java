@@ -65,7 +65,11 @@ public class TelegramListener extends Service {
     private static AlertDialog dialog;
     private static ArrayList<ReceivedMessage> summarizedList = new ArrayList<>();
 
+
+
     public static void initialize() {
+        newMessages = new ArrayList<>();
+        newMessages.clear();
         client = Client.create(new UpdatesHandler(), null, null);
         try {
             TimeUnit.SECONDS.sleep(1);
@@ -224,7 +228,7 @@ public class TelegramListener extends Service {
 
 
         String content = msg.content.toString();
-        Pattern pattern = Pattern.compile("\"(.*)\"");
+        Pattern pattern = Pattern.compile("text = \"(.*)\"");
         Matcher matcher = pattern.matcher(content);
         boolean isAlreadyInList = false;
         while (matcher.find()) {
@@ -232,6 +236,10 @@ public class TelegramListener extends Service {
         }
         String group = contactList.get(msg.chatId);
         String person = contactList.get((long)msg.senderUserId);
+        if(group == null || person == null || group.equals("null") || person.equals("null")) {
+            getMainChatList(100);
+            getContacts();
+        }
         if(group.contains("Telegram")) {
             return;
         }
@@ -257,13 +265,17 @@ public class TelegramListener extends Service {
 
         long id = checkContacts(name);
         String contact = contactList.get(id);
+        if(contact == null || contact.equals("null")) {
+            getMainChatList(100);
+            getContacts();
+        }
         ReceivedMessage rm = null;
         for (ReceivedMessage msg: summarizedList) {
             if(msg.getGroup().equals(contact)){
                 if(msg.getPersons().get(0).equals(contact)) {
                     mainActivity.updateOutput("Nachricht von " + msg.getGroup() + ": " + msg.getMessageText(),false,0);
                 } else {
-                    mainActivity.updateOutput("Nachrichten in Gruppe" + msg.getGroup() + ": " + msg.getPersons().get(0) + " sagt " +msg.getMessageText(),false,0);
+                    mainActivity.updateOutput("Nachrichten in Gruppe " + msg.getGroup() + ": " + msg.getPersons().get(0) + " sagt " + msg.getMessageText(),false,0);
                 }
                 rm = msg;
                 break;
@@ -322,7 +334,7 @@ public class TelegramListener extends Service {
     private static void getAndPlayMessage(TdApi.Message message, boolean wait) {
         String msg = message.content.toString();
 
-        Pattern pattern = Pattern.compile("\"(.*)\"");
+        Pattern pattern = Pattern.compile("text = \"(.*)\"");
         Matcher matcher = pattern.matcher(msg);
         while (matcher.find()) {
             msg = matcher.group(1);
@@ -331,6 +343,10 @@ public class TelegramListener extends Service {
         Long chatID = message.chatId;
         String person = contactList.get((long) message.senderUserId);
         String chat = contactList.get(message.chatId);
+        if(person == null || chat == null || chat.equals("null") || person.equals("null")) {
+            getMainChatList(100);
+            getContacts();
+        }
         System.out.println(msg);
         boolean isSamePerson = lastMessage != null && lastMessage.chatId == message.chatId;
         if (!wait) {
@@ -346,17 +362,16 @@ public class TelegramListener extends Service {
             } else {
                 //group chat
                 if(isSamePerson) {
-                    mainActivity.updateOutput("Nachricht von " + person + ":" + msg,true, chatID);
+                    mainActivity.updateOutput("Gruppen-Nachricht von " + person + ":" + msg,true, chatID);
                 }  else{
-                    mainActivity.updateOutput("Nachricht von" + person + " in " + chat + ": " + msg,true, chatID);
+                    mainActivity.updateOutput("Nachricht von " + person + " in " + chat + ": " + msg,true, chatID);
                 }
             }
         }
     }
 
     private static void handleNewMessage(TdApi.UpdateNewMessage message) {
-        getMainChatList(100);
-        getContacts();
+
         MainActivity.isActiveMode = MainActivity.isActiveModeSwitch.isChecked();
         if(MainActivity.isActiveMode) {
             boolean wait = !newMessages.isEmpty() || MainActivity.isBusy;
@@ -391,6 +406,8 @@ public class TelegramListener extends Service {
             switch (object.getConstructor()) {
                 case TdApi.UpdateNewMessage.CONSTRUCTOR:
                     TdApi.UpdateNewMessage updateNewMessage = (TdApi.UpdateNewMessage) object;
+
+
                     if(!updateNewMessage.message.isOutgoing) {
                         handleNewMessage(updateNewMessage);
                     }
@@ -466,12 +483,12 @@ public class TelegramListener extends Service {
                     break;
                 }
                 case TdApi.UpdateChatLastMessage.CONSTRUCTOR: {
-                    TdApi.UpdateChatLastMessage updateChat = (TdApi.UpdateChatLastMessage) object;
+                    /*TdApi.UpdateChatLastMessage updateChat = (TdApi.UpdateChatLastMessage) object;
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
                         chat.lastMessage = updateChat.lastMessage;
                         setChatOrder(chat, updateChat.order);
-                    }
+                    }*/
                     break;
                 }
                 case TdApi.UpdateChatOrder.CONSTRUCTOR: {

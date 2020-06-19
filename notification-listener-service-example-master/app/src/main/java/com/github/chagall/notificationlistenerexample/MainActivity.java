@@ -397,6 +397,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializationTest() throws FileNotFoundException {
+        long time = System.currentTimeMillis();
         testAudio = resourceToFile(R.raw.testvoice);
         SpeechToText speechToText;
         IamAuthenticator authenticator;
@@ -417,6 +418,10 @@ public class MainActivity extends AppCompatActivity {
         String result = "";
 
         while(result.equals("")) {
+            if(System.currentTimeMillis() - time > 5000){
+                System.out.println("Initialization of speech to text api failed");
+                break;
+            }
             try{
                 transcript = speechToText
                         .recognize(options)
