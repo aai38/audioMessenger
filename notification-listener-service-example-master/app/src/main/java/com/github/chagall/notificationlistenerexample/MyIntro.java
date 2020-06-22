@@ -29,8 +29,22 @@ public class MyIntro extends AppIntro {
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(
+                "Nachricht schreiben",
+                "Wenn du sowohl deine Nachricht als auch den Kontakt eingegeben hast, wird dir beides nochmal vorgelesen. Anschließend musst du das Absenden der Nachricht bestätigen oder verweigern.",
+                R.drawable.iconfinder_mic_1055024,
+                Color.parseColor("black")));
+
+        addSlide(AppIntroFragment.newInstance(
                 "Nachrichten abhören",
-                "Du kannst das Signalwort 'Abhören' sprechen und nach dem Signalton den Namen des Kontaktes nennen, von dem du die Nachrichten abhören möchtest. ",
+                "Du kannst das Signalwort 'Abhören' sprechen und nach dem Signalton den Namen des Kontaktes nennen, von dem du die Nachrichten abhören möchtest. " +
+                        "Wenn du alle neuen Nachrichten abhören möchtest, nenne statt des Kontaktes das Signalwort 'Alle'.",
+                R.drawable.iconfinder_mic_1055024,
+                Color.parseColor("black")));
+
+        addSlide(AppIntroFragment.newInstance(
+                "Nachrichten beantworten",
+                "Nachdem dir die Nachricht eines Kontaktes vorgelesen wurde, hast du die Möglichekeit direkt darauf zu antworten. Dafür nennst du direkt nach der Ausgabe der Nachricht das Signalwort" +
+                        "'Antworten'. Daraufhin wird ein Signalton ausgegeben, jetzt kannst du deine Antwort per Sprachbefehl eingeben.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
 
@@ -52,6 +66,23 @@ public class MyIntro extends AppIntro {
                 R.drawable.active_mode,
                 Color.parseColor("black")));
 
+        addSlide(AppIntroFragment.newInstance(
+                "Abbruch",
+                "Du hast bei jeder Aktion die Möglichkeit das Signalwort 'Abbrechen' zu nennen. Daraufhin wird die laufende Aktion sofort abgebrochen.",
+                R.drawable.baseline_clear_white_18dp,
+                Color.parseColor("black")));
+
+        addSlide(AppIntroFragment.newInstance(
+                "Kopfhörer",
+                "...",
+                R.drawable.baseline_headset_white_18dp,
+                Color.parseColor("black")));
+
+        addSlide(AppIntroFragment.newInstance(
+                "Tutorial",
+                "Du kannst jederzeit dieses Tutorial wieder aufrufen. Dazu klickst du auf den Button 'Anleitung'.",
+                R.drawable.tutorial_button,
+                Color.parseColor("black")));
 
 
         showStatusBar(false);
