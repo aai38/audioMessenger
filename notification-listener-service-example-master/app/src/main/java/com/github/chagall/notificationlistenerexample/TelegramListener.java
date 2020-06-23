@@ -248,7 +248,7 @@ public class TelegramListener extends Service {
                 rec.addText(content);
                 isAlreadyInList = true;
             } else if(rec.getGroup().equals(group)) {
-                rec.addText("Und "+ person +" sagt: "+content);
+                rec.addText(" Und "+ person +" sagt: "+content);
                 rec.addPerson(person);
                 isAlreadyInList = true;
             }
@@ -275,7 +275,7 @@ public class TelegramListener extends Service {
                 if(msg.getPersons().get(0).equals(contact)) {
                     mainActivity.updateOutput("Nachricht von " + msg.getGroup() + ": " + msg.getMessageText(),false,0);
                 } else {
-                    mainActivity.updateOutput("Nachrichten in Gruppe " + msg.getGroup() + ": " + msg.getPersons().get(0) + " sagt " + msg.getMessageText(),false,0);
+                    mainActivity.updateOutput("Nachrichten in Gruppe " + msg.getGroup() + ": " + msg.getPersons().get(0) + " sagt: " + msg.getMessageText()+".",false,0);
                 }
                 rm = msg;
                 break;
@@ -284,7 +284,7 @@ public class TelegramListener extends Service {
         if(rm != null) {
             summarizedList.remove(rm);
         } else {
-            mainActivity.updateOutput("Keine neuen Nachrichten von dieser Person vorhanden",false,0);
+            mainActivity.updateOutput("Keine neuen Nachrichten von dieser Person oder Gruppe vorhanden",false,0);
         }
 
 
@@ -327,7 +327,7 @@ public class TelegramListener extends Service {
             if (persons != null && persons.length() > 0 && persons.charAt(persons.length() - 1) == ',') {
                 persons = persons.substring(0, persons.length() - 1);
             }
-            mainActivity.updateOutput("Nachrichten von" + persons, false, 0);
+            mainActivity.updateOutput("Nachrichten von " + persons, false, 0);
         }
     }
 
