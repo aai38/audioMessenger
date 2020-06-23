@@ -69,13 +69,13 @@ public class MyIntro extends AppIntro {
         addSlide(AppIntroFragment.newInstance(
                 "Abbruch",
                 "Du hast bei jeder Aktion die Möglichkeit das Signalwort 'Abbrechen' zu nennen. Daraufhin wird die laufende Aktion sofort abgebrochen.",
-                R.drawable.baseline_clear_white,
+                R.drawable.baseline_clear_white_18dp,
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(
                 "Kopfhörer",
                 "...",
-                R.drawable.baseline_headset_white,
+                R.drawable.baseline_headset_white_18dp,
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(

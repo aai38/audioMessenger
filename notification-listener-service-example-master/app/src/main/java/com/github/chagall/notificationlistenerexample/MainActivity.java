@@ -240,6 +240,24 @@ public class MainActivity extends AppCompatActivity {
         errorEarcon = sp.load(this, R.raw.earcon4,1);
         feedbackEarcon = sp.load(this, R.raw.earcon6, 1);
 
+        /*File file1 = new File("../../../../../res/raw/earcon4.mp3");
+        int succ11 = t1.addEarcon("[earcon]", file1.getAbsolutePath());//"", R.raw.earcon1);
+        Bundle param1 = new android.os.Bundle();
+        param1.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
+        param1.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
+        //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
+        int succ111 = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param1, "earcon");
+        System.out.println("Success: "+succ11+ " " + succ111);
+
+        File file = new File("../../../../../res/raw/earcon6.mp3");
+        int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
+        Bundle param = new android.os.Bundle();
+        param.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
+        param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
+        //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
+        int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
+        System.out.println("Success: "+succ1+ " " + succ);*/
+
         shared = getPreferences(Context.MODE_PRIVATE);
 
         calls_before = shared.getInt("calls", 0);
@@ -800,6 +818,8 @@ public class MainActivity extends AppCompatActivity {
             micro.result = questionMark;
             if(!(containsCancel(micro.result))){
                 TelegramListener.sendMessage(micro.result,"",chatID);
+            } else {
+                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             }
             isBusy = false;
             TelegramListener.playNextMessage(false);
@@ -817,6 +837,8 @@ public class MainActivity extends AppCompatActivity {
             }
             if(!(containsCancel(micro.result))){
                 TelegramListener.playStoredMessagesFromContact(micro.result);
+            } else {
+                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             }
 
         } else if(keyword == 2) {
@@ -843,6 +865,8 @@ public class MainActivity extends AppCompatActivity {
 
             if(!(containsCancel(micro.result))){
                 sendMessage(micro.result);
+            } else {
+                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             }
 
         } else if(keyword == 3) {
@@ -979,6 +1003,7 @@ public class MainActivity extends AppCompatActivity {
         micro.stopRecording();
         if(micro.result.equals("")) {
             updateOutput("Du hast keinen Kontakt eingesprochen, Funktion wird abgebrochen.",false,0);
+            sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
             return;
         }
 
