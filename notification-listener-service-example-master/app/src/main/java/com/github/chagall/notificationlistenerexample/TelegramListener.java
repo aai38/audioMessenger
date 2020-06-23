@@ -361,11 +361,9 @@ public class TelegramListener extends Service {
                 }
             } else {
                 //group chat
-                if(isSamePerson) {
-                    mainActivity.updateOutput("Gruppen-Nachricht von " + person + ":" + msg,true, chatID);
-                }  else{
-                    mainActivity.updateOutput("Nachricht von " + person + " in " + chat + ": " + msg,true, chatID);
-                }
+
+                mainActivity.updateOutput("Nachricht von " + person + " in " + chat + ": " + msg,true, chatID);
+
             }
         }
     }
