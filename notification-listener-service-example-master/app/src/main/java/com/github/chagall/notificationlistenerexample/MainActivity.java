@@ -477,29 +477,36 @@ public class MainActivity extends AppCompatActivity {
         int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
         System.out.println("Success: "+succ1+ " " + succ);
         //t1.speak(text,TextToSpeech.QUEUE_ADD,null);
-        if(text.contains("Keine neuen Nachrichten")){
+        if(text.startsWith("Keine neuen Nachrichten")){
             t1.speak(text,TextToSpeech.QUEUE_ADD,null);
         } else { //split text in three pieces
-            output = new String[3]; //nachricht von, contact, message
-            if(text.contains("Nachricht")) {
-                //output[0] = text.split("(?<=von)(?s)(.*$)")[0];
-                String m = text.split(" ")[0]; //Nachricht(en)
-                String f = text.split(" ")[1]; //von
-                output[0] = m+" "+f;
-                //output[1] = text.split("von")[1].split(":")[0];
-                String contact = text.split(":")[0];
-                output[1] = contact.substring(contact.lastIndexOf(" ")+1);
-                output[2] = text.split(":")[1];
+            output = new String[3];
+            if(text.startsWith("Nachricht von")) { //single message
+                output[0] = "Nachricht von ";
+                //get "<person>" or "<person> in <group>"
+                String withoutBeginning = text.replace("Nachricht von ","");
+                String person = withoutBeginning.split(":")[0];
+                output[1] = person;
+                //get <msg>
+                output[2] = withoutBeginning.split(":")[1];
 
                 //Log.d("0", output[0]);
                 //Log.d("1", output[1]);
                 //Log.d("2", output[2]);
+
+                //its possible that output[1] contains "in <group>"
                 Log.e("favorites", favorites.toString());
-                if(favorites.contains(output[1])) {
-                    Log.e("favorite in", output[1] + favorites.get(0));
+                String p;
+                if(output[1].contains("in")){
+                    p = output[1].split(" ")[0];
+                } else {
+                    p = output[1];
+                }
+                if(favorites.contains(p)) {
+                    Log.e("favorite in", p + favorites.get(0));
                     int index = 0;
                     for (int i = 0; i < favorites.size(); i++) {
-                        if (favorites.get(i).equals(output[1])) {
+                        if (favorites.get(i).equals(p)) {
                             index = i + 2;
                         }
                     }
@@ -516,8 +523,6 @@ public class MainActivity extends AppCompatActivity {
                         favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon4, 1);
                     }
                 }
-
-
 
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
@@ -537,6 +542,137 @@ public class MainActivity extends AppCompatActivity {
 
                 t2.speak(output[1], TextToSpeech.QUEUE_ADD, map);
                 t3.speak(output[2], TextToSpeech.QUEUE_ADD, map3);
+            } else if(text.startsWith("Nachrichten")){ //multiple message
+                if(text.startsWith("Nachrichten von")){
+                    output[0] = "Nachrichten von ";
+                    String withoutBeginning = text.replace("Nachrichten von ","");
+                    String personList = withoutBeginning.replace(",", " ");
+                    output[1] = personList; //<person1> <person2> ...
+                    output[2] = ""; //no msg
+
+                    //create person Array and search for favorites
+                    Log.e("favorites", favorites.toString());
+                    String[] personArray = personList.split(" ");
+                    for(String person : personArray){
+                        if(favorites.contains(person)) {
+                            Log.e("favorite in", person + favorites.get(0));
+                            int index = 0;
+                            for (int i = 0; i < favorites.size(); i++) {
+                                if (favorites.get(i).equals(person)) {
+                                    index = i + 2;
+                                }
+                            }
+
+                            if (index == 2) {
+                                Log.e("index before start", ""+index);
+                                spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
+                                favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon2, 1);
+                            } else if (index == 3) {
+                                spFavoriteTwo = new SoundPool(2, STREAM_MUSIC, 0);
+                                favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon3, 1);
+                            } else if (index == 4) {
+                                spFavoriteThree = new SoundPool(2, STREAM_MUSIC, 0);
+                                favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon4, 1);
+                            }
+                        }
+                    }
+
+                    HashMap<String, String> map = new HashMap<String, String>();
+                    map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
+
+                    HashMap<String, String> map2 = new HashMap<String, String>();
+                    map2.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID1");
+
+                    HashMap<String, String> map3 = new HashMap<String, String>();
+                    map3.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID2");
+
+                    if(speech_rate_calls >= 4) {
+                        sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
+                    } else {
+                        t1.speak(output[0],TextToSpeech.QUEUE_ADD, map2);
+                    }
+
+                    t2.speak(output[1], TextToSpeech.QUEUE_ADD, map);
+                    t3.speak(output[2], TextToSpeech.QUEUE_ADD, map3);
+                } else { //text.startsWith("Nachrichten in")
+                    output[0] = "Nachrichten in ";
+                    String withoutBeginning = text.replace("Nachrichten in ","");
+
+                    output[0] += withoutBeginning.split(":")[0]; //"Nachrichten in <group>"
+
+                    //get <person1> sagt: <msg1>. Und <person2> sagt: <msg2>. ...
+                    String loop = text.replace(output[0]+":", "");
+
+                    //create hashmap to store <person> and <msg>
+                    HashMap<String,String> personMessage = new HashMap<>();
+                    String[] pm = loop.split("."); //get each person and msg
+
+                    for (String pM : pm){
+                        if(pM.startsWith("Und")){ //multiple one
+                            pM.replace("Und", "");
+                        }
+                        String person = pM.split("sagt:")[0];
+                        String message = pM.split("sagt:")[1];
+                        personMessage.put(person, message);
+                    }
+
+                    boolean firstPlay = true;
+                    for(String key: personMessage.keySet()){
+
+                        output[1] = key; //person
+                        output[2] = personMessage.get(key); //message
+
+                        Log.e("favorites", favorites.toString());
+
+                        if(favorites.contains(output[1])) {
+                            Log.e("favorite in", output[1] + favorites.get(0));
+                            int index = 0;
+                            for (int i = 0; i < favorites.size(); i++) {
+                                if (favorites.get(i).equals(output[1])) {
+                                    index = i + 2;
+                                }
+                            }
+
+                            if (index == 2) {
+                                Log.e("index before start", ""+index);
+                                spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
+                                favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon2, 1);
+                            } else if (index == 3) {
+                                spFavoriteTwo = new SoundPool(2, STREAM_MUSIC, 0);
+                                favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon3, 1);
+                            } else if (index == 4) {
+                                spFavoriteThree = new SoundPool(2, STREAM_MUSIC, 0);
+                                favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon4, 1);
+                            }
+                        }
+
+
+                        HashMap<String, String> map = new HashMap<String, String>();
+                        map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
+
+                        HashMap<String, String> map2 = new HashMap<String, String>();
+                        map2.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID1");
+
+                        HashMap<String, String> map3 = new HashMap<String, String>();
+                        map3.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID2");
+
+                        if(firstPlay){
+                            firstPlay = false;
+                            if(speech_rate_calls >= 4) {
+                                sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
+                            } else {
+                                t1.speak(output[0],TextToSpeech.QUEUE_ADD, map2);
+                            }
+
+                            t2.speak(output[1]+ " sagt ", TextToSpeech.QUEUE_ADD, map);
+                            t3.speak(output[2], TextToSpeech.QUEUE_ADD, map3);
+                        } else {
+                            t2.speak(" Und "+output[1]+"sagt ", TextToSpeech.QUEUE_ADD, map);
+                            t3.speak(output[2], TextToSpeech.QUEUE_ADD, map3);
+                        }
+
+                    }
+                }
             } else {
                 t1.speak(text,TextToSpeech.QUEUE_ADD,null);
             }
