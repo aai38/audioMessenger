@@ -1,7 +1,6 @@
 package com.github.chagall.notificationlistenerexample;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,8 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.net.Uri;
-import android.os.FileObserver;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -23,18 +20,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 
 
 import com.ibm.cloud.sdk.core.http.HttpMediaType;
@@ -81,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
     private Button play;
 
     public static TextToSpeech t1;
-    public static TextToSpeech t2;
-    public static TextToSpeech t3;
+    public static TextToSpeech t2; //person
+    public static TextToSpeech t3; //message
     public static MicrophoneListener micro;
     public boolean hasRecorded;
     public String fileName;
@@ -91,8 +83,18 @@ public class MainActivity extends AppCompatActivity {
     private SoundPool spFavoriteTwo;
     private SoundPool spFavoriteThree;
 
-    public static int messageReceivedEarcon;
+    //public static int messageReceivedEarcon;
     public static int answerModeActiveEarcon;
+    public static int noNewMessageEarcon;
+    public static int singleMessageEarcon;
+    public static int multipleMessageEarcon;
+    public static int errorEarcon;
+    public static int feedbackEarcon;
+
+    private boolean isNoMessage = false;
+    private boolean isSingleMessage = false;
+    private boolean isMultipleMessage = false;
+
     private int favoriteOneEarcon;
     private int favoriteTwoEarcon;
     private int favoriteThreeEarcon;
@@ -229,59 +231,15 @@ public class MainActivity extends AppCompatActivity {
                 t3.setLanguage(Locale.GERMAN);
             }
         });
-        sp = new SoundPool(2, STREAM_MUSIC, 0);
-        messageReceivedEarcon = sp.load(this, R.raw.earcon1, 1);
+        sp = new SoundPool(10, STREAM_MUSIC, 0);
+        //messageReceivedEarcon = sp.load(this, R.raw.earcon1, 1);
         answerModeActiveEarcon = sp.load(this, R.raw.earcon_answer_mode, 1);
+        noNewMessageEarcon = sp.load(this, R.raw.earcon1, 1);
+        singleMessageEarcon = sp.load(this, R.raw.earcon2, 1);
+        multipleMessageEarcon = sp.load(this, R.raw.earcon3, 1);
+        errorEarcon = sp.load(this, R.raw.earcon4,1);
+        feedbackEarcon = sp.load(this, R.raw.earcon6, 1);
 
-
-        /*
-        this.speechSpeed = (SeekBar)findViewById(R.id.speechSpeed);
-        this.speechSpeed.setMax(10);
-        this.speechSpeed.setProgress(0);
-        this.speechSpeed.incrementProgressBy(1);
-        this.speechSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                speechSpeedValue = progress;
-                //1.0 normal, 0.5 half the normal speed
-                t1.setSpeechRate(progress);
-                //Log.d("SPEECH speed", "value:"+progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        this.contactSpeed = (SeekBar)findViewById(R.id.contactSpeed);
-        this.contactSpeed.setMax(10);
-        this.contactSpeed.setProgress(0);
-        this.contactSpeed.incrementProgressBy(1);
-        this.contactSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                t2.setSpeechRate(progress);
-                //Log.d("CONTACT speed", "value:"+progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-         */
         shared = getPreferences(Context.MODE_PRIVATE);
 
         calls_before = shared.getInt("calls", 0);
@@ -296,13 +254,9 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("rate_calls", (calls_before/20)+1);
 
 
-
-
         t2.setSpeechRate(speech_rate_answers);
         editor.putInt("rate_answers", answers_before/20+1);
         editor.apply();
-
-
 
 
         mailButton = findViewById(R.id.mailButton);
@@ -468,20 +422,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playMessage(String text, boolean answerAllowed, long chatID) {
-        File file = new File("../../../../../res/raw/earcon1.mp3");
-        int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
-        Bundle param = new android.os.Bundle();
-        param.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
-        param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
-        //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
-        int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
-        System.out.println("Success: "+succ1+ " " + succ);
-        //t1.speak(text,TextToSpeech.QUEUE_ADD,null);
+
+        isNoMessage = false;
+        isSingleMessage = false;
+        isMultipleMessage = false;
+
         if(text.startsWith("Keine neuen Nachrichten")){
+            isNoMessage = true;
+            File file = new File("../../../../../res/raw/earcon1.mp3");
+            int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
+            Bundle param = new android.os.Bundle();
+            param.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
+            param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
+            //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
+            int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
+            System.out.println("Success: "+succ1+ " " + succ);
+
             t1.speak(text,TextToSpeech.QUEUE_ADD,null);
         } else { //split text in three pieces
             output = new String[3];
             if(text.startsWith("Nachricht von")) { //single message
+                isSingleMessage = true;
+                File file = new File("../../../../../res/raw/earcon2.mp3");
+                int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());
+                Bundle param = new android.os.Bundle();
+                param.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
+                param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
+                int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
+                System.out.println("Success: "+succ1+ " " + succ);
+
                 output[0] = "Nachricht von ";
                 //get "<person>" or "<person> in <group>"
                 String withoutBeginning = text.replace("Nachricht von ","");
@@ -489,10 +458,6 @@ public class MainActivity extends AppCompatActivity {
                 output[1] = person;
                 //get <msg>
                 output[2] = withoutBeginning.split(":")[1];
-
-                //Log.d("0", output[0]);
-                //Log.d("1", output[1]);
-                //Log.d("2", output[2]);
 
                 //its possible that output[1] contains "in <group>"
                 Log.e("favorites", favorites.toString());
@@ -535,7 +500,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 if(speech_rate_calls >= 4) {
-                    sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
+                    sp.play(singleMessageEarcon, 1,1,0,0,speechSpeedValue);
                 } else {
                     t1.speak(output[0],TextToSpeech.QUEUE_ADD, map2);
                 }
@@ -543,6 +508,16 @@ public class MainActivity extends AppCompatActivity {
                 t2.speak(output[1], TextToSpeech.QUEUE_ADD, map);
                 t3.speak(output[2], TextToSpeech.QUEUE_ADD, map3);
             } else if(text.startsWith("Nachrichten")){ //multiple message
+                isMultipleMessage = true;
+                File file = new File("../../../../../res/raw/earcon3.mp3");
+                int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
+                Bundle param = new android.os.Bundle();
+                param.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
+                param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
+                //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
+                int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
+                System.out.println("Success: "+succ1+ " " + succ);
+
                 if(text.startsWith("Nachrichten von")){
                     output[0] = "Nachrichten von ";
                     String withoutBeginning = text.replace("Nachrichten von ","");
@@ -587,7 +562,7 @@ public class MainActivity extends AppCompatActivity {
                     map3.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID2");
 
                     if(speech_rate_calls >= 4) {
-                        sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
+                        sp.play(multipleMessageEarcon, 1,1,0,0,speechSpeedValue);
                     } else {
                         t1.speak(output[0],TextToSpeech.QUEUE_ADD, map2);
                     }
@@ -659,7 +634,7 @@ public class MainActivity extends AppCompatActivity {
                         if(firstPlay){
                             firstPlay = false;
                             if(speech_rate_calls >= 4) {
-                                sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
+                                sp.play(multipleMessageEarcon, 1,1,0,0,speechSpeedValue);
                             } else {
                                 t1.speak(output[0],TextToSpeech.QUEUE_ADD, map2);
                             }
@@ -671,6 +646,7 @@ public class MainActivity extends AppCompatActivity {
                             t3.speak(output[2], TextToSpeech.QUEUE_ADD, map3);
                         }
 
+                        personMessage.remove(key);
                     }
                 }
             } else {
@@ -682,7 +658,14 @@ public class MainActivity extends AppCompatActivity {
         t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId){
-                sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
+                if(isNoMessage){
+                    sp.play(noNewMessageEarcon, 1,1,0,0,speechSpeedValue);
+                } else if(isSingleMessage){
+                    sp.play(singleMessageEarcon, 1,1,0,0,speechSpeedValue);
+                } else if(isMultipleMessage){
+                    sp.play(multipleMessageEarcon, 1,1,0,0,speechSpeedValue);
+                }
+                //sp.play(messageReceivedEarcon, 1,1,0,0,speechSpeedValue);
 
             }
             @Override
@@ -773,7 +756,7 @@ public class MainActivity extends AppCompatActivity {
                 micro.stopRecording();
                 return 3;
             } else if(checkKeyword(micro.result, 4)) { //"abbruch"
-                sp.play(answerModeActiveEarcon, 0.3f, 0.3f, 0, 0, 1.5f);
+                sp.play(errorEarcon, 0.3f, 0.3f, 0, 0, 1.5f);
                 micro.stopRecording();
                 return 4;
             }
@@ -807,6 +790,7 @@ public class MainActivity extends AppCompatActivity {
             }
             if(micro.result.equals("")) {
                 updateOutput("Du hast keinen Text eingesprochen, Funktion wird abgebrochen.",false,0);
+                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
                 return;
             }
             String point = micro.result.replaceAll("punkt", ".");
@@ -848,6 +832,7 @@ public class MainActivity extends AppCompatActivity {
             }
             if(micro.result.equals("")) {
                 updateOutput("Du hast keinen Text eingesprochen, Funktion wird abgebrochen.",false,0);
+                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
                 return;
             }
             String point = micro.result.replaceAll("punkt", ".");
@@ -910,6 +895,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         micro.stopRecording();
+        sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
         return false;
 
 
