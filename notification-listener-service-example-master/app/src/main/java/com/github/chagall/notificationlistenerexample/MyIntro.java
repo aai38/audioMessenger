@@ -51,13 +51,13 @@ public class MyIntro extends AppIntro {
         addSlide(AppIntroFragment.newInstance(
                 "Favoriten festlegen",
                 "Du kannst über das Stern-Icon deine Favoriten festlegen. Es öffnet sich eine Liste mit allen Kontakten, aus der du deine Favoriten wählen kannst.",
-                R.drawable.iconfinder_star_381628,
+                R.drawable.iconfinder_star_381628_large,
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(
                 "Informationen abrufen",
                 "Du kannst über das Info-Icon bestimmte Informationen abrufen. Es öffnet sich ein Fenster, welches Informationen über die Häufigkeiten der App-Nutzung anzeigt.",
-                R.drawable.info_circle,
+                R.drawable.info_circle_large,
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(
@@ -73,9 +73,10 @@ public class MyIntro extends AppIntro {
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(
-                "Kopfhörer",
-                "...",
-                R.drawable.baseline_headset_white,
+                "Headset",
+                "Du kannst die App auch über ein Headset verwenden. Über 'Play/Pause' kannst du alle Nachrichten abhören. " +
+                        "Über die Taste 'Vorwärts' kannst du auf eine Nachricht antworten und über die 'Zurück'-Taste kannst du eine Nachricht schreiben.",
+                R.drawable.headset_keys,
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(
