@@ -910,19 +910,47 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(micro.result.equals("ja")) {
+            ArrayList<Double> yesValues = new ArrayList<>();
+            yesValues.add(TelegramListener.similarity("ja",micro.result));
+            yesValues.add(TelegramListener.similarity("jap",micro.result));
+            yesValues.add(TelegramListener.similarity("joa",micro.result));
+            yesValues.add(TelegramListener.similarity("ihr",micro.result));
+            yesValues.add(TelegramListener.similarity("richtig",micro.result));
+            yesValues.add(TelegramListener.similarity("passt",micro.result));
+            yesValues.add(TelegramListener.similarity("yes",micro.result));
+            double yes = getMaxOfDoubles(yesValues);
+            ArrayList<Double> noValues = new ArrayList<>();
+            yesValues.add(TelegramListener.similarity("nein",micro.result));
+            yesValues.add(TelegramListener.similarity("no",micro.result));
+            yesValues.add(TelegramListener.similarity("nope",micro.result));
+            yesValues.add(TelegramListener.similarity("ne",micro.result));
+            yesValues.add(TelegramListener.similarity("falsch",micro.result));
+            double no = getMaxOfDoubles(noValues);
+            if(yes >= 0.6 && yes > no) {
                 micro.stopRecording();
+                sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
                 return true;
-            } else if(micro.result.equals("nein")){
+            } else if(no >= 0.6){
                 micro.stopRecording();
+                sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
                 return false;
             }
         }
         micro.stopRecording();
-        sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
+        sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
         return false;
 
 
+    }
+
+    private static double getMaxOfDoubles(ArrayList<Double> doubles){
+        double max = 0;
+        for (double d: doubles) {
+            if(d > max) {
+                max = d;
+            }
+        }
+        return max;
     }
 
     /**
@@ -981,7 +1009,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean checkKeyword(String phrase, int keywordIndex) {
 
         for (String s : phrase.split(" ")) {
-            if(s.equals(keywords[keywordIndex])) {
+            double d = TelegramListener.similarity(s,keywords[keywordIndex]);
+            if(d > 0.7) {
                 return true;
             }
         }

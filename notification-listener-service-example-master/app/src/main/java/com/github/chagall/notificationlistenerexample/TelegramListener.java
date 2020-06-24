@@ -89,14 +89,16 @@ public class TelegramListener extends Service {
     }
 
     public static void sendMessage(String msg, String name, long id) {
-        getMainChatList(100);
+        if(contactList.isEmpty()){
+            getMainChatList(100);
+            getContacts();
+        }
 
-        getContacts();
 
         if(id == 0) {
             id = checkContacts(name);
         }
-        recheck(id, msg);
+        id = recheck(id, msg);
         System.out.println("SendMsg to:"+id+" "+contactList.get(id));
         System.out.println(msg);
 
@@ -132,6 +134,7 @@ public class TelegramListener extends Service {
     private static long recheck(long result, String msg){
         if(result == 0){
             MainActivity.t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht.", TextToSpeech.QUEUE_ADD,null);
+            MainActivity.sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
             return 0;
         } else {
             MainActivity.t1.speak("Die Nachricht, " + msg +  ", wird an "+contactList.get(result)+" gesendet, ist dies richtig?", TextToSpeech.QUEUE_ADD,null);
@@ -148,7 +151,7 @@ public class TelegramListener extends Service {
     }
 
 
-    private static double similarity(String s1, String s2) {
+    public static double similarity(String s1, String s2) {
         String longer = s1, shorter = s2;
         if (s1.length() < s2.length()) { // longer should always have greater length
             longer = s2; shorter = s1;
@@ -239,6 +242,8 @@ public class TelegramListener extends Service {
         if(group == null || person == null || group.equals("null") || person.equals("null")) {
             getMainChatList(100);
             getContacts();
+            group = contactList.get(msg.chatId);
+            person = contactList.get((long)msg.senderUserId);
         }
         if(group.contains("Telegram")) {
             return;
@@ -268,6 +273,7 @@ public class TelegramListener extends Service {
         if(contact == null || contact.equals("null")) {
             getMainChatList(100);
             getContacts();
+            contact = contactList.get(id);
         }
         ReceivedMessage rm = null;
         for (ReceivedMessage msg: summarizedList) {
@@ -346,6 +352,8 @@ public class TelegramListener extends Service {
         if(person == null || chat == null || chat.equals("null") || person.equals("null")) {
             getMainChatList(100);
             getContacts();
+            person = contactList.get((long) message.senderUserId);
+            chat = contactList.get(message.chatId);
         }
         System.out.println(msg);
         boolean isSamePerson = lastMessage != null && lastMessage.chatId == message.chatId;
