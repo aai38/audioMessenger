@@ -17,14 +17,14 @@ public class MyIntro extends AppIntro {
 
         addSlide(AppIntroFragment.newInstance(
                 "Kurzanleitung",
-                "Du kannst zu jeder Zeit auf das Mikrofon klicken und bestimmte Signalwörter einsprechen. Die verfügbaren Signalwörter sind 'Schreibe', 'Abhören', 'Alle'.",
+                "Du kannst zu jeder Zeit auf das Mikrofon klicken und bestimmte Signalwörter einsprechen. Die verfügbaren Signalwörter sind 'Schreibe', 'Abhören', 'Alle' und 'Abbruch'.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(
                 "Nachricht schreiben",
                 "Wenn du eine Nachricht schreiben möchtest, spreche das Wort 'Schreibe'. Im Anschluss kommt ein Signalton. " +
-                        "Nach dem Ton sprichst du deine gewünschte Nachricht ein. Anschließend kannst du den Kontakt auswählen.",
+                        "Nach dem Ton sprichst du deine gewünschte Nachricht ein. Anschließend kannst du den Kontakt via Sprachbefehl eingeben.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
 
@@ -43,8 +43,8 @@ public class MyIntro extends AppIntro {
 
         addSlide(AppIntroFragment.newInstance(
                 "Nachrichten beantworten",
-                "Nachdem dir die Nachricht eines Kontaktes vorgelesen wurde, hast du die Möglichekeit direkt darauf zu antworten. Dafür nennst du direkt nach der Ausgabe der Nachricht das Signalwort" +
-                        "'Antworten'. Daraufhin wird ein Signalton ausgegeben, jetzt kannst du deine Antwort per Sprachbefehl eingeben.",
+                "Nachdem dir die Nachricht eines Kontaktes vorgelesen wurde, hast du die Möglichkeit direkt darauf zu antworten. Dafür nennst du direkt nach der Ausgabe der Nachricht das Signalwort" +
+                        " 'Antworten'. Daraufhin wird ein Signalton ausgegeben, jetzt kannst du deine Antwort per Sprachbefehl eingeben.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
 
