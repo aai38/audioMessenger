@@ -466,9 +466,9 @@ public class TelegramListener extends Service {
                     TdApi.UpdateNewMessage updateNewMessage = (TdApi.UpdateNewMessage) object;
 
 
-                    //if(!updateNewMessage.message.isOutgoing) {
+                    if(!updateNewMessage.message.isOutgoing) {
                         handleNewMessage(updateNewMessage);
-                    //}
+                    }
 
 
                     break;
