@@ -472,10 +472,10 @@ public class MainActivity extends AppCompatActivity {
                 output[0] = "Nachricht von ";
                 //get "<person>" or "<person> in <group>"
                 String withoutBeginning = text.replace("Nachricht von ","");
-                String person = withoutBeginning.split(":")[0];
+                String person = withoutBeginning.split("#")[0];
                 output[1] = person;
                 //get <msg>
-                output[2] = withoutBeginning.split(":")[1];
+                output[2] = withoutBeginning.split("#")[1];
 
                 //its possible that output[1] contains "in <group>"
                 Log.e("favorites", favorites.toString());
@@ -591,10 +591,10 @@ public class MainActivity extends AppCompatActivity {
                     output[0] = "Nachrichten in ";
                     String withoutBeginning = text.replace("Nachrichten in ","");
 
-                    output[0] += withoutBeginning.split(":")[0]; //"Nachrichten in <group>"
+                    output[0] += withoutBeginning.split("#")[0]; //"Nachrichten in <group>"
 
                     //get <person1> sagt: <msg1>. Und <person2> sagt: <msg2>. ...
-                    String loop = text.replace(output[0]+":", "");
+                    String loop = text.replace(output[0]+"#", "");
 
                     //create hashmap to store <person> and <msg>
                     HashMap<String,String> personMessage = new HashMap<>();
@@ -604,8 +604,8 @@ public class MainActivity extends AppCompatActivity {
                         if(pM.startsWith("Und")){ //multiple one
                             pM.replace("Und", "");
                         }
-                        String person = pM.split("sagt:")[0];
-                        String message = pM.split("sagt:")[1];
+                        String person = pM.split("sagt#")[0];
+                        String message = pM.split("sagt#")[1];
                         personMessage.put(person, message);
                     }
 
