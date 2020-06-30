@@ -228,10 +228,20 @@ public class TelegramListener extends Service {
     }
 
     private static void addElementToSummarizedList(TdApi.Message msg){
-
-
+        boolean isAnimation = false;
+        boolean isSticker = false;
         String content = msg.content.toString();
-        Pattern pattern = Pattern.compile("text = \"(.*)\"");
+        if( content.contains("MessageSticker")) {
+            isSticker = true;
+        }
+        if( content.contains("MessageAnimation")) {
+            isAnimation = true;
+        }
+
+        Pattern pattern = Pattern.compile("text = \"((.|\\n)*)\"");
+
+
+
         Matcher matcher = pattern.matcher(content);
         boolean isAlreadyInList = false;
         while (matcher.find()) {
@@ -250,10 +260,24 @@ public class TelegramListener extends Service {
         }
         for (ReceivedMessage rec: summarizedList) {
             if(rec.getPersons().get(0).equals(group)) {
-                rec.addText(content);
+                if(isSticker) {
+                    rec.addText("Ein Sticker. ");
+                } else if(isAnimation) {
+                    rec.addText("Ein Gif. ");
+                }else{
+                    rec.addText(content+". ");
+                }
+
                 isAlreadyInList = true;
             } else if(rec.getGroup().equals(group)) {
-                rec.addText(" Und "+ person +" sagt: "+content);
+                if(isSticker) {
+                    rec.addText("Und "+ person +" schickt einen Sticker. ");
+                } else if(isAnimation) {
+                    rec.addText("Und "+ person +" schickt ein Gif. ");
+                }else{
+                    rec.addText("Und "+ person +" sagt: "+content+". ");
+                }
+
                 rec.addPerson(person);
                 isAlreadyInList = true;
             }
@@ -339,8 +363,17 @@ public class TelegramListener extends Service {
 
     private static void getAndPlayMessage(TdApi.Message message, boolean wait) {
         String msg = message.content.toString();
+        boolean isAnimation = false;
+        boolean isSticker = false;
 
-        Pattern pattern = Pattern.compile("text = \"(.*)\"");
+        if( msg.contains("MessageSticker")) {
+            isSticker = true;
+        }
+        if( msg.contains("MessageAnimation")) {
+            isAnimation = true;
+        }
+
+        Pattern pattern = Pattern.compile("text = \"((.|\\n)*)\"");
         Matcher matcher = pattern.matcher(msg);
         while (matcher.find()) {
             msg = matcher.group(1);
@@ -361,16 +394,35 @@ public class TelegramListener extends Service {
             if(id == (int) message.chatId) {
                 //single chat
                 if(isSamePerson) {
-                    mainActivity.updateOutput("Nachricht von " + person + ":" + msg ,true, chatID);
+                    if(isSticker) {
+                        mainActivity.updateOutput(person + " hat dir einen Sticker geschickt.",true, chatID);
+                    } else if(isAnimation){
+                        mainActivity.updateOutput(person + " hat dir ein Gif geschickt." ,true, chatID);
+                    } else {
+                        mainActivity.updateOutput("Nachricht von " + person + ":" + msg ,true, chatID);
+                    }
+
 
                 } else {
-                    mainActivity.updateOutput("Nachricht von " + person + ":" + msg ,true, chatID);
+                    if(isSticker) {
+                        mainActivity.updateOutput(person + " hat dir einen Sticker geschickt.",true, chatID);
+                    } else if(isAnimation){
+                        mainActivity.updateOutput(person + " hat dir ein Gif geschickt." ,true, chatID);
+                    } else {
+                        mainActivity.updateOutput("Nachricht von " + person + ":" + msg ,true, chatID);
+                    }
 
                 }
             } else {
                 //group chat
+                if(isSticker) {
+                    mainActivity.updateOutput(person + " hat dir einen Sticker in "+chat+" geschickt.",true, chatID);
+                } else if(isAnimation){
+                    mainActivity.updateOutput(person + " hat dir ein Gif in "+chat+" geschickt." ,true, chatID);
+                } else {
+                    mainActivity.updateOutput("Nachricht von " + person + " in " + chat + ": " + msg,true, chatID);
+                }
 
-                mainActivity.updateOutput("Nachricht von " + person + " in " + chat + ": " + msg,true, chatID);
 
             }
         }
@@ -414,9 +466,9 @@ public class TelegramListener extends Service {
                     TdApi.UpdateNewMessage updateNewMessage = (TdApi.UpdateNewMessage) object;
 
 
-                    if(!updateNewMessage.message.isOutgoing) {
+                    //if(!updateNewMessage.message.isOutgoing) {
                         handleNewMessage(updateNewMessage);
-                    }
+                    //}
 
 
                     break;
