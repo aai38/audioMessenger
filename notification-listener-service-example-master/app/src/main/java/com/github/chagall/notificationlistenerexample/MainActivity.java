@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences shared;
     private SharedPreferences.Editor editor;
+    private static SharedPreferences sharedPreferences;
     private ImageButton favorite;
     public static boolean isBusy = false;
 
@@ -124,6 +125,12 @@ public class MainActivity extends AppCompatActivity {
     private int calls_before;
     private int speech_rate_answers;
     private int speech_rate_calls;
+    private int number_cancel;
+    private int number_write;
+    private int number_hearall;
+    private int number_hearone;
+    private int number_error;
+    private static int number_falseContact;
 
     private ArrayList<String> favorites = new ArrayList();
     private int index;
@@ -259,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("Success: "+succ1+ " " + succ);*/
 
         shared = getPreferences(Context.MODE_PRIVATE);
+        sharedPreferences = shared;
 
         calls_before = shared.getInt("calls", 0);
         answers_before = shared.getInt("answers", 0);
@@ -340,6 +348,12 @@ public class MainActivity extends AppCompatActivity {
 
         calls_before = shared.getInt("calls", 0);
         answers_before = shared.getInt("answers", 0);
+        number_cancel = shared.getInt("number_cancel", 0);
+        number_hearall = shared.getInt("number_hearall", 0);
+        number_write = shared.getInt("number_write", 0);
+        number_hearone = shared.getInt("number_hearone", 0);
+        number_error = shared.getInt("number_error", 0);
+        number_falseContact = shared.getInt("number_falseContact", 0);
 
 
         editor.putInt("calls", calls_before+1);
@@ -747,6 +761,7 @@ public class MainActivity extends AppCompatActivity {
 
     public int listenToKeyword() {
         micro.startRecording(3000);
+        editor = shared.edit();
         //
         //setTextFromOtherThread("Warte 3s auf Schlüsselwort ...");
         while(micro.isRecording) {
@@ -755,25 +770,32 @@ public class MainActivity extends AppCompatActivity {
             //the answer keyword was spoken
             if(checkKeyword(micro.result,0)) {
 
-                editor = shared.edit();
                 editor.putInt("answers", answers_before+1);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 0;
             } else if(checkKeyword(micro.result, 1)) { // eine Nachricht abhören
+                editor.putInt("number_hearone", number_hearone+1);
+                editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 1;
             } else if(checkKeyword(micro.result, 2)){ //"schreibe"
+                editor.putInt("number_write", number_write+1);
+                editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 2;
             } else if(checkKeyword(micro.result, 3)){ //alle Nachrichten abhören
+                editor.putInt("number_hearall", number_hearall+1);
+                editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 3;
             } else if(checkKeyword(micro.result, 4)) { //"abbruch"
+                editor.putInt("number_cancel", number_cancel+1);
+                editor.apply();
                 sp.play(errorEarcon, 0.3f, 0.3f, 0, 0, 1.5f);
                 micro.stopRecording();
                 return 4;
@@ -795,6 +817,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void reactToKeyword(int keyword, boolean isReactionToNotification, long chatID){
+        editor = shared.edit();
         if(keyword == 0 && isReactionToNotification) {
 
             micro.startRecording(5000);
@@ -807,6 +830,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             if(micro.result.equals("")) {
+                editor.putInt("number_error", number_error+1);
+                editor.apply();
                 updateOutput("Du hast keinen Text eingesprochen, Funktion wird abgebrochen.",false,0);
                 sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
                 return;
@@ -819,6 +844,8 @@ public class MainActivity extends AppCompatActivity {
             if(!(containsCancel(micro.result))){
                 TelegramListener.sendMessage(micro.result,"",chatID);
             } else {
+                editor.putInt("number_error", number_error+1);
+                editor.apply();
                 sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             }
             isBusy = false;
@@ -838,6 +865,7 @@ public class MainActivity extends AppCompatActivity {
             if(!(containsCancel(micro.result))){
                 TelegramListener.playStoredMessagesFromContact(micro.result);
             } else {
+
                 sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             }
 
@@ -855,6 +883,8 @@ public class MainActivity extends AppCompatActivity {
             if(micro.result.equals("")) {
                 updateOutput("Du hast keinen Text eingesprochen, Funktion wird abgebrochen.",false,0);
                 sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
+                editor.putInt("number_error", number_error+1);
+                editor.apply();
                 return;
             }
             String point = micro.result.replaceAll("punkt", ".");
@@ -902,6 +932,9 @@ public class MainActivity extends AppCompatActivity {
     public static boolean confirmationCheck() {
 
 
+        SharedPreferences.Editor editor;
+        editor = sharedPreferences.edit();
+
         micro.startRecording(3000);
         while(micro.isRecording){
             //wait until user has spoken his answer
@@ -933,6 +966,8 @@ public class MainActivity extends AppCompatActivity {
             } else if(no >= 0.6){
                 micro.stopRecording();
                 sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
+                editor.putInt("number_falseContact", number_falseContact+1);
+                editor.apply();
                 return false;
             }
         }
@@ -1032,6 +1067,9 @@ public class MainActivity extends AppCompatActivity {
         micro.stopRecording();
         if(micro.result.equals("")) {
             updateOutput("Du hast keinen Kontakt eingesprochen, Funktion wird abgebrochen.",false,0);
+            editor = shared.edit();
+            editor.putInt("number_error", number_error+1);
+            editor.apply();
             sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
             return;
         }
@@ -1075,6 +1113,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean containsCancel(String text){
         //is "abbruch" in given string?
         if(text.contains("abbruch")){
+            editor = shared.edit();
+            editor.putInt("number_cancel", number_cancel+1);
+            editor.apply();
             return true;
         } else {
             return false;
