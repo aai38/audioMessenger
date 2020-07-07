@@ -37,7 +37,7 @@ public class MyIntro extends AppIntro {
         addSlide(AppIntroFragment.newInstance(
                 "Nachrichten abhören",
                 "Du kannst das Signalwort 'Abhören' sprechen und nach dem Signalton den Namen des Kontaktes nennen, von dem du die Nachrichten abhören möchtest. " +
-                        "Wenn du alle neuen Nachrichten abhören möchtest, nenne statt des Kontaktes das Signalwort 'Alle'.",
+                        "Wenn du alle neuen Nachrichten abhören möchtest, spreche stattdessen das Signalwort 'Alle'.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
 
