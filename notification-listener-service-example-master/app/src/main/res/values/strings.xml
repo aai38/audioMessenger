@@ -20,5 +20,6 @@
     <string name="cancel">Abbrechen</string>
     <string name="confirm">Bestätigen</string>
     <string name="countryCode">+49</string>
+    <string name="noLoginCode">Login Code erneut anfordern</string>
 
 </resources>

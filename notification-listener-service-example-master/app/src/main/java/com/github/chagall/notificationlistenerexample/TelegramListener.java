@@ -971,7 +971,7 @@ public class TelegramListener extends Service {
         phoneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                phoneNumber = input.getText().toString().replaceAll("\\s+",""); //remove whitespaces
+                phoneNumber = "+49"+input.getText().toString().replaceAll("\\s+",""); //remove whitespaces
                 client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
                 mainActivity.setContentView(R.layout.authorization_login_code);
                 EditText inputCode = (EditText) mainActivity.findViewById(R.id.loginCode);
@@ -982,6 +982,14 @@ public class TelegramListener extends Service {
                         code = inputCode.getText().toString();
                         mainActivity.setContentView(R.layout.activity_main);
                         mainActivity.activateButtons();
+                    }
+                });
+
+                Button requestNew = (Button) mainActivity.findViewById(R.id.requestNewCode);
+                requestNew.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
                     }
                 });
             }
