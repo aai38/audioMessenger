@@ -14,10 +14,11 @@
     <string name="no">No</string>
 
     <string name="authorizationTitle">Authorisierung</string>
-    <string name="enterPhoneNumber">Zur Nutzung dieser App, musst du deine Telefonnummer eingeben (beginnend mit +49...).</string>
-    <string name="enterLoginCode">Gib nun den von Telegram gesendeten Login Code ein.</string>
+    <string name="enterPhoneNumber">Zur Nutzung dieser App, musst du deine Telefonnummer vervollständigen. Ein Telegram Account wird vorausgesetzt.</string>
+    <string name="enterLoginCode">Du hast in der Telegram App einen Login Code erhalten. Gib den Login Code ein.</string>
     <string name="request">Code anfordern</string>
     <string name="cancel">Abbrechen</string>
     <string name="confirm">Bestätigen</string>
+    <string name="countryCode">+49</string>
 
 </resources>

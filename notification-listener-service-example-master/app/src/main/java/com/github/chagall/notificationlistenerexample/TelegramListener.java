@@ -273,7 +273,7 @@ public class TelegramListener extends Service {
                 } else if(isAnimation) {
                     rec.addText("Und "+ person +" schickt ein Gif. ");
                 }else{
-                    rec.addText("Und "+ person +" sagt# "+content+". ");
+                    rec.addText("Und "+ person +" sagt§ "+content+". ");
                 }
 
                 rec.addPerson(person);
@@ -301,9 +301,9 @@ public class TelegramListener extends Service {
         for (ReceivedMessage msg: summarizedList) {
             if(msg.getGroup().equals(contact)){
                 if(msg.getPersons().get(0).equals(contact)) {
-                    mainActivity.updateOutput("Nachricht von " + msg.getGroup() + "# " + msg.getMessageText(),false,0);
+                    mainActivity.updateOutput("Nachricht von " + msg.getGroup() + "§ " + msg.getMessageText(),false,0);
                 } else {
-                    mainActivity.updateOutput("Nachrichten in Gruppe " + msg.getGroup() + "# " + msg.getPersons().get(0) + " sagt# " + msg.getMessageText()+".",false,0);
+                    mainActivity.updateOutput("Nachrichten in Gruppe " + msg.getGroup() + "§ " + msg.getPersons().get(0) + " sagt§ " + msg.getMessageText()+".",false,0);
                 }
                 rm = msg;
                 break;
@@ -330,9 +330,9 @@ public class TelegramListener extends Service {
             ReceivedMessage msg = summarizedList.get(0);
 
             if(msg.getGroup().equals(msg.getPersons().get(0))) { //single person
-                mainActivity.updateOutput("Nachricht von " + msg.getPersons().get(0) + "# " + msg.getMessageText(),false,0);
+                mainActivity.updateOutput("Nachricht von " + msg.getPersons().get(0) + "§ " + msg.getMessageText(),false,0);
             } else { //group
-                mainActivity.updateOutput("Nachricht von " + msg.getPersons().get(0) + " in " + msg.getGroup() + "# " + msg.getMessageText(),false,0);
+                mainActivity.updateOutput("Nachricht von " + msg.getPersons().get(0) + " in " + msg.getGroup() + "§ " + msg.getMessageText(),false,0);
             }
             summarizedList.remove(msg);
 
@@ -399,7 +399,7 @@ public class TelegramListener extends Service {
                     } else if(isAnimation){
                         mainActivity.updateOutput(person + " hat dir ein Gif geschickt." ,true, chatID);
                     } else {
-                        mainActivity.updateOutput("Nachricht von " + person + "#" + msg ,true, chatID);
+                        mainActivity.updateOutput("Nachricht von " + person + "§" + msg ,true, chatID);
                     }
 
 
@@ -409,7 +409,7 @@ public class TelegramListener extends Service {
                     } else if(isAnimation){
                         mainActivity.updateOutput(person + " hat dir ein Gif geschickt." ,true, chatID);
                     } else {
-                        mainActivity.updateOutput("Nachricht von " + person + "#" + msg ,true, chatID);
+                        mainActivity.updateOutput("Nachricht von " + person + "§" + msg ,true, chatID);
                     }
 
                 }
@@ -420,7 +420,7 @@ public class TelegramListener extends Service {
                 } else if(isAnimation){
                     mainActivity.updateOutput(person + " hat dir ein Gif in "+chat+" geschickt." ,true, chatID);
                 } else {
-                    mainActivity.updateOutput("Nachricht von " + person + " in " + chat + "# " + msg,true, chatID);
+                    mainActivity.updateOutput("Nachricht von " + person + " in " + chat + "§ " + msg,true, chatID);
                 }
 
 
@@ -971,7 +971,7 @@ public class TelegramListener extends Service {
         phoneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                phoneNumber = input.getText().toString();
+                phoneNumber = input.getText().toString().replaceAll("\\s+",""); //remove whitespaces
                 client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
                 mainActivity.setContentView(R.layout.authorization_login_code);
                 EditText inputCode = (EditText) mainActivity.findViewById(R.id.loginCode);
@@ -987,6 +987,8 @@ public class TelegramListener extends Service {
             }
         });
     }
+
+
 
     public static HashMap<Long, String> getContactList () {
         if(contactList.isEmpty()) {

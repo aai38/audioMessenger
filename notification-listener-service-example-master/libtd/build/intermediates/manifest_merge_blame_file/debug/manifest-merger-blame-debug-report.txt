@@ -25,23 +25,23 @@
 25
 26    <uses-sdk
 27        android:minSdkVersion="10"
-27-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml
+27-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml
 28        android:targetSdkVersion="26" />
-28-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml
+28-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml
 29
 30    <uses-permission android:name="android.permission.INTERNET" />
-30-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml:24:5-66
-30-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml:24:22-64
+30-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml:24:5-66
+30-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml:24:22-64
 31    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-31-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml:25:5-80
-31-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml:25:22-78
+31-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml:25:5-80
+31-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml:25:22-78
 32
 33    <application
-33-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml:26:5-30:19
+33-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml:26:5-30:19
 34        android:allowBackup="true"
-34-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml:26:18-44
+34-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml:26:18-44
 35        android:label="@string/app_name" >
-35-->C:\Users\Rebecca\Documents\Uni\Sem9\DT Anwendungsfach\audiomessengerNeu\notification-listener-service-example-master\libtd\src\main\AndroidManifest.xml:27:9-41
+35-->/Users/linaxu/Documents/audiomessenger/notification-listener-service-example-master/libtd/src/main/AndroidManifest.xml:27:9-41
 36    </application>
 37
 38</manifest>
