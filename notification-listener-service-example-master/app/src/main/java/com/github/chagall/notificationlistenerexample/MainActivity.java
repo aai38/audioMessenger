@@ -143,16 +143,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //load tutorial
-        tutorialBtn =(Button) findViewById(R.id.tutBtn);
-        tutorialBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openDescription();
-            }
-        });
+
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        activateButtons();
 
         //initialization test
         Thread iniThread = new Thread(new Runnable() {
@@ -170,48 +164,12 @@ public class MainActivity extends AppCompatActivity {
         //handle headset input
         startService(new Intent(this, HeadsetService.class));
 
-        favorite = findViewById(R.id.imageButton);
-        favorite.setOnClickListener((View view) -> {
-            Intent activityIntent = new Intent(this, FavoritesActivity.class);
-            startActivity(activityIntent);
-        });
+
 
         // Record to the external cache directory for visibility
         fileName = getFilesDir()+"/speak.pcm";
         micro = new MicrophoneListener(fileName);
 
-        ImageView button = (ImageView) findViewById(R.id.recordBtn);
-        button.setOnClickListener( (View view) -> {
-            if(!isBusy) {
-                activeListeningThread = null;
-                activeListeningThread = new Thread(new Runnable() {
-                    public void run() {
-                        isBusy = true;
-                        handleUserCommands(false,0);
-                        isBusy = false;
-                        TelegramListener.playNextMessage(true);
-                        return;
-                    }
-                }, "Message Thread");
-                activeListeningThread.start();
-            }
-
-
-        });
-
-        // initiate a Switch
-        isActiveModeSwitch = (Switch) findViewById(R.id.switch1);
-
-        // check current state of a Switch (true or false).
-        isActiveMode = isActiveModeSwitch.isChecked();
-
-
-        //view = (TextView) this.findViewById(R.id.image_change_explanation);
-        // If the user did not turn the notification listener service on we prompt him to do so
-        if(!isNotificationServiceEnabled()){
-            enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
-            enableNotificationListenerAlertDialog.show();
-        }
 
         // Finally we register a receiver to tell the MainActivity when a notification has been received
         broadcastReceiver = new NotificationBroadcastReceiver(this);
@@ -247,23 +205,6 @@ public class MainActivity extends AppCompatActivity {
         errorEarcon = sp.load(this, R.raw.earcon4,1);
         feedbackEarcon = sp.load(this, R.raw.earcon6, 1);
 
-        /*File file1 = new File("../../../../../res/raw/earcon4.mp3");
-        int succ11 = t1.addEarcon("[earcon]", file1.getAbsolutePath());//"", R.raw.earcon1);
-        Bundle param1 = new android.os.Bundle();
-        param1.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
-        param1.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
-        //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
-        int succ111 = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param1, "earcon");
-        System.out.println("Success: "+succ11+ " " + succ111);
-
-        File file = new File("../../../../../res/raw/earcon6.mp3");
-        int succ1 = t1.addEarcon("[earcon]", file.getAbsolutePath());//"", R.raw.earcon1);
-        Bundle param = new android.os.Bundle();
-        param.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, 3);
-        param.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "earcon");
-        //param.putBundle(String.valueOf(TextToSpeech.Engine.KEY_PARAM_STREAM), String.valueOf(AudioManager.STREAM_MUSIC));
-        int succ = t1.playEarcon("[earcon]",TextToSpeech.QUEUE_FLUSH, param, "earcon");
-        System.out.println("Success: "+succ1+ " " + succ);*/
 
         shared = getPreferences(Context.MODE_PRIVATE);
         sharedPreferences = shared;
@@ -284,15 +225,6 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("rate_answers", answers_before/20+1);
         editor.apply();
 
-
-        mailButton = findViewById(R.id.mailButton);
-        mailButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                InformationDialogue informationDialogue = new InformationDialogue();
-                informationDialogue.show(getSupportFragmentManager(), "TAG");
-            }
-        });
 
         //Code to get the JSON data
 
@@ -322,6 +254,61 @@ public class MainActivity extends AppCompatActivity {
 
         TelegramListener.mainActivity = this;
         TelegramListener.initialize();
+
+    }
+
+    public void activateButtons() {
+        //tutorial
+        tutorialBtn =(Button) findViewById(R.id.tutBtn);
+        tutorialBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDescription();
+            }
+        });
+
+        //favorites
+        favorite = findViewById(R.id.imageButton);
+        favorite.setOnClickListener((View view) -> {
+            Intent activityIntent = new Intent(this, FavoritesActivity.class);
+            startActivity(activityIntent);
+        });
+
+        //record
+        ImageView button = (ImageView) findViewById(R.id.recordBtn);
+        button.setOnClickListener( (View view) -> {
+            if(!isBusy) {
+                activeListeningThread = null;
+                activeListeningThread = new Thread(new Runnable() {
+                    public void run() {
+                        isBusy = true;
+                        handleUserCommands(false,0);
+                        isBusy = false;
+                        TelegramListener.playNextMessage(true);
+                        return;
+                    }
+                }, "Message Thread");
+                activeListeningThread.start();
+            }
+
+
+        });
+
+        // initiate a Switch
+        isActiveModeSwitch = (Switch) findViewById(R.id.switch1);
+
+        // check current state of a Switch (true or false).
+        isActiveMode = isActiveModeSwitch.isChecked();
+
+        //mail
+        mailButton = findViewById(R.id.mailButton);
+        mailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InformationDialogue informationDialogue = new InformationDialogue();
+                informationDialogue.show(getSupportFragmentManager(), "TAG");
+            }
+        });
     }
 
     public void openDescription() {

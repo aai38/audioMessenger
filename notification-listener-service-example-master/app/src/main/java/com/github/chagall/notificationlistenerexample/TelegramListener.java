@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -74,8 +75,7 @@ public class TelegramListener extends Service {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        getMainChatList(100);
-        getContacts();
+
         //dialog = new AlertDialog.Builder(mainActivity).create();
     }
 
@@ -381,8 +381,10 @@ public class TelegramListener extends Service {
         String person = contactList.get((long) message.senderUserId);
         String chat = contactList.get(message.chatId);
         if(person == null || chat == null || chat.equals("null") || person.equals("null")) {
+
             getMainChatList(100);
             getContacts();
+
             person = contactList.get((long) message.senderUserId);
             chat = contactList.get(message.chatId);
         }
@@ -460,11 +462,24 @@ public class TelegramListener extends Service {
         @Override
         public void onResult(TdApi.Object object) {
             switch (object.getConstructor()) {
+
+
                 case TdApi.UpdateNewMessage.CONSTRUCTOR:
+
                     TdApi.UpdateNewMessage updateNewMessage = (TdApi.UpdateNewMessage) object;
 
-
                     if(!updateNewMessage.message.isOutgoing) {
+                        Long id = updateNewMessage.message.chatId;
+                        if(chats.get(id) != null && contactList.get(id) == null) {
+                            boolean alreadyAdded = false;
+                            for (Long l : contactList.keySet()){
+                                alreadyAdded = id.equals(l);
+
+                            }
+                            if(!alreadyAdded) {
+                                contactList.put(id, Objects.requireNonNull(chats.get(id)).title);
+                            }
+                        }
                         handleNewMessage(updateNewMessage);
                     }
 
@@ -502,12 +517,28 @@ public class TelegramListener extends Service {
                     TdApi.UpdateNewChat updateNewChat = (TdApi.UpdateNewChat) object;
 
                     TdApi.Chat chat = updateNewChat.chat;
+
                     synchronized (chat) {
                         chats.put(chat.id, chat);
 
                         long order = chat.order;
                         chat.order = 0;
                         setChatOrder(chat, order);
+                        Long id = chat.id;
+                        if(chats.get(id) != null && contactList.get(id) == null) {
+                            boolean alreadyAdded = false;
+                            for (Long l : contactList.keySet()){
+                                alreadyAdded = id.equals(l);
+
+                            }
+                            if(!alreadyAdded) {
+
+                                contactList.put(id, Objects.requireNonNull(chats.get(id)).title);
+
+
+                            }
+                        }
+
                     }
                     break;
                 }
@@ -528,12 +559,25 @@ public class TelegramListener extends Service {
                     break;
                 }
                 case TdApi.UpdateChatChatList.CONSTRUCTOR: {
+
                     TdApi.UpdateChatChatList updateChat = (TdApi.UpdateChatChatList) object;
                     TdApi.Chat chat = chats.get(updateChat.chatId);
+
                     synchronized (mainChatList) { // to not change Chat.chatList while mainChatList is locked
                         synchronized (chat) {
                             assert chat.order == 0; // guaranteed by TDLib
                             chat.chatList = updateChat.chatList;
+                            Long id = updateChat.chatId;
+                            if(chats.get(id) != null && contactList.get(id) == null) {
+                                boolean alreadyAdded = false;
+                                for (Long l : contactList.keySet()){
+                                    alreadyAdded = id.equals(l);
+
+                                }
+                                if(!alreadyAdded) {
+                                    contactList.put(id, Objects.requireNonNull(chats.get(id)).title);
+                                }
+                            }
                         }
                     }
                     break;
@@ -551,7 +595,19 @@ public class TelegramListener extends Service {
                     TdApi.UpdateChatOrder updateChat = (TdApi.UpdateChatOrder) object;
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
+
                         setChatOrder(chat, updateChat.order);
+                        Long id = updateChat.chatId;
+                        if(chats.get(id) != null && contactList.get(id) == null) {
+                            boolean alreadyAdded = false;
+                            for (Long l : contactList.keySet()){
+                                alreadyAdded = id.equals(l);
+
+                            }
+                            if(!alreadyAdded) {
+                                contactList.put(id, Objects.requireNonNull(chats.get(id)).title);
+                            }
+                        }
                     }
                     break;
                 }
@@ -768,6 +824,7 @@ public class TelegramListener extends Service {
                 } finally {
                     authorizationLock.unlock();
                 }
+
                 break;
             case TdApi.AuthorizationStateLoggingOut.CONSTRUCTOR:
                 haveAuthorization = false;
@@ -803,6 +860,7 @@ public class TelegramListener extends Service {
     }
 
     private static void getMainChatList(final int limit) {
+
         final HashMap<Long,String> currentMap = new HashMap<>();
         synchronized (mainChatList) {
             if (!haveFullMainChatList && limit > mainChatList.size()) {
@@ -814,15 +872,17 @@ public class TelegramListener extends Service {
                     offsetOrder = last.order;
                     offsetChatId = last.chatId;
                 }
+                int chats_size = chats.size();
                 client.send(new TdApi.GetChats(new TdApi.ChatListMain(), offsetOrder, offsetChatId, limit - mainChatList.size()), new Client.ResultHandler() {
                     @Override
                     public void onResult(TdApi.Object object) {
                         switch (object.getConstructor()) {
                             case TdApi.Error.CONSTRUCTOR:
-                                //System.err.println("Receive an error for GetChats:" + newLine + object);
+
                                 break;
                             case TdApi.Chats.CONSTRUCTOR:
                                 long[] chatIds = ((TdApi.Chats) object).chatIds;
+
                                 if (chatIds.length == 0) {
                                     synchronized (mainChatList) {
                                         haveFullMainChatList = true;
@@ -837,30 +897,46 @@ public class TelegramListener extends Service {
                     }
                 });
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.SECONDS.sleep(2);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                }
+                for (Long l: chats.keySet()) {
+                    if(contactList.get(l) == null) {
+                        boolean alreadyAdded = false;
+                        for (Long le : contactList.keySet()){
+                            alreadyAdded = l.equals(le);
+
+                        }
+                        if(!alreadyAdded) {
+                            contactList.put(l, Objects.requireNonNull(chats.get(l)).title);
+                        }
+                    }
+
                 }
                 //return currentMap;
                 return;
             }
 
             // have enough chats in the chat list to answer request
-            java.util.Iterator<OrderedChat> iter = mainChatList.iterator();
-            System.out.println();
-            System.out.println("First " + limit + " chat(s) out of " + mainChatList.size() + " known chat(s):");
-            for (int i = 0; i < limit; i++) {
-                if(iter.hasNext()) {
-                    long chatId = iter.next().chatId;
-                    TdApi.Chat chat = chats.get(chatId);
-                    synchronized (chat) {
-                        currentMap.put(chatId, chat.title);
-                        contactList = currentMap;
-                    }
-                }
 
-            }
-            contactList = currentMap;
+                java.util.Iterator<OrderedChat> iter = mainChatList.iterator();
+                System.out.println();
+                System.out.println("First " + limit + " chat(s) out of " + mainChatList.size() + " known chat(s):");
+                for (int i = 0; i < limit; i++) {
+                    if(iter.hasNext()) {
+                        long chatId = iter.next().chatId;
+                        TdApi.Chat chat = chats.get(chatId);
+                        synchronized (chat) {
+                            currentMap.put(chatId, chat.title);
+                            contactList = currentMap;
+                        }
+                    }
+
+                }
+                contactList = currentMap;
+
+
         }
 
 
@@ -905,6 +981,7 @@ public class TelegramListener extends Service {
                     public void onClick(View v) {
                         code = inputCode.getText().toString();
                         mainActivity.setContentView(R.layout.activity_main);
+                        mainActivity.activateButtons();
                     }
                 });
             }
@@ -912,6 +989,11 @@ public class TelegramListener extends Service {
     }
 
     public static HashMap<Long, String> getContactList () {
+        if(contactList.isEmpty()) {
+            getContacts();
+            getMainChatList(100);
+        }
+
         return contactList;
     }
 }
