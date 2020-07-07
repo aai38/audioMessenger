@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.drinkless.td.libcore.telegram.Client;
 import org.drinkless.td.libcore.telegram.TdApi;
@@ -979,9 +980,15 @@ public class TelegramListener extends Service {
                 codeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        code = inputCode.getText().toString();
-                        mainActivity.setContentView(R.layout.activity_main);
-                        mainActivity.activateButtons();
+                        if(inputCode.getText().toString().isEmpty()){
+                            Toast.makeText(mainActivity, "Gib bitte einen Login Code ein.",
+                                    Toast.LENGTH_LONG).show();
+                        } else {
+                            code = inputCode.getText().toString();
+                            mainActivity.setContentView(R.layout.activity_main);
+                            mainActivity.activateButtons();
+                        }
+
                     }
                 });
 
