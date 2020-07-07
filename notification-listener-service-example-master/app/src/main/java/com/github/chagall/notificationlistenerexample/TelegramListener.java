@@ -985,13 +985,13 @@ public class TelegramListener extends Service {
                     }
                 });
 
-                Button requestNew = (Button) mainActivity.findViewById(R.id.requestNewCode);
+                /*Button requestNew = (Button) mainActivity.findViewById(R.id.requestNewCode);
                 requestNew.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
+                        //client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
                     }
-                });
+                });*/
             }
         });
     }
