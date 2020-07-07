@@ -23,8 +23,8 @@ public class MyIntro extends AppIntro {
 
         addSlide(AppIntroFragment.newInstance(
                 "Nachricht schreiben",
-                "Wenn du eine Nachricht schreiben möchtest, spreche das Wort 'Schreibe'. Im Anschluss kommt ein Signalton. " +
-                        "Nach dem Ton sprichst du deine gewünschte Nachricht ein. Anschließend kannst du den Kontakt via Sprachbefehl eingeben.",
+                "Um eine Nachricht zu schreiben, sag 'Schreibe'. Im Anschluss kommt ein Signalton. " +
+                        "Nach dem Ton sprichst du deine Nachricht ein. Anschließend kannst du den Kontakt via Sprachbefehl eingeben.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
 
@@ -43,7 +43,7 @@ public class MyIntro extends AppIntro {
 
         addSlide(AppIntroFragment.newInstance(
                 "Nachrichten beantworten",
-                "Nachdem dir die Nachricht eines Kontaktes vorgelesen wurde, hast du die Möglichkeit direkt darauf zu antworten. Dafür nennst du direkt nach der Ausgabe der Nachricht das Signalwort" +
+                "Nachdem dir die Nachricht eines Kontaktes vorgelesen wurde, kannst du direkt darauf antworten. Dafür sagst du direkt nach der Ausgabe der Nachricht" +
                         " 'Antworten'. Daraufhin wird ein Signalton ausgegeben, jetzt kannst du deine Antwort per Sprachbefehl eingeben.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
