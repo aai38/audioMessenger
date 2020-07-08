@@ -65,6 +65,7 @@ public class TelegramListener extends Service {
     private static AlertDialog dialog;
     private static ArrayList<ReceivedMessage> summarizedList = new ArrayList<>();
 
+    private static boolean authorizationError = false;
 
 
     public static void initialize() {
@@ -728,10 +729,15 @@ public class TelegramListener extends Service {
         public void onResult(TdApi.Object object) {
             switch (object.getConstructor()) {
                 case TdApi.Error.CONSTRUCTOR:
-                    //System.err.println("Receive an error:" + newLine + object);
+                    System.out.println("FEHLER BEI DER AUTORISIERUNG: "+object);
+                    authorizationError = true;
+                    Toast.makeText(mainActivity, "Fehler: "+object, Toast.LENGTH_LONG).show();
                     onAuthorizationStateUpdated(null); // repeat last action
                     break;
                 case TdApi.Ok.CONSTRUCTOR:
+                    System.out.println("AUTORISIERUNG GUT"+ object);
+                    authorizationError = false;
+                    Toast.makeText(mainActivity, "Erfolgreich", Toast.LENGTH_LONG).show();
                     // result is already received through UpdateAuthorizationState, nothing to do
                     break;
                 default:
@@ -803,7 +809,7 @@ public class TelegramListener extends Service {
             }
             case TdApi.AuthorizationStateWaitCode.CONSTRUCTOR: {
                 //String code = promptString("Please enter authentication code: ");
-                client.send(new TdApi.CheckAuthenticationCode(code), new AuthorizationRequestHandler());
+                //client.send(new TdApi.CheckAuthenticationCode(code), new AuthorizationRequestHandler());
                 break;
             }
             case TdApi.AuthorizationStateWaitRegistration.CONSTRUCTOR: {
@@ -978,33 +984,40 @@ public class TelegramListener extends Service {
                 } else {
                     phoneNumber = "+49"+input.getText().toString().replaceAll("\\s+",""); //remove whitespaces
                     client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
-                    mainActivity.setContentView(R.layout.authorization_login_code);
-                    EditText inputCode = (EditText) mainActivity.findViewById(R.id.loginCode);
-                    Button codeButton = (Button) mainActivity.findViewById(R.id.codeButton);
-                    codeButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if(inputCode.getText().toString().isEmpty()){
-                                Toast.makeText(mainActivity, "Gib bitte einen Login Code ein.",
-                                        Toast.LENGTH_LONG).show();
-                            } else {
-                                code = inputCode.getText().toString();
-                                mainActivity.setContentView(R.layout.activity_main);
-                                mainActivity.activateButtons();
-                            }
-
-                        }
-                    });
-                }
-
-
-                /*Button requestNew = (Button) mainActivity.findViewById(R.id.requestNewCode);
-                requestNew.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                });*/
+                    if(!authorizationError){ //no error
+                        mainActivity.setContentView(R.layout.authorization_login_code);
+                        EditText inputCode = (EditText) mainActivity.findViewById(R.id.loginCode);
+                        Button codeButton = (Button) mainActivity.findViewById(R.id.codeButton);
+                        codeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if(inputCode.getText().toString().isEmpty()){
+                                    Toast.makeText(mainActivity, "Gib bitte einen Login Code ein.",
+                                            Toast.LENGTH_LONG).show();
+                                } else {
+                                    code = inputCode.getText().toString();
+                                    client.send(new TdApi.CheckAuthenticationCode(code), new AuthorizationRequestHandler());
+                                    try {
+                                        TimeUnit.SECONDS.sleep(1);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    if(!authorizationError){
+                                        mainActivity.setContentView(R.layout.activity_main);
+                                        mainActivity.activateButtons();
+                                    }
+                                }
+
+                            }
+                        });
+                    }
+
+                }
             }
         });
     }
