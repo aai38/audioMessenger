@@ -498,13 +498,13 @@ public class MainActivity extends AppCompatActivity {
                     if (index == 2) {
                         Log.e("index before start", ""+index);
                         spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
-                        favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon2, 1);
+                        favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon_fav1, 1);
                     } else if (index == 3) {
                         spFavoriteTwo = new SoundPool(2, STREAM_MUSIC, 0);
-                        favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon3, 1);
+                        favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon_fav2, 1);
                     } else if (index == 4) {
                         spFavoriteThree = new SoundPool(2, STREAM_MUSIC, 0);
-                        favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon4, 1);
+                        favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon_fav3, 1);
                     }
                 }
 
@@ -560,13 +560,13 @@ public class MainActivity extends AppCompatActivity {
                             if (index == 2) {
                                 Log.e("index before start", ""+index);
                                 spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
-                                favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon2, 1);
+                                favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon_fav1, 1);
                             } else if (index == 3) {
                                 spFavoriteTwo = new SoundPool(2, STREAM_MUSIC, 0);
-                                favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon3, 1);
+                                favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon_fav2, 1);
                             } else if (index == 4) {
                                 spFavoriteThree = new SoundPool(2, STREAM_MUSIC, 0);
-                                favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon4, 1);
+                                favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon_fav3, 1);
                             }
                         }
                     }
@@ -630,13 +630,13 @@ public class MainActivity extends AppCompatActivity {
                             if (index == 2) {
                                 Log.e("index before start", ""+index);
                                 spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
-                                favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon2, 1);
+                                favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon_fav1, 1);
                             } else if (index == 3) {
                                 spFavoriteTwo = new SoundPool(2, STREAM_MUSIC, 0);
-                                favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon3, 1);
+                                favoriteTwoEarcon = spFavoriteTwo.load(getApplicationContext(), R.raw.earcon_fav2, 1);
                             } else if (index == 4) {
                                 spFavoriteThree = new SoundPool(2, STREAM_MUSIC, 0);
-                                favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon4, 1);
+                                favoriteThreeEarcon = spFavoriteThree.load(getApplicationContext(), R.raw.earcon_fav3, 1);
                             }
                         }
 
