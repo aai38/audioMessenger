@@ -50,7 +50,7 @@ public class MyIntro extends AppIntro {
 
         addSlide(AppIntroFragment.newInstance(
                 "Favoriten festlegen",
-                "Du kannst über das Stern-Icon deine Favoriten festlegen. Es öffnet sich eine Liste mit allen Kontakten, aus der du deine Favoriten wählen kannst.",
+                "Du kannst über das Stern-Icon einmalig 3 Favoriten festlegen. Es öffnet sich eine Liste mit allen Kontakten, aus der du deine 3 Favoriten wählen kannst.",
                 R.drawable.iconfinder_star_381628_large,
                 Color.parseColor("black")));
 
