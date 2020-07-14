@@ -727,7 +727,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        while(t1.isSpeaking()) {
+        while(t1.isSpeaking() || t2.isSpeaking() || t3.isSpeaking()) {
             //wait until message was played
         }
 
@@ -871,54 +871,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public static boolean confirmationCheck() {
 
-
-        SharedPreferences.Editor editor;
-        editor = sharedPreferences.edit();
-
-        micro.startRecording(3000);
-        while(micro.isRecording){
-            //wait until user has spoken his answer
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            ArrayList<Double> yesValues = new ArrayList<>();
-            yesValues.add(TelegramListener.similarity("ja",micro.result));
-            yesValues.add(TelegramListener.similarity("jap",micro.result));
-            yesValues.add(TelegramListener.similarity("joa",micro.result));
-            yesValues.add(TelegramListener.similarity("ihr",micro.result));
-            yesValues.add(TelegramListener.similarity("richtig",micro.result));
-            yesValues.add(TelegramListener.similarity("passt",micro.result));
-            yesValues.add(TelegramListener.similarity("yes",micro.result));
-            double yes = getMaxOfDoubles(yesValues);
-            ArrayList<Double> noValues = new ArrayList<>();
-            yesValues.add(TelegramListener.similarity("nein",micro.result));
-            yesValues.add(TelegramListener.similarity("no",micro.result));
-            yesValues.add(TelegramListener.similarity("nope",micro.result));
-            yesValues.add(TelegramListener.similarity("ne",micro.result));
-            yesValues.add(TelegramListener.similarity("falsch",micro.result));
-            double no = getMaxOfDoubles(noValues);
-            if(yes >= 0.6 && yes > no) {
-                micro.stopRecording();
-                sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
-                return true;
-            } else if(no >= 0.6){
-                micro.stopRecording();
-                sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
-                editor.putInt("number_falseContact", number_falseContact+1);
-                editor.apply();
-                return false;
-            }
-        }
-        micro.stopRecording();
-        sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
-        return false;
-
-
-    }
 
     private static double getMaxOfDoubles(ArrayList<Double> doubles){
         double max = 0;
@@ -983,6 +936,57 @@ public class MainActivity extends AppCompatActivity {
         return(alertDialogBuilder.create());
     }
 
+    public static boolean confirmationCheck() {
+
+
+        SharedPreferences.Editor editor;
+        editor = sharedPreferences.edit();
+        sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+        micro.startRecording(3000);
+        while(micro.isRecording){
+            //wait until user has spoken his answer
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            ArrayList<Double> yesValues = new ArrayList<>();
+            yesValues.add(TelegramListener.similarity("ja",micro.result));
+            yesValues.add(TelegramListener.similarity("ähm ja",micro.result));
+            yesValues.add(TelegramListener.similarity("ja ähm",micro.result));
+            yesValues.add(TelegramListener.similarity("jahr",micro.result));
+            yesValues.add(TelegramListener.similarity("jap",micro.result));
+            yesValues.add(TelegramListener.similarity("joa",micro.result));
+            yesValues.add(TelegramListener.similarity("ihr",micro.result));
+            yesValues.add(TelegramListener.similarity("richtig",micro.result));
+            yesValues.add(TelegramListener.similarity("passt",micro.result));
+            yesValues.add(TelegramListener.similarity("yes",micro.result));
+            double yes = getMaxOfDoubles(yesValues);
+            ArrayList<Double> noValues = new ArrayList<>();
+            noValues.add(TelegramListener.similarity("nein",micro.result));
+            noValues.add(TelegramListener.similarity("ähm nein",micro.result));
+            noValues.add(TelegramListener.similarity("no",micro.result));
+            noValues.add(TelegramListener.similarity("nope",micro.result));
+            noValues.add(TelegramListener.similarity("ne",micro.result));
+            noValues.add(TelegramListener.similarity("falsch",micro.result));
+            double no = getMaxOfDoubles(noValues);
+            if(yes >= 0.6 && yes > no) {
+                micro.stopRecording();
+                sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
+                return true;
+            } else if(no >= 0.6){
+                micro.stopRecording();
+                sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
+                return false;
+            }
+        }
+        micro.stopRecording();
+        sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
+        return false;
+
+
+    }
+
     public boolean checkKeyword(String phrase, int keywordIndex) {
 
         for (String s : phrase.split(" ")) {
@@ -996,17 +1000,27 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean verifyMessage(String message) {
         if(micro.result.equals("")) {
-            updateOutput("Du hast keinen Text eingesprochen, versuche es noch einmal.",false,0);
+            t1.speak("Du hast keinen Text eingesprochen, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
             sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             editor.putInt("number_error", number_error+1);
             editor.apply();
+            while(t1.isSpeaking()) {
+                //wait until message was played
+            }
             return false;
         } else {
-            updateOutput("Die Nachricht lautet: " + message + ". Ist dies richtig?", false,0);
+            t1.speak("Die Nachricht lautet: " + message + ". Ist dies richtig?",TextToSpeech.QUEUE_ADD,null);
+            while(t1.isSpeaking()) {
+                //wait until message was played
+            }
             if(confirmationCheck()) {
                 return true;
             } else {
-                updateOutput("Versuche es noch einmal.", false,0);
+                t1.speak("Spreche die Nachricht nochmal ein.",TextToSpeech.QUEUE_ADD,null);
+                while(t1.isSpeaking()) {
+                    //wait until message was played
+                }
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 return false;
             }
         }
@@ -1033,11 +1047,11 @@ public class MainActivity extends AppCompatActivity {
             sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             return "";
         }
-
-        if(!verifyMessage(micro.result)){
+        String msg = micro.result;
+        if(!verifyMessage(msg)){
             return inputMessage();
         } else {
-            return micro.result;
+            return msg;
         }
 
 
@@ -1047,27 +1061,39 @@ public class MainActivity extends AppCompatActivity {
     public long verifyContact(String contact) {
 
         if(contact.equals("")) {
-            updateOutput("Du hast keinen Kontakt eingesprochen, versuche es noch einmal.",false,0);
+            t1.speak("Du hast keinen Kontakt eingesprochen, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
             editor = shared.edit();
             editor.putInt("number_error", number_error+1);
             editor.apply();
             sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
+            while(t1.isSpeaking()) {
+                //wait until message was played
+            }
             return 0;
         }
         long id = TelegramListener.checkContacts(contact);
         if(id == 0){
-            updateOutput("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht, versuche es noch einmal.", false,0);
+            t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
             sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
             editor = shared.edit();
-            editor.putInt("number_error", number_error+1);
+            editor.putInt("number_falseContact", number_falseContact+1);
             editor.apply();
+            while(t1.isSpeaking()) {
+                //wait until message was played
+            }
             return 0;
         } else {
-            updateOutput("Die Nachricht wird an " + TelegramListener.getContactById(id) + " geschickt, ist dies richtig?", false,0);
+            t1.speak("Die Nachricht wird an " + TelegramListener.getContactById(id) + " geschickt, ist dies richtig?",TextToSpeech.QUEUE_ADD,null);
+            while(t1.isSpeaking() || t2.isSpeaking() || t3.isSpeaking()) {
+                //wait until message was played
+            }
             if(confirmationCheck()) {
                 return id;
             } else {
-                updateOutput("Versuche es noch einmal.", false,0);
+                t1.speak("Spreche den Kontakt nochmal ein.",TextToSpeech.QUEUE_ADD,null);
+                while(t1.isSpeaking()) {
+                    //wait until message was played
+                }
                 return 0;
             }
         }
@@ -1075,6 +1101,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public long chooseContact() {
+
         sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
         micro.startRecording(5000);
         while(micro.isRecording){
@@ -1103,6 +1130,10 @@ public class MainActivity extends AppCompatActivity {
     public void sendMessage (String message, long id){
 
         if(id == 0) {
+            t1.speak("Spreche den Kontakt ein.",TextToSpeech.QUEUE_ADD,null);
+            while(t1.isSpeaking()) {
+                //wait until message was played
+            }
             id = chooseContact();
             if(id == 0) {
                 return;
