@@ -88,17 +88,8 @@ public class TelegramListener extends Service {
         return null;
     }
 
-    public static void sendMessage(String msg, String name, long id) {
-        if(contactList.isEmpty()){
-            getMainChatList(100);
-            getContacts();
-        }
+    public static void sendMessage(String msg, long id) {
 
-
-        if(id == 0) {
-            id = checkContacts(name);
-        }
-        id = recheck(id, msg);
         System.out.println("SendMsg to:"+id+" "+contactList.get(id));
         System.out.println(msg);
 
@@ -106,11 +97,19 @@ public class TelegramListener extends Service {
             sendMessage(id,msg);
         }
 
-
     }
 
-    private static Long checkContacts(String name) {
+    public static String getContactById(long id) {
+        return contactList.get(id);
+    }
+
+
+    public static Long checkContacts(String name) {
         System.out.println("checkContacts name: "+name);
+        if(contactList.isEmpty()){
+            getMainChatList(100);
+            getContacts();
+        }
         Long result = 0L;
         double oldSimilarity = 0;
         for (Long id: contactList.keySet()) {
@@ -131,24 +130,7 @@ public class TelegramListener extends Service {
         return result;
     }
 
-    private static long recheck(long result, String msg){
-        if(result == 0){
-            MainActivity.t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht.", TextToSpeech.QUEUE_ADD,null);
-            MainActivity.sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
-            return 0;
-        } else {
-            MainActivity.t1.speak("Die Nachricht, " + msg +  ", wird an "+contactList.get(result)+" gesendet, ist dies richtig?", TextToSpeech.QUEUE_ADD,null);
-            while(MainActivity.t1.isSpeaking()){
 
-            }
-            MainActivity.sp.play(MainActivity.answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-            boolean confirmation = MainActivity.confirmationCheck();
-            if(!confirmation){
-                return 0;
-            }
-        }
-        return result;
-    }
 
 
     public static double similarity(String s1, String s2) {

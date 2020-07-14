@@ -807,33 +807,9 @@ public class MainActivity extends AppCompatActivity {
         editor = shared.edit();
         if(keyword == 0 && isReactionToNotification) {
 
-            micro.startRecording(5000);
-            while(micro.isRecording){
-                //wait until user has spoken his answer
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(micro.result.equals("")) {
-                editor.putInt("number_error", number_error+1);
-                editor.apply();
-                updateOutput("Du hast keinen Text eingesprochen, Funktion wird abgebrochen.",false,0);
-                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
-                return;
-            }
-            String point = micro.result.replaceAll("punkt", ".");
-            String comma = point.replaceAll("komma", ",");
-            String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
-            String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
-            micro.result = questionMark;
-            if(!(containsCancel(micro.result))){
-                TelegramListener.sendMessage(micro.result,"",chatID);
-            } else {
-                editor.putInt("number_error", number_error+1);
-                editor.apply();
-                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
+            String msg = inputMessage();
+            if(!msg.equals("")) {
+                sendMessage(msg, chatID);
             }
             isBusy = false;
             TelegramListener.playNextMessage(false);
@@ -852,39 +828,16 @@ public class MainActivity extends AppCompatActivity {
             if(!(containsCancel(micro.result))){
                 TelegramListener.playStoredMessagesFromContact(micro.result);
             } else {
-
                 sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             }
 
         } else if(keyword == 2) {
 
-            micro.startRecording(5000);
-            while(micro.isRecording){
-                //wait until user has spoken his answer
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            String msg = inputMessage();
+            if(!msg.equals("")) {
+                sendMessage(msg,0);
             }
-            if(micro.result.equals("")) {
-                updateOutput("Du hast keinen Text eingesprochen, Funktion wird abgebrochen.",false,0);
-                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
-                editor.putInt("number_error", number_error+1);
-                editor.apply();
-                return;
-            }
-            String point = micro.result.replaceAll("punkt", ".");
-            String comma = point.replaceAll("komma", ",");
-            String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
-            String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
-            micro.result = questionMark;
 
-            if(!(containsCancel(micro.result))){
-                sendMessage(micro.result);
-            } else {
-                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
-            }
 
         } else if(keyword == 3) {
             TelegramListener.playAllStoredMessages();
@@ -896,6 +849,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
 
     public void updateOutput(String text, boolean answerAllowed, long chatID) {
 
@@ -1039,8 +994,87 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    //send text message with given string
-    public void sendMessage (String message){
+    public boolean verifyMessage(String message) {
+        if(micro.result.equals("")) {
+            updateOutput("Du hast keinen Text eingesprochen, versuche es noch einmal.",false,0);
+            sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
+            editor.putInt("number_error", number_error+1);
+            editor.apply();
+            return false;
+        } else {
+            updateOutput("Die Nachricht lautet: " + message + ". Ist dies richtig?", false,0);
+            if(confirmationCheck()) {
+                return true;
+            } else {
+                updateOutput("Versuche es noch einmal.", false,0);
+                return false;
+            }
+        }
+    }
+
+    public String inputMessage() {
+        micro.startRecording(5000);
+        while(micro.isRecording){
+            //wait until user has spoken his answer
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        String point = micro.result.replaceAll("punkt", ".");
+        String comma = point.replaceAll("komma", ",");
+        String exclamationPoint = comma.replaceAll("ausrufezeichen", "!");
+        String questionMark = exclamationPoint.replaceAll("fragezeichen", "?");
+        micro.result = questionMark;
+
+        if(containsCancel(micro.result)){
+            sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
+            return "";
+        }
+
+        if(!verifyMessage(micro.result)){
+            return inputMessage();
+        } else {
+            return micro.result;
+        }
+
+
+
+    }
+
+    public long verifyContact(String contact) {
+
+        if(contact.equals("")) {
+            updateOutput("Du hast keinen Kontakt eingesprochen, versuche es noch einmal.",false,0);
+            editor = shared.edit();
+            editor.putInt("number_error", number_error+1);
+            editor.apply();
+            sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
+            return 0;
+        }
+        long id = TelegramListener.checkContacts(contact);
+        if(id == 0){
+            updateOutput("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht, versuche es noch einmal.", false,0);
+            sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
+            editor = shared.edit();
+            editor.putInt("number_error", number_error+1);
+            editor.apply();
+            return 0;
+        } else {
+            updateOutput("Die Nachricht wird an " + TelegramListener.getContactById(id) + " geschickt, ist dies richtig?", false,0);
+            if(confirmationCheck()) {
+                return id;
+            } else {
+                updateOutput("Versuche es noch einmal.", false,0);
+                return 0;
+            }
+        }
+
+    }
+
+    public long chooseContact() {
         sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
         micro.startRecording(5000);
         while(micro.isRecording){
@@ -1052,48 +1086,30 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         micro.stopRecording();
-        if(micro.result.equals("")) {
-            updateOutput("Du hast keinen Kontakt eingesprochen, Funktion wird abgebrochen.",false,0);
-            editor = shared.edit();
-            editor.putInt("number_error", number_error+1);
-            editor.apply();
-            sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
-            return;
+        if(containsCancel(micro.result)){
+            sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
+            return 0;
+        }
+        long id = verifyContact(micro.result);
+        if(id == 0) {
+            id = chooseContact();
         }
 
-        TelegramListener.sendMessage(message,micro.result,0);
+        return id;
 
-        /*Intent waIntent = new Intent(Intent.ACTION_SEND);
-        waIntent.setType("text/plain");
-        waIntent.setPackage("org.telegram.messenger");
-        if (waIntent != null) {
-            waIntent.putExtra(Intent.EXTRA_TEXT, message);//
-            startActivity(Intent.createChooser(waIntent, "Share with"));
+    }
+
+    //send text message with given string
+    public void sendMessage (String message, long id){
+
+        if(id == 0) {
+            id = chooseContact();
+            if(id == 0) {
+                return;
+            }
         }
-        else
-        {
-            Toast.makeText(getApplicationContext(), "Telegram is not installed", Toast.LENGTH_SHORT).show();
-        }*/
-        /*Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        //String url = "https://t.me/Naiggoo";
-        //sendIntent.setData(Uri.parse(url));
-        //sendIntent.putExtra(Intent.EXTRA_TEXT, message);
-        sendIntent.setPackage("org.telegram.messenger");
-        sendIntent.putExtra(Intent.EXTRA_EMAIL, "https://t.me/Naiggoo");
-        //sendIntent.putExtra(Intent.EXTRA_SUBJECT, "");
-        sendIntent.putExtra(Intent.EXTRA_STREAM, message);
-        startActivity(sendIntent);*/
-        /*try {
-            Intent telegram = new Intent(Intent.ACTION_SEND);
-            telegram.setData(Uri.parse("https://t.me/Naiggoo"));
-                    telegram.setPackage("org.telegram.messenger");
-                    telegram.putExtra(Intent.EXTRA_TEXT, message);
-            startActivity(telegram);
-        } catch (Exception e) {
-            Toast.makeText(this, "Telegram app is not installed", Toast.LENGTH_LONG).show();
-        }*/
 
+        TelegramListener.sendMessage(message,id);
     }
 
 
