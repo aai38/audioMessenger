@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.ibm.cloud.sdk.core.http.HttpMediaType;
@@ -281,6 +282,8 @@ public class MainActivity extends AppCompatActivity {
         ImageView button = (ImageView) findViewById(R.id.recordBtn);
         button.setOnClickListener( (View view) -> {
             if(!isBusy) {
+                showToastFeedback(5);
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 activeListeningThread = null;
                 activeListeningThread = new Thread(new Runnable() {
                     public void run() {
@@ -1157,5 +1160,32 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return false;
         }
+    }
+
+    public void showToastFeedback(int action){
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_LONG;
+        String text;
+        switch (action) {
+            case 0: //alle - PLAY
+                text = "Alle Nachrichten...";
+                break;
+            case 1: //antworten - NEXT
+                text = "Antworten...";
+                break;
+            case 2: //schreibe - PREVIOUS
+                text = "Schreiben...";
+                break;
+            case 3:
+                text = "Antworten nicht möglich. Keine letzte Nachricht vorhanden.";
+                break;
+            case 5: //record button clicked
+                text = "Mikrofon hört zu...";
+                break;
+            default:
+                text = "Momentan keine Aktion möglich.";
+                break;
+        }
+        Toast.makeText(context, text, duration).show();
     }
 }

@@ -10,8 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.Toast;
-import com.github.chagall.notificationlistenerexample.MainActivity;
 
 import static android.media.AudioManager.STREAM_MUSIC;
 
@@ -63,6 +61,7 @@ public final class HeadsetService extends Service {
                         switch (keyCode){
                             case KeyEvent.KEYCODE_MEDIA_PLAY:
                                 //alle
+                                mA.showToastFeedback(0);
                                 mA.reactToKeyword(3, false, 0);
                                 MainActivity.isBusy = false;
                                 TelegramListener.playNextMessage(true);
@@ -70,21 +69,27 @@ public final class HeadsetService extends Service {
                             case KeyEvent.KEYCODE_MEDIA_NEXT:
                                 //antworten
                                 spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-                                mA.reactToKeyword(0, true, TelegramListener.lastMessage.chatId);
-                                MainActivity.isBusy = false;
-                                TelegramListener.playNextMessage(true);
+                                if(TelegramListener.lastMessage == null){
+                                    mA.showToastFeedback(3);
+                                } else {
+                                    mA.showToastFeedback(1);
+                                    mA.reactToKeyword(0, true, TelegramListener.lastMessage.chatId);
+                                    MainActivity.isBusy = false;
+                                    TelegramListener.playNextMessage(true);
+                                }
                                 return true;
                             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
                                 //schreibe
                                 spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                                mA.showToastFeedback(2);
                                 mA.reactToKeyword(2, false, 0);
                                 MainActivity.isBusy = false;
                                 TelegramListener.playNextMessage(true);
                                 return true;
                         }
-
+                    } else {
+                        mA.showToastFeedback(4);
                     }
-
                 }
                 return super.onMediaButtonEvent(mediaButtonIntent);
             }
