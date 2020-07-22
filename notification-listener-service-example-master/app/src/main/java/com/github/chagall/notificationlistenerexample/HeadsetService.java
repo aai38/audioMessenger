@@ -17,11 +17,11 @@ import static android.media.AudioManager.STREAM_MUSIC;
 
 public final class HeadsetService extends Service {
     String TAG = "HeadsetService";
-    MainActivity m = new MainActivity();
     private int answerModeActiveEarcon;
     private SoundPool spool;
 
     private static MediaSession mediaSession;
+    public static MainActivity mA;
 
     @Override
     public void onCreate() {
@@ -63,21 +63,21 @@ public final class HeadsetService extends Service {
                         switch (keyCode){
                             case KeyEvent.KEYCODE_MEDIA_PLAY:
                                 //alle
-                                m.reactToKeyword(3, false,0);
+                                mA.reactToKeyword(3, false, 0);
                                 MainActivity.isBusy = false;
                                 TelegramListener.playNextMessage(true);
                                 return true;
                             case KeyEvent.KEYCODE_MEDIA_NEXT:
                                 //antworten
                                 spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-                                m.reactToKeyword(0, true, TelegramListener.lastMessage.chatId);
+                                mA.reactToKeyword(0, true, TelegramListener.lastMessage.chatId);
                                 MainActivity.isBusy = false;
                                 TelegramListener.playNextMessage(true);
                                 return true;
                             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
                                 //schreibe
                                 spool.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-                                m.reactToKeyword(2, false, 0);
+                                mA.reactToKeyword(2, false, 0);
                                 MainActivity.isBusy = false;
                                 TelegramListener.playNextMessage(true);
                                 return true;

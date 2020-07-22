@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         iniThread.start();
 
         //handle headset input
-        startService(new Intent(this, HeadsetService.class));
+        //startService(new Intent(this, HeadsetService.class));
 
 
 
@@ -255,6 +255,9 @@ public class MainActivity extends AppCompatActivity {
         TelegramListener.mainActivity = this;
         TelegramListener.initialize();
 
+        //handle headset input
+        HeadsetService.mA = this;
+        startService(new Intent(this, HeadsetService.class));
     }
 
     public void activateButtons() {
