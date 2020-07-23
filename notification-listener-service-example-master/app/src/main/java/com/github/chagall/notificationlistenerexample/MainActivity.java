@@ -738,6 +738,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(answerAllowed) {
+            sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
             handleUserCommands(true, chatID);
         }
 
@@ -753,7 +754,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public int listenToKeyword() {
-        micro.startRecording(3000);
+
+        micro.startRecording(4000);
         editor = shared.edit();
         //
         //setTextFromOtherThread("Warte 3s auf Schlüsselwort ...");
@@ -823,7 +825,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (keyword == 1) {
             //
 
-            micro.startRecording(3000);
+            micro.startRecording(20000);
             while (micro.isRecording) {
                 try {
                     Thread.sleep(10);
@@ -889,58 +891,8 @@ public class MainActivity extends AppCompatActivity {
         return max;
     }
 
-    /**
-     * Is Notification Service Enabled.
-     * Verifies if the notification listener service is enabled.
-     * Got it from: https://github.com/kpbird/NotificationListenerService-Example/blob/master/NLSExample/src/main/java/com/kpbird/nlsexample/NLService.java
-     * @return True if enabled, false otherwise.
-     */
-    private boolean isNotificationServiceEnabled(){
-        String pkgName = getPackageName();
-        final String flat = Settings.Secure.getString(getContentResolver(),
-                ENABLED_NOTIFICATION_LISTENERS);
-        if (!TextUtils.isEmpty(flat)) {
-            final String[] names = flat.split(":");
-            for (int i = 0; i < names.length; i++) {
-                final ComponentName cn = ComponentName.unflattenFromString(names[i]);
-                if (cn != null) {
-                    if (TextUtils.equals(pkgName, cn.getPackageName())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
 
 
-
-
-    /**
-     * Build Notification Listener Alert Dialog.
-     * Builds the alert dialog that pops up if the user has not turned
-     * the Notification Listener Service on yet.
-     * @return An alert dialog which leads to the notification enabling screen
-     */
-    private AlertDialog buildNotificationServiceAlertDialog(){
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle(R.string.notification_listener_service);
-        alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
-        alertDialogBuilder.setPositiveButton(R.string.yes,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        startActivity(new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS));
-                    }
-                });
-        alertDialogBuilder.setNegativeButton(R.string.no,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // If you choose to not enable the notification listener
-                        // the app. will not work as expected
-                    }
-                });
-        return(alertDialogBuilder.create());
-    }
 
     public static boolean confirmationCheck() {
 
@@ -964,6 +916,7 @@ public class MainActivity extends AppCompatActivity {
             yesValues.add(TelegramListener.similarity("jap",micro.result));
             yesValues.add(TelegramListener.similarity("joa",micro.result));
             yesValues.add(TelegramListener.similarity("ihr",micro.result));
+            yesValues.add(TelegramListener.similarity("wir",micro.result));
             yesValues.add(TelegramListener.similarity("richtig",micro.result));
             yesValues.add(TelegramListener.similarity("passt",micro.result));
             yesValues.add(TelegramListener.similarity("yes",micro.result));
@@ -976,7 +929,7 @@ public class MainActivity extends AppCompatActivity {
             noValues.add(TelegramListener.similarity("ne",micro.result));
             noValues.add(TelegramListener.similarity("falsch",micro.result));
             double no = getMaxOfDoubles(noValues);
-            if(yes >= 0.6 && yes > no) {
+            if((yes >= 0.6 && yes > no) || micro.result.contains("ja")) {
                 micro.stopRecording();
                 sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
                 return true;
@@ -1033,7 +986,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String inputMessage() {
-        micro.startRecording(5000);
+        micro.startRecording(20000);
         while(micro.isRecording){
             //wait until user has spoken his answer
             try {
@@ -1109,7 +1062,7 @@ public class MainActivity extends AppCompatActivity {
     public long chooseContact() {
 
         sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-        micro.startRecording(5000);
+        micro.startRecording(8000);
         while(micro.isRecording){
             //wait until user has spoken his answer
             try {

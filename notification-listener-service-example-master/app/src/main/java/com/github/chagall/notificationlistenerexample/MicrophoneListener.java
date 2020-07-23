@@ -135,7 +135,7 @@ public class MicrophoneListener {
 
                 bData = short2byte(sData);
                 os.write(bData);
-                if(System.currentTimeMillis() - time > 3000){
+                if(System.currentTimeMillis() - time > 2800){
                     send = true;
                     time = System.currentTimeMillis();
                 }
@@ -216,7 +216,7 @@ public class MicrophoneListener {
 
                         System.out.println(result);
 
-                        if (done) {
+                        if (done || System.currentTimeMillis() - startTime > minTimeout) {
 
                             stopRecording();
                             return;

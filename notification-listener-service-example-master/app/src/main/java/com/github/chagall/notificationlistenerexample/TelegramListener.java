@@ -707,6 +707,7 @@ public class TelegramListener extends Service {
     }
 
     private static class AuthorizationRequestHandler implements Client.ResultHandler {
+        boolean authorized = false;
         @Override
         public void onResult(TdApi.Object object) {
             switch (object.getConstructor()) {
@@ -714,12 +715,16 @@ public class TelegramListener extends Service {
                     System.out.println("FEHLER BEI DER AUTORISIERUNG: "+object);
                     authorizationError = true;
                     Toast.makeText(mainActivity, "Fehler: "+object, Toast.LENGTH_LONG).show();
-                    onAuthorizationStateUpdated(null); // repeat last action
+                    if(!authorized) {
+                        onAuthorizationStateUpdated(null); // repeat last action
+                    }
+
                     break;
                 case TdApi.Ok.CONSTRUCTOR:
                     System.out.println("AUTORISIERUNG GUT"+ object);
                     authorizationError = false;
                     Toast.makeText(mainActivity, "Erfolgreich", Toast.LENGTH_LONG).show();
+                    authorized = true;
                     // result is already received through UpdateAuthorizationState, nothing to do
                     break;
                 default:
@@ -847,87 +852,93 @@ public class TelegramListener extends Service {
         currentPrompt = null;
         return str;
     }
-
+    private static int counter = 10;
     private static void getMainChatList(final int limit) {
+       if(counter > 0) {
+           final HashMap<Long, String> currentMap = new HashMap<>();
+           synchronized (mainChatList) {
 
-        final HashMap<Long,String> currentMap = new HashMap<>();
-        synchronized (mainChatList) {
-            if (!haveFullMainChatList && limit > mainChatList.size()) {
-                // have enough chats in the chat list or chat list is too small
-                long offsetOrder = Long.MAX_VALUE;
-                long offsetChatId = 0;
-                if (!mainChatList.isEmpty()) {
-                    OrderedChat last = mainChatList.last();
-                    offsetOrder = last.order;
-                    offsetChatId = last.chatId;
-                }
-                int chats_size = chats.size();
-                client.send(new TdApi.GetChats(new TdApi.ChatListMain(), offsetOrder, offsetChatId, limit - mainChatList.size()), new Client.ResultHandler() {
-                    @Override
-                    public void onResult(TdApi.Object object) {
-                        switch (object.getConstructor()) {
-                            case TdApi.Error.CONSTRUCTOR:
+               if (!haveFullMainChatList && limit > mainChatList.size()) {
+                   // have enough chats in the chat list or chat list is too small
+                   long offsetOrder = Long.MAX_VALUE;
+                   long offsetChatId = 0;
+                   if (!mainChatList.isEmpty()) {
+                       OrderedChat last = mainChatList.last();
+                       offsetOrder = last.order;
+                       offsetChatId = last.chatId;
+                   }
+                   int chats_size = chats.size();
 
-                                break;
-                            case TdApi.Chats.CONSTRUCTOR:
-                                long[] chatIds = ((TdApi.Chats) object).chatIds;
+                   client.send(new TdApi.GetChats(new TdApi.ChatListMain(), offsetOrder, offsetChatId, limit - mainChatList.size()), new Client.ResultHandler() {
+                       @Override
+                       public void onResult(TdApi.Object object) {
+                           switch (object.getConstructor()) {
+                               case TdApi.Error.CONSTRUCTOR:
 
-                                if (chatIds.length == 0) {
-                                    synchronized (mainChatList) {
-                                        haveFullMainChatList = true;
-                                    }
-                                }
-                                // chats had already been received through updates, let's retry request
-                                getMainChatList(limit);
-                                break;
-                            default:
-                                //System.err.println("Receive wrong response from TDLib:" + newLine + object);
-                        }
-                    }
-                });
-                try {
-                    TimeUnit.SECONDS.sleep(2);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                for (Long l: chats.keySet()) {
-                    if(contactList.get(l) == null) {
-                        boolean alreadyAdded = false;
-                        for (Long le : contactList.keySet()){
-                            alreadyAdded = l.equals(le);
+                                   break;
+                               case TdApi.Chats.CONSTRUCTOR:
+                                   long[] chatIds = ((TdApi.Chats) object).chatIds;
 
-                        }
-                        if(!alreadyAdded) {
-                            contactList.put(l, Objects.requireNonNull(chats.get(l)).title);
-                        }
-                    }
+                                   if (chatIds.length == 0) {
+                                       synchronized (mainChatList) {
+                                           haveFullMainChatList = true;
+                                       }
+                                   }
+                                   // chats had already been received through updates, let's retry request
 
-                }
-                //return currentMap;
-                return;
-            }
+                                   getMainChatList(limit);
+                                   counter--;
+                                   break;
+                               default:
+                                   //System.err.println("Receive wrong response from TDLib:" + newLine + object);
+                           }
+                       }
+                   });
+                   try {
+                       TimeUnit.SECONDS.sleep(2);
+                   } catch (InterruptedException e) {
+                       e.printStackTrace();
+                   }
+                   for (Long l : chats.keySet()) {
+                       if (contactList.get(l) == null) {
+                           boolean alreadyAdded = false;
+                           for (Long le : contactList.keySet()) {
+                               alreadyAdded = l.equals(le);
 
-            // have enough chats in the chat list to answer request
+                           }
+                           if (!alreadyAdded) {
+                               contactList.put(l, Objects.requireNonNull(chats.get(l)).title);
+                           }
+                       }
 
-                java.util.Iterator<OrderedChat> iter = mainChatList.iterator();
-                System.out.println();
-                System.out.println("First " + limit + " chat(s) out of " + mainChatList.size() + " known chat(s):");
-                for (int i = 0; i < limit; i++) {
-                    if(iter.hasNext()) {
-                        long chatId = iter.next().chatId;
-                        TdApi.Chat chat = chats.get(chatId);
-                        synchronized (chat) {
-                            currentMap.put(chatId, chat.title);
-                            contactList = currentMap;
-                        }
-                    }
+                   }
+                   //return currentMap;
+                   return;
+               }
 
-                }
-                contactList = currentMap;
+               // have enough chats in the chat list to answer request
+
+               java.util.Iterator<OrderedChat> iter = mainChatList.iterator();
+               System.out.println();
+               System.out.println("First " + limit + " chat(s) out of " + mainChatList.size() + " known chat(s):");
+               for (int i = 0; i < limit; i++) {
+                   if (iter.hasNext()) {
+                       long chatId = iter.next().chatId;
+                       TdApi.Chat chat = chats.get(chatId);
+                       synchronized (chat) {
+                           currentMap.put(chatId, chat.title);
+                           contactList = currentMap;
+                       }
+                   }
+
+               }
+               contactList = currentMap;
 
 
-        }
-
+           }
+       } else {
+           counter = 10;
+       }
 
     }
 
