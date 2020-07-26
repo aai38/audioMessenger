@@ -138,6 +138,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Button tutorialBtn;
 
+    private AudioManager am;
+    private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,10 +165,6 @@ public class MainActivity extends AppCompatActivity {
         }, "Initialization Thread");
         iniThread.start();
 
-        //handle headset input
-        //startService(new Intent(this, HeadsetService.class));
-
-
 
         // Record to the external cache directory for visibility
         fileName = getFilesDir()+"/speak.pcm";
@@ -178,7 +177,9 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction("com.github.chagall.notificationlistenerexample");
         registerReceiver(broadcastReceiver,intentFilter);
 
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        requestAudioFocus();
+        //initializeAudioFocus();
         am.setStreamVolume(STREAM_MUSIC, 15, 0);
         t1 = new TextToSpeech(getApplicationContext(), (status) -> {
             if(status != TextToSpeech.ERROR) {
@@ -249,6 +250,9 @@ public class MainActivity extends AppCompatActivity {
 
         Log.e("favorites", favorites.toString());
 
+        //handle headset input
+        HeadsetService.mA = this;
+        startService(new Intent(this, HeadsetService.class));
 
 
         //Telegram
@@ -256,9 +260,6 @@ public class MainActivity extends AppCompatActivity {
         TelegramListener.mainActivity = this;
         TelegramListener.initialize();
 
-        //handle headset input
-        HeadsetService.mA = this;
-        startService(new Intent(this, HeadsetService.class));
     }
 
     public void activateButtons() {
@@ -1140,5 +1141,62 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         Toast.makeText(context, text, duration).show();
+    }
+
+    /*private void initializeAudioFocus(){
+        String TAG = "AUDIOFOCUS";
+        mOnAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+
+            @Override
+            public void onAudioFocusChange(int focusChange) {
+                switch (focusChange) {
+                    case AudioManager.AUDIOFOCUS_GAIN:
+                        Log.i(TAG, "AUDIOFOCUS_GAIN");
+                        //requestAudioFocus();
+                        break;
+                    case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
+                        Log.i(TAG, "AUDIOFOCUS_GAIN_TRANSIENT");
+                        break;
+                    case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
+                        Log.i(TAG, "AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK");
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                        Log.e(TAG, "AUDIOFOCUS_LOSS");
+                        //pause();
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                        Log.e(TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
+                        //pause();
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                        Log.e(TAG, "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+                        break;
+                    case AudioManager.AUDIOFOCUS_REQUEST_FAILED:
+                        Log.e(TAG, "AUDIOFOCUS_REQUEST_FAILED");
+                        break;
+                    default:
+                        //
+                }
+            }
+        };
+    }*/
+
+    public boolean requestAudioFocus(){
+        String TAG = "AUDIOFOCUS";
+        int result = am.requestAudioFocus(mOnAudioFocusChangeListener,
+                // Use the music stream.
+                AudioManager.STREAM_MUSIC,
+                // Request permanent focus.
+                AudioManager.AUDIOFOCUS_GAIN);
+
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            Log.i(TAG, "Request granted");
+
+            return true;
+        } else {
+            // FAILED
+            Log.e(TAG,">>>>>>>>>>>>> FAILED TO GET AUDIO FOCUS <<<<<<<<<<<<<<<<<<<<<<<<");
+            return false;
+        }
     }
 }

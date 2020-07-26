@@ -56,7 +56,7 @@ public final class HeadsetService extends Service {
                 if (ke != null && ke.getAction() == KeyEvent.ACTION_DOWN) {
                     int keyCode = ke.getKeyCode();
                     Log.d(TAG, "onMediaButtonEvent Received command: " + ke);
-                    if(!MainActivity.isBusy) {
+                    if(!MainActivity.isBusy && mA.requestAudioFocus()) {
                         MainActivity.isBusy = true;
                         switch (keyCode){
                             case KeyEvent.KEYCODE_MEDIA_PLAY:
