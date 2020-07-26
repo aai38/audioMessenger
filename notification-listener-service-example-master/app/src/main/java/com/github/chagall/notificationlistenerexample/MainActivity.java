@@ -909,7 +909,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            ArrayList<Double> yesValues = new ArrayList<>();
+            /*ArrayList<Double> yesValues = new ArrayList<>();
             yesValues.add(TelegramListener.similarity("ja",micro.result));
             yesValues.add(TelegramListener.similarity("ähm ja",micro.result));
             yesValues.add(TelegramListener.similarity("ja ähm",micro.result));
@@ -929,6 +929,7 @@ public class MainActivity extends AppCompatActivity {
             noValues.add(TelegramListener.similarity("nope",micro.result));
             noValues.add(TelegramListener.similarity("ne",micro.result));
             noValues.add(TelegramListener.similarity("falsch",micro.result));
+            noValues.add(TelegramListener.similarity("abbruch", micro.result));
             double no = getMaxOfDoubles(noValues);
             if((yes >= 0.6 && yes > no) || micro.result.contains("ja")) {
                 micro.stopRecording();
@@ -938,6 +939,15 @@ public class MainActivity extends AppCompatActivity {
                 micro.stopRecording();
                 sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
                 return false;
+            }*/
+            if(micro.result.contains("abbruch")){
+                micro.stopRecording();
+                sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
+                return false;
+            } else {
+                micro.stopRecording();
+                sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
+                return true;
             }
         }
         micro.stopRecording();
@@ -969,7 +979,7 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         } else {
-            t1.speak("Die Nachricht lautet: " + message + ". Ist dies richtig?",TextToSpeech.QUEUE_ADD,null);
+            t1.speak("Die Nachricht lautet: " + message + ".",TextToSpeech.QUEUE_ADD,null);
             while(t1.isSpeaking()) {
                 //wait until message was played
             }
@@ -1043,7 +1053,7 @@ public class MainActivity extends AppCompatActivity {
             }
             return 0;
         } else {
-            t1.speak("Die Nachricht wird an " + TelegramListener.getContactById(id) + " geschickt, ist dies richtig?",TextToSpeech.QUEUE_ADD,null);
+            t1.speak("Die Nachricht wird an " + TelegramListener.getContactById(id) + " geschickt.",TextToSpeech.QUEUE_ADD,null);
             while(t1.isSpeaking() || t2.isSpeaking() || t3.isSpeaking()) {
                 //wait until message was played
             }
