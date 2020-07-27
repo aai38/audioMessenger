@@ -30,6 +30,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.ibm.cloud.sdk.core.http.HttpMediaType;
 import com.ibm.cloud.sdk.core.security.IamAuthenticator;
 import com.ibm.cloud.sdk.core.service.exception.BadRequestException;
@@ -48,14 +50,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import HelperClasses.NotificationBroadcastReceiver;
 
 import static android.media.AudioManager.*;
 import static java.lang.String.valueOf;
@@ -69,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView interceptedNotificationImageView;
     private static TextView view;
-    public static NotificationBroadcastReceiver broadcastReceiver;
     private AlertDialog enableNotificationListenerAlertDialog;
     private Button play;
 
@@ -109,9 +109,9 @@ public class MainActivity extends AppCompatActivity {
     public static boolean isSamePerson = false;
     public String bufferedAnswer = "";
 
-    private SharedPreferences shared;
-    private SharedPreferences.Editor editor;
-    private static SharedPreferences sharedPreferences;
+    public SharedPreferences shared;
+    public SharedPreferences.Editor editor;
+    public static SharedPreferences sharedPreferences;
     private ImageButton favorite;
     public static boolean isBusy = false;
 
@@ -171,11 +171,7 @@ public class MainActivity extends AppCompatActivity {
         micro = new MicrophoneListener(fileName);
 
 
-        // Finally we register a receiver to tell the MainActivity when a notification has been received
-        broadcastReceiver = new NotificationBroadcastReceiver(this);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.github.chagall.notificationlistenerexample");
-        registerReceiver(broadcastReceiver,intentFilter);
+
 
         am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         requestAudioFocus();
@@ -259,6 +255,13 @@ public class MainActivity extends AppCompatActivity {
 
         TelegramListener.mainActivity = this;
         TelegramListener.initialize();
+        Gson gson = new Gson();
+        String json = shared.getString("failCalls", "");
+        if(json != "") {
+            Type type = new TypeToken<List<FailContactCalls>>(){}.getType();
+            TelegramListener.failCalls  = gson.fromJson(json, type);
+        }
+
 
     }
 
@@ -274,9 +277,11 @@ public class MainActivity extends AppCompatActivity {
 
         //favorites
         favorite = findViewById(R.id.imageButton);
-        favorite.setOnClickListener((View view) -> {
-            Intent activityIntent = new Intent(this, FavoritesActivity.class);
-            startActivity(activityIntent);
+        favorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFavorites();
+            }
         });
 
         //record
@@ -320,6 +325,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void openDescription() {
         Intent intent = new Intent(this, MyIntro.class);
+        startActivity(intent);
+    }
+
+    public void openFavorites() {
+        Intent intent = new Intent(this, FavoritesActivity.class);
+        startActivity(intent);
+    }
+
+    public void openChooseContact(String msg){
+        Intent intent = new Intent(this, ChooseContactActivity.class);
+        intent.putExtra("msg", msg);
         startActivity(intent);
     }
 
@@ -746,20 +762,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setTextFromOtherThread(String s) {
-        view.post(new Runnable() {
-            public void run() {
-                view.setText(s);
-            }
-        });
-    }
 
     public int listenToKeyword() {
 
         micro.startRecording(4000);
         editor = shared.edit();
-        //
-        //setTextFromOtherThread("Warte 3s auf Schlüsselwort ...");
+
         while(micro.isRecording) {
             //wait until a keyword was spoken
 
@@ -921,7 +929,7 @@ public class MainActivity extends AppCompatActivity {
             yesValues.add(TelegramListener.similarity("richtig",micro.result));
             yesValues.add(TelegramListener.similarity("passt",micro.result));
             yesValues.add(TelegramListener.similarity("yes",micro.result));
-            double yes = getMaxOfDoubles(yesValues);
+            double yes = getMaxOfDoubles(yesValues);*/
             ArrayList<Double> noValues = new ArrayList<>();
             noValues.add(TelegramListener.similarity("nein",micro.result));
             noValues.add(TelegramListener.similarity("ähm nein",micro.result));
@@ -931,28 +939,23 @@ public class MainActivity extends AppCompatActivity {
             noValues.add(TelegramListener.similarity("falsch",micro.result));
             noValues.add(TelegramListener.similarity("abbruch", micro.result));
             double no = getMaxOfDoubles(noValues);
-            if((yes >= 0.6 && yes > no) || micro.result.contains("ja")) {
+            if(no >= 0.6) {
                 micro.stopRecording();
-                sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
-                return true;
-            } else if(no >= 0.6){
-                micro.stopRecording();
-                sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
+                sp.play(errorEarcon, 0.3f, 0.3f, 0, 0, 1.5f);
                 return false;
-            }*/
-            if(micro.result.contains("abbruch")){
-                micro.stopRecording();
-                sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
-                return false;
-            } else {
-                micro.stopRecording();
-                sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
-                return true;
             }
+
         }
-        micro.stopRecording();
-        sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
-        return false;
+        if(micro.result.contains("abbruch") || micro.result.contains("nein") || micro.result.contains("stop") || micro.result.contains("falsch")){
+            micro.stopRecording();
+            sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
+            return false;
+        } else {
+            micro.stopRecording();
+            sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
+            return true;
+        }
+
 
 
     }
@@ -1028,7 +1031,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public long verifyContact(String contact) {
+    private int countFails = 0;
+
+    public long verifyContact(String contact, FailContactCalls failCalls) {
 
         if(contact.equals("")) {
             t1.speak("Du hast keinen Kontakt eingesprochen, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
@@ -1043,6 +1048,20 @@ public class MainActivity extends AppCompatActivity {
         }
         long id = TelegramListener.checkContacts(contact);
         if(id == 0){
+            if(failCalls.fail1.equals("")) {
+                failCalls.fail1 = contact;
+            } else if(failCalls.fail2.equals("")) {
+                failCalls.fail2 = contact;
+            } else if(failCalls.fail3.equals("")) {
+                failCalls.fail3 = contact;
+                t1.speak("Wähle den Kontakt bitte per Hand aus.",TextToSpeech.QUEUE_ADD,null);
+            }
+            countFails++;
+            if(countFails == 3) {
+                countFails = 0;
+                return -1;
+            }
+
             t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
             sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
             editor = shared.edit();
@@ -1058,8 +1077,22 @@ public class MainActivity extends AppCompatActivity {
                 //wait until message was played
             }
             if(confirmationCheck()) {
+                countFails = 0;
                 return id;
             } else {
+                if(failCalls.fail1.equals("")) {
+                    failCalls.fail1 = contact;
+                } else if(failCalls.fail2.equals("")) {
+                    failCalls.fail2 = contact;
+                } else if(failCalls.fail3.equals("")) {
+                    failCalls.fail3 = contact;
+                    t1.speak("Wähle den Kontakt bitte per Hand aus.",TextToSpeech.QUEUE_ADD,null);
+                }
+                countFails++;
+                if(countFails == 3) {
+                    countFails = 0;
+                    return -1;
+                }
                 t1.speak("Spreche den Kontakt nochmal ein.",TextToSpeech.QUEUE_ADD,null);
                 while(t1.isSpeaking()) {
                     //wait until message was played
@@ -1070,7 +1103,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public long chooseContact() {
+    public long chooseContact(FailContactCalls failCalls) {
 
         sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
         micro.startRecording(8000);
@@ -1087,9 +1120,9 @@ public class MainActivity extends AppCompatActivity {
             sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             return 0;
         }
-        long id = verifyContact(micro.result);
+        long id = verifyContact(micro.result, failCalls);
         if(id == 0) {
-            id = chooseContact();
+            id = chooseContact(failCalls);
         }
 
         return id;
@@ -1098,19 +1131,25 @@ public class MainActivity extends AppCompatActivity {
 
     //send text message with given string
     public void sendMessage (String message, long id){
-
+        FailContactCalls failCalls = new FailContactCalls();
         if(id == 0) {
             t1.speak("Spreche den Kontakt ein.",TextToSpeech.QUEUE_ADD,null);
             while(t1.isSpeaking()) {
                 //wait until message was played
             }
-            id = chooseContact();
+
+            id = chooseContact(failCalls);
             if(id == 0) {
                 return;
             }
         }
+        if(id == -1) {
+            openChooseContact(message);
+            TelegramListener.failCalls.add(failCalls);
+        } else {
+            TelegramListener.sendMessage(message,id);
+        }
 
-        TelegramListener.sendMessage(message,id);
     }
 
 

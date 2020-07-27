@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -12,6 +14,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
 
 import org.drinkless.td.libcore.telegram.Client;
 import org.drinkless.td.libcore.telegram.TdApi;
@@ -60,6 +64,7 @@ public class TelegramListener extends Service {
 
 
     private static HashMap<Long, String> contactList = new HashMap<>();;
+    public static ArrayList<FailContactCalls> failCalls = new ArrayList<>();
     public static ArrayList<TdApi.Message> newMessages = new ArrayList<>();
     public static TdApi.Message lastMessage = null;
     private static AlertDialog dialog;
@@ -86,6 +91,25 @@ public class TelegramListener extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public static void updateFailCalls(long id) {
+        FailContactCalls f = null;
+        for (int i =0; i < failCalls.size(); i++) {
+            if(failCalls.get(i).id == id) {
+                f = failCalls.get(i);
+            }
+        }
+        failCalls.remove(f);
+        failCalls.get(failCalls.size()-1).id = id;
+
+
+        mainActivity.editor =  mainActivity.shared.edit();
+        Gson gson = new Gson();
+
+        String jsonFailCalls = gson.toJson(failCalls);
+        mainActivity.editor.putString("failCalls", jsonFailCalls);
+        mainActivity.editor.apply();
     }
 
     public static void sendMessage(String msg, long id) {
@@ -124,6 +148,26 @@ public class TelegramListener extends Service {
             }
 
 
+        }
+        for (FailContactCalls f: failCalls) {
+            if(name.equals(f.fail1) || name.equals(f.fail2) || name.equals(f.fail3)) {
+                return f.id;
+            }
+            double similarity = similarity(name,f.fail1);
+            if(similarity > 0.3 && similarity > oldSimilarity) {
+                oldSimilarity = similarity;
+                result = f.id;
+            }
+            similarity = similarity(name,f.fail2);
+            if(similarity > 0.3 && similarity > oldSimilarity) {
+                oldSimilarity = similarity;
+                result = f.id;
+            }
+            similarity = similarity(name,f.fail3);
+            if(similarity > 0.3 && similarity > oldSimilarity) {
+                oldSimilarity = similarity;
+                result = f.id;
+            }
         }
 
         System.out.println(contactList.get(result));

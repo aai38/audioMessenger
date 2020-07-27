@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
-public class CustomAdapter  extends ArrayAdapter<Contact> implements View.OnClickListener {
+public class CustomAdapter extends ArrayAdapter<Contact> implements View.OnClickListener {
 
         private Context context;
         public static ArrayList<Contact> modelArrayList;

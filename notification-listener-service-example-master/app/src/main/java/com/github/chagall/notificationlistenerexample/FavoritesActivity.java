@@ -36,6 +36,7 @@ public class FavoritesActivity extends AppCompatActivity {
         back = findViewById(R.id.backButton);
         back.setOnClickListener((View view) -> {
             Intent backIntent = new Intent(this, MainActivity.class);
+            backIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(backIntent);
         });
 
