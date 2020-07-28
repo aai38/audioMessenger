@@ -235,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject jObj = jsonArray.getJSONObject(i);
                     String name = jObj.getString("name");
                     favorites.add(name);
-                    Log.e("name", name);
                 }
 
 
@@ -244,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Log.e("favorites", favorites.toString());
 
         //handle headset input
         HeadsetService.mA = this;
@@ -502,7 +500,6 @@ public class MainActivity extends AppCompatActivity {
                 output[2] = withoutBeginning.split("§")[1];
 
                 //its possible that output[1] contains "in <group>"
-                Log.e("favorites", favorites.toString());
                 String p;
                 if(output[1].contains("in")){
                     p = output[1].split(" ")[0];
@@ -510,7 +507,6 @@ public class MainActivity extends AppCompatActivity {
                     p = output[1];
                 }
                 if(favorites.contains(p)) {
-                    Log.e("favorite in", p + favorites.get(0));
                     int index = 0;
                     for (int i = 0; i < favorites.size(); i++) {
                         if (favorites.get(i).equals(p)) {
@@ -519,7 +515,6 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if (index == 2) {
-                        Log.e("index before start", ""+index);
                         spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
                         favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon_fav1, 1);
                     } else if (index == 3) {
@@ -568,11 +563,9 @@ public class MainActivity extends AppCompatActivity {
                     output[2] = ""; //no msg
 
                     //create person Array and search for favorites
-                    Log.e("favorites", favorites.toString());
                     String[] personArray = personList.split(" ");
                     for(String person : personArray){
                         if(favorites.contains(person)) {
-                            Log.e("favorite in", person + favorites.get(0));
                             int index = 0;
                             for (int i = 0; i < favorites.size(); i++) {
                                 if (favorites.get(i).equals(person)) {
@@ -581,7 +574,6 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             if (index == 2) {
-                                Log.e("index before start", ""+index);
                                 spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
                                 favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon_fav1, 1);
                             } else if (index == 3) {
@@ -639,10 +631,8 @@ public class MainActivity extends AppCompatActivity {
                         output[1] = key; //person
                         output[2] = personMessage.get(key); //message
 
-                        Log.e("favorites", favorites.toString());
 
                         if(favorites.contains(output[1])) {
-                            Log.e("favorite in", output[1] + favorites.get(0));
                             int index = 0;
                             for (int i = 0; i < favorites.size(); i++) {
                                 if (favorites.get(i).equals(output[1])) {
@@ -651,7 +641,6 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             if (index == 2) {
-                                Log.e("index before start", ""+index);
                                 spFavoriteOne = new SoundPool(2, STREAM_MUSIC, 0);
                                 favoriteOneEarcon = spFavoriteOne.load(getApplicationContext(), R.raw.earcon_fav1, 1);
                             } else if (index == 3) {
@@ -713,9 +702,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDone(String utteranceId) {
                 if(favorites.contains(output[1])) {
-                    Log.i("favorite in output", "");
                     if (index == 2) {
-                        Log.i("index_instart", "" + 2);
                         spFavoriteOne.play(favoriteOneEarcon, 1, 1, 0 , 0 , speechSpeedValue);
                     } else if (index == 3) {
                         spFavoriteTwo.play(favoriteTwoEarcon, 1, 1, 0 , 0 , speechSpeedValue);

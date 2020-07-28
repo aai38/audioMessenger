@@ -115,7 +115,7 @@ public class TelegramListener extends Service {
     public static void sendMessage(String msg, long id) {
 
         System.out.println("SendMsg to:"+id+" "+contactList.get(id));
-        System.out.println(msg);
+        //System.out.println(msg);
 
         if(id != 0){
             sendMessage(id,msg);
@@ -129,7 +129,6 @@ public class TelegramListener extends Service {
 
 
     public static Long checkContacts(String name) {
-        System.out.println("checkContacts name: "+name);
         if(contactList.isEmpty()){
             getMainChatList(100);
             getContacts();
@@ -170,7 +169,6 @@ public class TelegramListener extends Service {
             }
         }
 
-        System.out.println(contactList.get(result));
         return result;
     }
 
@@ -416,7 +414,6 @@ public class TelegramListener extends Service {
             person = contactList.get((long) message.senderUserId);
             chat = contactList.get(message.chatId);
         }
-        System.out.println(msg);
         boolean isSamePerson = lastMessage != null && lastMessage.chatId == message.chatId;
         if (!wait) {
             if(id == (int) message.chatId) {
@@ -963,8 +960,8 @@ public class TelegramListener extends Service {
                // have enough chats in the chat list to answer request
 
                java.util.Iterator<OrderedChat> iter = mainChatList.iterator();
-               System.out.println();
-               System.out.println("First " + limit + " chat(s) out of " + mainChatList.size() + " known chat(s):");
+               //System.out.println();
+               //System.out.println("First " + limit + " chat(s) out of " + mainChatList.size() + " known chat(s):");
                for (int i = 0; i < limit; i++) {
                    if (iter.hasNext()) {
                        long chatId = iter.next().chatId;
