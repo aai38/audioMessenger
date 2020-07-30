@@ -24,13 +24,14 @@ public class MyIntro extends AppIntro {
         addSlide(AppIntroFragment.newInstance(
                 "Nachricht schreiben",
                 "Um eine Nachricht zu schreiben, sag 'Schreibe'. Im Anschluss kommt ein Signalton. " +
-                        "Nach dem Ton sprichst du deine Nachricht ein. Anschließend kannst du den Kontakt via Sprachbefehl eingeben.",
+                        "Nach dem Ton sprichst du deine Nachricht ein. Diese wird dir nochmal vorgelesen.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
 
         addSlide(AppIntroFragment.newInstance(
                 "Nachricht schreiben",
-                "Wenn du sowohl deine Nachricht als auch den Kontakt eingegeben hast, wird dir beides nochmal vorgelesen. Anschließend musst du das Absenden der Nachricht bestätigen oder verweigern.",
+                "Anschließend gibst du per Sprachbefehl deinen Kontakt ein. Dieser wird die ebenfalls nochmal vorgelesen. Falls der Kontakt falsch erkannt wurde, 'Nein' oder 'Stop' sagen." +
+                        "Du kannst den Kontakt erneut eingeben. Wenn er dreimal falsch erkannt wurde, kannst du den Kontakt von Hand auswählen.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
 
