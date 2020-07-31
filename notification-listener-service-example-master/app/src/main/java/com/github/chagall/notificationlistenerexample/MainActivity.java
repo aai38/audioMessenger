@@ -1,7 +1,9 @@
 package com.github.chagall.notificationlistenerexample;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,6 +13,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -20,10 +24,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -141,13 +150,15 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager am;
     private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
 
+    private BroadcastReceiver networkReceiver;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
+        networkReceiver = new NetworkChangeReceiver();
+        NetworkChangeReceiver.ma = this;
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
         activateButtons();
@@ -259,6 +270,8 @@ public class MainActivity extends AppCompatActivity {
             Type type = new TypeToken<List<FailContactCalls>>(){}.getType();
             TelegramListener.failCalls  = gson.fromJson(json, type);
         }
+
+
 
 
     }
@@ -1234,5 +1247,18 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG,">>>>>>>>>>>>> FAILED TO GET AUDIO FOCUS <<<<<<<<<<<<<<<<<<<<<<<<");
             return false;
         }
+    }
+
+    public void notifyInternetConnection(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("") .setTitle("");
+
+        builder.setMessage("Netzwerk Status hat sich geändert.")
+                .setCancelable(true);
+        //Creating dialog box
+        AlertDialog alert = builder.create();
+        //Setting the title manually
+        alert.setTitle("Netzwerk");
+        alert.show();
     }
 }
