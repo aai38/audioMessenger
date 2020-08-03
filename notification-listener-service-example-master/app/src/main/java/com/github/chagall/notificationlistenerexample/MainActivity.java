@@ -693,7 +693,8 @@ public class MainActivity extends AppCompatActivity {
                         personMessage.remove(key);
                     }
                 }
-            } else {
+            }
+            else {
                 t1.speak(text,TextToSpeech.QUEUE_ADD,null);
             }
 
@@ -765,7 +766,7 @@ public class MainActivity extends AppCompatActivity {
 
     public int listenToKeyword() {
 
-        micro.startRecording(4000);
+        micro.startRecording(1500);
         editor = shared.edit();
 
         while(micro.isRecording) {
@@ -909,7 +910,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor;
         editor = sharedPreferences.edit();
         sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-        micro.startRecording(3000);
+        micro.startRecording(2400);
         while(micro.isRecording){
             //wait until user has spoken his answer
             try {
@@ -982,7 +983,8 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         } else {
-            t1.speak("Die Nachricht lautet: " + message + ".",TextToSpeech.QUEUE_ADD,null);
+            t1.speak("Die Nachricht lautet",TextToSpeech.QUEUE_ADD,null);
+            t2.speak(message,TextToSpeech.QUEUE_ADD,null);
             while(t1.isSpeaking()) {
                 //wait until message was played
             }
@@ -1072,7 +1074,10 @@ public class MainActivity extends AppCompatActivity {
             }
             return 0;
         } else {
-            t1.speak("Die Nachricht wird an " + TelegramListener.getContactById(id) + " geschickt.",TextToSpeech.QUEUE_ADD,null);
+            t1.speak("Die Nachricht wird geschickt an ",TextToSpeech.QUEUE_ADD,null);
+            t2.speak(TelegramListener.getContactById(id),TextToSpeech.QUEUE_ADD,null);
+
+
             while(t1.isSpeaking() || t2.isSpeaking() || t3.isSpeaking()) {
                 //wait until message was played
             }
@@ -1106,7 +1111,7 @@ public class MainActivity extends AppCompatActivity {
     public long chooseContact(FailContactCalls failCalls) {
 
         sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
-        micro.startRecording(8000);
+        micro.startRecording(6000);
         while(micro.isRecording){
             //wait until user has spoken his answer
             try {
