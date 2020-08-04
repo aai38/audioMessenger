@@ -35,4 +35,5 @@ dependencies {
     //Add library for intro
     implementation 'com.github.paolorotolo:appintro:4.1.0'
     implementation project(path: ':libtd')
+    testImplementation 'junit:junit:4.12'
 }
