@@ -27,7 +27,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        int status = NetworkUtil.getConnectivityStatusString(context);
+        /*int status = NetworkUtil.getConnectivityStatusString(context);
         Log.i("NETWORK", "status: "+status);
         Log.i("NETWORK", "intent: "+intent.getAction());
         if ("android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
@@ -36,6 +36,13 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
             } else {
                 Log.i("NETWORK", "else case: connected");
             }
+        }*/
+        if(isOnline(context)){
+            ma.notifyInternetConnection();
+            Log.i("NETWORK", "online");
+        } else {
+            ma.notifyInternetConnection();
+            Log.i("NETWORK", "not online");
         }
     }
 
@@ -44,6 +51,13 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         NetworkInfo nInfo = cm.getActiveNetworkInfo();
         boolean connected = nInfo != null && nInfo.isConnected();
         return connected;
+    }
+
+    public boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        //should check null because in airplane mode it will be null
+        return (netInfo != null && netInfo.isConnected());
     }
 
 }

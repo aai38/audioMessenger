@@ -29,6 +29,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -323,6 +324,17 @@ public class MainActivity extends AppCompatActivity {
         // check current state of a Switch (true or false).
         isActiveMode = isActiveModeSwitch.isChecked();
 
+        isActiveModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    showToastFeedback(7);
+                } else {
+                    showToastFeedback(8);
+                }
+            }
+        });
+
         //mail
         mailButton = findViewById(R.id.mailButton);
         mailButton.setOnClickListener(new View.OnClickListener() {
@@ -359,7 +371,7 @@ public class MainActivity extends AppCompatActivity {
         finish();
         super.onDestroy();
         //unregisterReceiver(broadcastReceiver);
-
+        unregisterReceiver(networkReceiver);
     }
 
     @Override
@@ -774,31 +786,35 @@ public class MainActivity extends AppCompatActivity {
 
             //the answer keyword was spoken
             if(checkKeyword(micro.result,0)) {
-
+                showToastFeedback(1);
                 editor.putInt("answers", answers_before+1);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 0;
             } else if(checkKeyword(micro.result, 1)) { // eine Nachricht abhören
+                showToastFeedback(9);
                 editor.putInt("number_hearone", number_hearone+1);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 1;
             } else if(checkKeyword(micro.result, 2)){ //"schreibe"
+                showToastFeedback(2);
                 editor.putInt("number_write", number_write+1);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 2;
             } else if(checkKeyword(micro.result, 3)){ //alle Nachrichten abhören
+                showToastFeedback(0);
                 editor.putInt("number_hearall", number_hearall+1);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 3;
             } else if(checkKeyword(micro.result, 4)) { //"abbruch"
+                showToastFeedback(10);
                 editor.putInt("number_cancel", number_cancel+1);
                 editor.apply();
                 sp.play(errorEarcon, 0.3f, 0.3f, 0, 0, 1.5f);
@@ -807,6 +823,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         //no keyword
+        showToastFeedback(11);
         return -1;
     }
 
@@ -1153,6 +1170,7 @@ public class MainActivity extends AppCompatActivity {
             TelegramListener.failCalls.add(failCalls);
         } else {
             TelegramListener.sendMessage(message,id);
+            showToastFeedback(6);
         }
 
     }
@@ -1189,6 +1207,24 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case 5: //record button clicked
                 text = "Mikrofon hört zu...";
+                break;
+            case 6:
+                text = "Nachricht gesendet.";
+                break;
+            case 7:
+                text = "Aktiv Modus an.";
+                break;
+            case 8:
+                text = "Aktiv Modus aus.";
+                break;
+            case 9:
+                text = "Eine Nachricht abhören...";
+                break;
+            case 10:
+                text = "Abbruch.";
+                break;
+            case 11:
+                text = "Kein Schlüsselwort erkannt.";
                 break;
             default:
                 text = "Momentan keine Aktion möglich.";
