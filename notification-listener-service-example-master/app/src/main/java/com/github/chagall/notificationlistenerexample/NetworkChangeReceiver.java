@@ -19,26 +19,24 @@ import android.widget.Toast;
 public class NetworkChangeReceiver extends BroadcastReceiver {
     public static MainActivity ma;
 
-    @Override
+    /*@Override
     public void onReceive(Context context, final Intent intent) {
-        /*System.out.println("*** Action: " + intent.getAction());
-        if(intent.getAction().equalsIgnoreCase("android.net.conn.CONNECTIVITY_CHANGE") || intent.getAction().equalsIgnoreCase("android.net.wifi.WIFI_STATE_CHANGED")) {
-            //Toast.makeText(context, "Connection changed to: "+hasInternetConnection(), Toast.LENGTH_SHORT).show();
-            ma.notifyInternetConnection();
-        }*/
-        /*int status = NetworkUtil.getConnectivityStatusString(context);
-        System.out.println("*** Action: " + intent.getAction());
-        if ("android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) { //|| "android.net.wifi.WIFI_STATE_CHANGED".equals(intent.getAction())
-            if (status == NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
-                Toast.makeText(context, "Not connected", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            System.out.println("NICHT");
-        }*/
         System.out.println("*** Action: " + intent.getAction() + " hasInternetConnection: "+ hasInternetConnection());
         ma.notifyInternetConnection();
+    }*/
+
+    @Override
+    public void onReceive(final Context context, final Intent intent) {
+        int status = NetworkUtil.getConnectivityStatusString(context);
+        Log.i("NETWORK", "status: "+status);
+        Log.i("NETWORK", "intent: "+intent.getAction());
+        if ("android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
+            if (status == NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
+                Log.i("NETWORK", "if case: not connected");
+            } else {
+                Log.i("NETWORK", "else case: connected");
+            }
+        }
     }
 
     private boolean hasInternetConnection(){
