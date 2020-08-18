@@ -34,11 +34,6 @@
         <service
             android:name=".HeadsetService"
             android:label="HeadsetService" />
-        <receiver android:name="NetworkChangeReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
         <provider
             android:name=".GenericFileProvider"
             android:authorities="${applicationId}.provider"

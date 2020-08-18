@@ -79,6 +79,14 @@
             android:tint="#000000"
             app:srcCompat="@android:drawable/ic_dialog_alert" />
 
+        <TextView
+            android:id="@+id/serverConnectionTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="40dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

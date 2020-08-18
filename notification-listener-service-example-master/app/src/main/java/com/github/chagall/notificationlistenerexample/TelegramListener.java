@@ -1,13 +1,10 @@
 package com.github.chagall.notificationlistenerexample;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
@@ -487,8 +484,6 @@ public class TelegramListener extends Service {
         @Override
         public void onResult(TdApi.Object object) {
             switch (object.getConstructor()) {
-
-
                 case TdApi.UpdateNewMessage.CONSTRUCTOR:
 
                     TdApi.UpdateNewMessage updateNewMessage = (TdApi.UpdateNewMessage) object;
@@ -741,8 +736,29 @@ public class TelegramListener extends Service {
                     TdApi.UpdateSupergroupFullInfo updateSupergroupFullInfo = (TdApi.UpdateSupergroupFullInfo) object;
                     //supergroupsFullInfo.put(updateSupergroupFullInfo.supergroupId, updateSupergroupFullInfo.supergroupFullInfo);
                     break;
+                case TdApi.UpdateConnectionState.CONSTRUCTOR:
+                    TdApi.UpdateConnectionState connectionState = (TdApi.UpdateConnectionState) object;
+                    String text = "";
+                    switch(connectionState.state.getConstructor()){
+                        case TdApi.ConnectionStateConnecting.CONSTRUCTOR: //currently establishing a connection
+                            text = "Keine Verbindung zum Telegram Server";
+                            mainActivity.showServerConnectionStatus(text);
+                            break;
+                        case TdApi.ConnectionStateReady.CONSTRUCTOR: //there is a working connection
+                            text = "Verbindung zum Telegram Server hergestellt";
+                            mainActivity.showServerConnectionStatus(text);
+                            break;
+                        case TdApi.ConnectionStateWaitingForNetwork.CONSTRUCTOR: //currently waiting for the network to become available
+                            text = "Auf Verbindung zum Telegram Server warten...";
+                            mainActivity.showServerConnectionStatus(text);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    break;
                 default:
-                    //System.out.println("Unsupported update:" + object);
+                    System.out.println("Unsupported update:" + object);
             }
         }
     }

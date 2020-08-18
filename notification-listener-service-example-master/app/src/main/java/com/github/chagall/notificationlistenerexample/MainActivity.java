@@ -2,7 +2,9 @@ package com.github.chagall.notificationlistenerexample;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,6 +36,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -74,6 +78,7 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static MainActivity reference;
     private String[] keywords = {"antworten", "abhören", "schreibe", "alle", "abbruch"};
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
@@ -82,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private static TextView view;
     private AlertDialog enableNotificationListenerAlertDialog;
     private Button play;
+    private TextView serverConnectionTextView;
 
     public static TextToSpeech t1;
     public static TextToSpeech t2; //person
@@ -158,8 +164,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        networkReceiver = new NetworkChangeReceiver();
-        NetworkChangeReceiver.ma = this;
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
         activateButtons();
@@ -344,6 +348,9 @@ public class MainActivity extends AppCompatActivity {
                 informationDialogue.show(getSupportFragmentManager(), "TAG");
             }
         });
+
+        //server connection
+        serverConnectionTextView = (TextView)findViewById(R.id.serverConnectionTextView);
     }
 
     public void openDescription() {
@@ -1290,16 +1297,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void notifyInternetConnection(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("") .setTitle("");
-
-        builder.setMessage("Netzwerk Status hat sich geändert.")
-                .setCancelable(true);
-        //Creating dialog box
-        AlertDialog alert = builder.create();
-        //Setting the title manually
-        alert.setTitle("Netzwerk");
-        alert.show();
+    public void showServerConnectionStatus(String status){
+        //Log.i("main", "wuhu: "+status);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                serverConnectionTextView.setText(status);
+                serverConnectionTextView.invalidate();
+            }
+        });
     }
 }
