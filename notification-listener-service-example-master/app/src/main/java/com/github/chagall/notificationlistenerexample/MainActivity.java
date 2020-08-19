@@ -1056,6 +1056,7 @@ public class MainActivity extends AppCompatActivity {
         }
         String msg = micro.result;
         if(!verifyMessage(msg)){
+            sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
             return inputMessage();
         } else {
             return msg;
