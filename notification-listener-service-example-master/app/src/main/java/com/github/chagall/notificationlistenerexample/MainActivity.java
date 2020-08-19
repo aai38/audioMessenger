@@ -998,7 +998,9 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean verifyMessage(String message) {
         if(micro.result.equals("")) {
-            t1.speak("Du hast keinen Text eingesprochen, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
+            if(speech_rate_calls < 4) {
+                t1.speak("Du hast keinen Text eingesprochen, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
+            }
             sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
             editor.putInt("number_error", number_error+1);
             editor.apply();
@@ -1007,7 +1009,10 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         } else {
-            t1.speak("Die Nachricht lautet",TextToSpeech.QUEUE_ADD,null);
+            sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
+            if(speech_rate_calls < 4) {
+                t1.speak("Die Nachricht lautet", TextToSpeech.QUEUE_ADD, null);
+            }
             t2.speak(message,TextToSpeech.QUEUE_ADD,null);
             while(t1.isSpeaking()) {
                 //wait until message was played
@@ -1015,7 +1020,10 @@ public class MainActivity extends AppCompatActivity {
             if(confirmationCheck()) {
                 return true;
             } else {
-                t1.speak("Spreche die Nachricht nochmal ein.",TextToSpeech.QUEUE_ADD,null);
+                if(speech_rate_calls < 4) {
+                    t1.speak("Spreche die Nachricht nochmal ein.", TextToSpeech.QUEUE_ADD, null);
+                }
+                sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
                 while(t1.isSpeaking()) {
                     //wait until message was played
                 }
@@ -1062,7 +1070,9 @@ public class MainActivity extends AppCompatActivity {
     public long verifyContact(String contact, FailContactCalls failCalls) {
 
         if(contact.equals("")) {
-            t1.speak("Du hast keinen Kontakt eingesprochen, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
+            if(speech_rate_calls < 4) {
+                t1.speak("Du hast keinen Kontakt eingesprochen, versuche es noch einmal.", TextToSpeech.QUEUE_ADD, null);
+            }
             editor = shared.edit();
             editor.putInt("number_error", number_error+1);
             editor.apply();
@@ -1074,22 +1084,25 @@ public class MainActivity extends AppCompatActivity {
         }
         long id = TelegramListener.checkContacts(contact);
         if(id == 0){
+            sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
             if(failCalls.fail1.equals("")) {
                 failCalls.fail1 = contact;
             } else if(failCalls.fail2.equals("")) {
                 failCalls.fail2 = contact;
             } else if(failCalls.fail3.equals("")) {
                 failCalls.fail3 = contact;
-                t1.speak("Wähle den Kontakt bitte per Hand aus.",TextToSpeech.QUEUE_ADD,null);
+                if(speech_rate_calls < 4) {
+                    t1.speak("Wähle den Kontakt bitte per Hand aus.", TextToSpeech.QUEUE_ADD, null);
+                }
             }
             countFails++;
             if(countFails == 3) {
                 countFails = 0;
                 return -1;
             }
-
-            t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
-            sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
+            if(speech_rate_calls < 4) {
+                t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht, versuche es noch einmal.", TextToSpeech.QUEUE_ADD, null);
+            }
             editor = shared.edit();
             editor.putInt("number_falseContact", number_falseContact+1);
             editor.apply();
@@ -1098,7 +1111,10 @@ public class MainActivity extends AppCompatActivity {
             }
             return 0;
         } else {
-            t1.speak("Die Nachricht wird geschickt an ",TextToSpeech.QUEUE_ADD,null);
+            sp.play(feedbackEarcon, 0.3f,0.3f,0,0,1.5f);
+            if(speech_rate_calls < 4) {
+                t1.speak("Die Nachricht wird geschickt an ", TextToSpeech.QUEUE_ADD, null);
+            }
             t2.speak(TelegramListener.getContactById(id),TextToSpeech.QUEUE_ADD,null);
 
 
@@ -1109,20 +1125,26 @@ public class MainActivity extends AppCompatActivity {
                 countFails = 0;
                 return id;
             } else {
+                sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
                 if(failCalls.fail1.equals("")) {
                     failCalls.fail1 = contact;
                 } else if(failCalls.fail2.equals("")) {
                     failCalls.fail2 = contact;
                 } else if(failCalls.fail3.equals("")) {
                     failCalls.fail3 = contact;
-                    t1.speak("Wähle den Kontakt bitte per Hand aus.",TextToSpeech.QUEUE_ADD,null);
+                    if(speech_rate_calls < 4) {
+                        t1.speak("Wähle den Kontakt bitte per Hand aus.", TextToSpeech.QUEUE_ADD, null);
+                    }
                 }
                 countFails++;
                 if(countFails == 3) {
                     countFails = 0;
                     return -1;
                 }
-                t1.speak("Spreche den Kontakt nochmal ein.",TextToSpeech.QUEUE_ADD,null);
+                if(speech_rate_calls < 4) {
+                    t1.speak("Spreche den Kontakt nochmal ein.", TextToSpeech.QUEUE_ADD, null);
+                }
+
                 while(t1.isSpeaking()) {
                     //wait until message was played
                 }
@@ -1162,7 +1184,9 @@ public class MainActivity extends AppCompatActivity {
     public void sendMessage (String message, long id){
         FailContactCalls failCalls = new FailContactCalls();
         if(id == 0) {
-            t1.speak("Spreche den Kontakt ein.",TextToSpeech.QUEUE_ADD,null);
+            if(speech_rate_calls < 4) {
+                t1.speak("Spreche den Kontakt ein.", TextToSpeech.QUEUE_ADD, null);
+            }
             while(t1.isSpeaking()) {
                 //wait until message was played
             }
