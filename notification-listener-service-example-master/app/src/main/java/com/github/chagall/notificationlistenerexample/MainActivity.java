@@ -335,7 +335,6 @@ public class MainActivity extends AppCompatActivity {
                 if(isFirstActiveStart) {
                     ActiveDialog activeDialog = new ActiveDialog();
                     activeDialog.show(getSupportFragmentManager(), "TAG");
-                    SharedPreferences.Editor editor = getPrefs.edit();
                     editor.putBoolean("firstActiveStart", false);
                     editor.apply();
                 }
@@ -359,7 +358,6 @@ public class MainActivity extends AppCompatActivity {
                 if(isFirstInfoStart) {
                     InformationDialog informationDialog = new InformationDialog();
                     informationDialog.show(getSupportFragmentManager(), "TAG");
-                    SharedPreferences.Editor editor = getPrefs.edit();
                     editor.putBoolean("firstInfoStart", false);
                     editor.apply();
                 } else {
@@ -405,7 +403,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        editor = shared.edit();
 
         calls_before = shared.getInt("calls", 0);
         answers_before = shared.getInt("answers", 0);
@@ -807,7 +804,6 @@ public class MainActivity extends AppCompatActivity {
     public int listenToKeyword() {
 
         micro.startRecording(1500);
-        editor = shared.edit();
 
         while(micro.isRecording) {
             //wait until a keyword was spoken
@@ -867,7 +863,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void reactToKeyword(int keyword, boolean isReactionToNotification, long chatID){
-        editor = shared.edit();
         if(keyword == 0 && isReactionToNotification) {
 
             String msg = inputMessage();
@@ -952,8 +947,6 @@ public class MainActivity extends AppCompatActivity {
     public static boolean confirmationCheck() {
 
 
-        SharedPreferences.Editor editor;
-        editor = sharedPreferences.edit();
         sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
         micro.startRecording(2400);
         while(micro.isRecording){
@@ -1095,7 +1088,6 @@ public class MainActivity extends AppCompatActivity {
             if(speech_rate_calls < 4) {
                 t1.speak("Du hast keinen Kontakt eingesprochen, versuche es noch einmal.", TextToSpeech.QUEUE_ADD, null);
             }
-            editor = shared.edit();
             editor.putInt("number_error", number_error+1);
             editor.apply();
             sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
@@ -1125,7 +1117,6 @@ public class MainActivity extends AppCompatActivity {
             if(speech_rate_calls < 4) {
                 t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht, versuche es noch einmal.", TextToSpeech.QUEUE_ADD, null);
             }
-            editor = shared.edit();
             editor.putInt("number_falseContact", number_falseContact+1);
             editor.apply();
             while(t1.isSpeaking()) {
@@ -1232,7 +1223,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean containsCancel(String text){
         //is "abbruch" in given string?
         if(text.contains("abbruch")){
-            editor = shared.edit();
             editor.putInt("number_cancel", number_cancel+1);
             editor.apply();
             return true;
