@@ -811,41 +811,47 @@ public class MainActivity extends AppCompatActivity {
             //the answer keyword was spoken
             if(checkKeyword(micro.result,0)) {
                 showToastFeedback(1);
-                editor.putInt("answers", answers_before+1);
+                answers_before++;
+                editor.putInt("answers", answers_before);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 0;
             } else if(checkKeyword(micro.result, 1)) { // eine Nachricht abhören
                 showToastFeedback(9);
-                editor.putInt("number_hearone", number_hearone+1);
+                number_hearone++;
+                editor.putInt("number_hearone", number_hearone);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 1;
             } else if(checkKeyword(micro.result, 2)){ //"schreibe"
                 showToastFeedback(2);
-                editor.putInt("number_write", number_write+1);
+                number_write++;
+                editor.putInt("number_write", number_write);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 2;
             } else if(checkKeyword(micro.result, 3)){ //alle Nachrichten abhören
                 showToastFeedback(0);
-                editor.putInt("number_hearall", number_hearall+1);
+                number_hearall++;
+                editor.putInt("number_hearall", number_hearall);
                 editor.apply();
                 sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
                 return 3;
             } else if(checkKeyword(micro.result, 4)) { //"abbruch"
                 showToastFeedback(10);
-                editor.putInt("number_cancel", number_cancel+1);
+                number_cancel++;
+                editor.putInt("number_cancel", number_cancel);
                 editor.apply();
                 sp.play(errorEarcon, 0.3f, 0.3f, 0, 0, 1.5f);
                 micro.stopRecording();
                 return 4;
             }
         }
+
         //no keyword
         showToastFeedback(11);
         return -1;
@@ -1016,7 +1022,8 @@ public class MainActivity extends AppCompatActivity {
                 t1.speak("Du hast keinen Text eingesprochen, versuche es noch einmal.",TextToSpeech.QUEUE_ADD,null);
             }
             sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
-            editor.putInt("number_error", number_error+1);
+            number_error++;
+            editor.putInt("number_error", number_error);
             editor.apply();
             while(t1.isSpeaking()) {
                 //wait until message was played
@@ -1088,7 +1095,8 @@ public class MainActivity extends AppCompatActivity {
             if(speech_rate_calls < 4) {
                 t1.speak("Du hast keinen Kontakt eingesprochen, versuche es noch einmal.", TextToSpeech.QUEUE_ADD, null);
             }
-            editor.putInt("number_error", number_error+1);
+            number_error++;
+            editor.putInt("number_error", number_error);
             editor.apply();
             sp.play(errorEarcon, 0.3f,0.3f,0,0,1.5f);
             while(t1.isSpeaking()) {
@@ -1117,7 +1125,8 @@ public class MainActivity extends AppCompatActivity {
             if(speech_rate_calls < 4) {
                 t1.speak("Deine Eingabe wurde nicht verstanden oder der Kontakt existiert nicht, versuche es noch einmal.", TextToSpeech.QUEUE_ADD, null);
             }
-            editor.putInt("number_falseContact", number_falseContact+1);
+            number_falseContact++;
+            editor.putInt("number_falseContact", number_falseContact);
             editor.apply();
             while(t1.isSpeaking()) {
                 //wait until message was played
@@ -1223,7 +1232,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean containsCancel(String text){
         //is "abbruch" in given string?
         if(text.contains("abbruch")){
-            editor.putInt("number_cancel", number_cancel+1);
+            number_cancel++;
+            editor.putInt("number_cancel", number_cancel);
             editor.apply();
             return true;
         } else {
