@@ -4,10 +4,12 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -28,6 +30,7 @@ public class FavoritesActivity extends AppCompatActivity {
     private ListView listView;
     private ArrayList<Contact> contacts;
     private CustomAdapter dataAdapter;
+    private int dialogOpen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,18 @@ public class FavoritesActivity extends AppCompatActivity {
         listView=(ListView)findViewById(R.id.list);
         contacts = new ArrayList<>();
         getContacts();
+
+        //tutorial-dialog
+        SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean isFirstFavStart = getPrefs.getBoolean("firstFavStart", true);
+        //show the dialog only at the first time
+        if(isFirstFavStart) {
+            FavoritesDialog favoritesDialog = new FavoritesDialog();
+            favoritesDialog.show(getSupportFragmentManager(), "TAG");
+            SharedPreferences.Editor editor = getPrefs.edit();
+            editor.putBoolean("firstFavStart", false);
+            editor.apply();
+        }
 
     }
 

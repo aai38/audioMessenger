@@ -17,6 +17,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -159,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
 
     private BroadcastReceiver networkReceiver;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -185,9 +185,6 @@ public class MainActivity extends AppCompatActivity {
         // Record to the external cache directory for visibility
         fileName = getFilesDir()+"/speak.pcm";
         micro = new MicrophoneListener(fileName);
-
-
-
 
         am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         requestAudioFocus();
@@ -331,6 +328,17 @@ public class MainActivity extends AppCompatActivity {
         isActiveModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                //tutorial-dialog
+                SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                boolean isFirstActiveStart = getPrefs.getBoolean("firstActiveStart", true);
+                //show the dialog only at the first time
+                if(isFirstActiveStart) {
+                    ActiveDialog activeDialog = new ActiveDialog();
+                    activeDialog.show(getSupportFragmentManager(), "TAG");
+                    SharedPreferences.Editor editor = getPrefs.edit();
+                    editor.putBoolean("firstActiveStart", false);
+                    editor.apply();
+                }
                 if(isChecked){
                     showToastFeedback(7);
                 } else {
@@ -344,8 +352,20 @@ public class MainActivity extends AppCompatActivity {
         mailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                InformationDialogue informationDialogue = new InformationDialogue();
-                informationDialogue.show(getSupportFragmentManager(), "TAG");
+                //tutorial-dialog
+                SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                boolean isFirstInfoStart = getPrefs.getBoolean("firstInfoStart", true);
+                //show the dialog only at the first time
+                if(isFirstInfoStart) {
+                    InformationDialog informationDialog = new InformationDialog();
+                    informationDialog.show(getSupportFragmentManager(), "TAG");
+                    SharedPreferences.Editor editor = getPrefs.edit();
+                    editor.putBoolean("firstInfoStart", false);
+                    editor.apply();
+                } else {
+                    InformationDialogue informationDialogue = new InformationDialogue();
+                    informationDialogue.show(getSupportFragmentManager(), "TAG");
+                }
             }
         });
 
@@ -354,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openDescription() {
-        Intent intent = new Intent(this, MyIntro.class);
+        Intent intent = new Intent(this, TutorialComplete.class);
         startActivity(intent);
     }
 
@@ -362,6 +382,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, FavoritesActivity.class);
         startActivity(intent);
     }
+
 
     public void openChooseContact(String msg){
         Intent intent = new Intent(this, ChooseContactActivity.class);

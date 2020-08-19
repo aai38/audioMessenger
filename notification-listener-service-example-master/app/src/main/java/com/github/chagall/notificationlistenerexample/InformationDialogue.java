@@ -70,6 +70,7 @@ public class InformationDialogue extends AppCompatDialogFragment {
                     }
                 });
         AlertDialog dialog = builder.create();
+
         return builder.create();
     }
 
