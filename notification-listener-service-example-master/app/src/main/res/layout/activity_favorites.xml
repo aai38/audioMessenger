@@ -17,7 +17,7 @@
             android:id="@+id/backButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="12dp"
             android:background="#FFFFFF"
             android:backgroundTint="#00FFFFFF"
             android:src="?attr/actionModeCloseDrawable"
@@ -39,7 +39,19 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/backButton"
             app:layout_constraintTop_toTopOf="parent" />
-
+        <ImageButton
+            android:id="@+id/confirm"
+            android:layout_marginStart="360dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_done_white"
+            android:tint="#FFFFFF"
+            android:backgroundTint="#000000"
+            android:background="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="Bestätigen" />
     </android.support.constraint.ConstraintLayout>
 
     <FrameLayout
@@ -50,7 +62,12 @@
         <ListView
             android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+
+        </ListView>
+
+
     </FrameLayout>
 
 </LinearLayout>

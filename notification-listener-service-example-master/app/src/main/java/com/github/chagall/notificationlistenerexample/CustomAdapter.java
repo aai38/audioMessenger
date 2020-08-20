@@ -2,6 +2,7 @@ package com.github.chagall.notificationlistenerexample;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -10,11 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,13 +42,17 @@ public class CustomAdapter extends ArrayAdapter<Contact> implements View.OnClick
         private SharedPreferences.Editor editor;
         private JSONArray jsonArray;
         private String resultJSON;
+        public static ArrayList<String> favNames;
+        public ImageButton confirm;
+        public boolean locked = false;
 
 
-        public CustomAdapter(Context context, ArrayList<Contact> modelArrayList) {
+        public CustomAdapter(Context context, ArrayList<Contact> modelArrayList, ImageButton confirm) {
             super(context, R.layout.activity_favorites, modelArrayList);
-
+            this.confirm = confirm;
             this.context = context;
             this.modelArrayList = modelArrayList;
+            favNames = new ArrayList<>();
 
         }
 
@@ -109,36 +118,39 @@ public class CustomAdapter extends ArrayAdapter<Contact> implements View.OnClick
 
             editor = sharedPrefs.edit();
             holder.checkBox.setChecked(sharedPrefs.getBoolean("CheckValue"+position, false));
+            locked = sharedPrefs.getBoolean("locked",false);
 
 
 
-            holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    int count_favorite = sharedPrefs.getInt("count_favorite", 0);
-                    if(isChecked && count_favorite <3) {
+            confirm.setOnClickListener((View view) -> {
+                if(locked) {
+                    Toast.makeText(context, "Deine Favoriten wurden schon gespeichert!", Toast.LENGTH_SHORT).show();
+                } else {
+                    if(sharedPrefs.getInt("count_favorite", 0) >= 3) {
+
                         new AlertDialog.Builder(context)
-                                .setTitle("Add Favorite")
-                                .setMessage("You want to add this contact to your favorites?")
+                                .setTitle("Bestätige Favoriten")
+                                .setMessage("Hast du alle deine Favoriten ausgewählt? Du kannst sie danach nicht mehr ändern!")
 
                                 // Specifying a listener allows you to take an action before dismissing the dialog.
                                 // The dialog is automatically dismissed when a dialog button is clicked.
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         jsonArray = new JSONArray();
-                                        editor.putBoolean("CheckValue"+position, isChecked);
-                                        editor.putInt("count_favorite", count_favorite+1);
-                                        editor.commit();
-                                        JSONObject jo = new JSONObject();
-                                        try {
-                                            jo.put("name", holder.name.getText());
-                                            jsonArray.put(jo);
-                                            StringWriter out = new StringWriter();
-
-                                            saveData(context, jsonArray.toString());
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
+                                        for (String name: favNames) {
+                                            JSONObject jo = new JSONObject();
+                                            try {
+                                                jo.put("name", name);
+                                                jsonArray.put(jo);
+                                                saveData(context, jsonArray.toString());
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
+                                        locked = true;
+                                        editor.putBoolean("locked", true);
+
+                                        editor.commit();
                                     }
                                 })
 
@@ -146,15 +158,79 @@ public class CustomAdapter extends ArrayAdapter<Contact> implements View.OnClick
                                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        buttonView.setChecked(false);
+
                                     }
                                 })
                                 .setIcon(android.R.drawable.ic_dialog_alert)
                                 .show();
 
+
+
+                    } else {
+                        Toast.makeText(context, "Du musst insgesamt 3 Favoriten wählen.", Toast.LENGTH_SHORT).show();
+                    }
+
+
+                }
+
+            });
+
+            holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    int count_favorite = sharedPrefs.getInt("count_favorite", 0);
+                    if(isChecked && count_favorite <3) {
+                        if(locked) {
+                            Toast.makeText(context, "Deine Favoriten wurden schon gespeichert!", Toast.LENGTH_SHORT).show();
+                            buttonView.setChecked(false);
+                        } else {
+                            new AlertDialog.Builder(context)
+                                    .setTitle("Füge Favorit hinzu")
+                                    .setMessage("Willst du diesen Kontakt zu deinen Favoriten hinzufügen?")
+
+                                    // Specifying a listener allows you to take an action before dismissing the dialog.
+                                    // The dialog is automatically dismissed when a dialog button is clicked.
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            editor.putBoolean("CheckValue" + position, isChecked);
+                                            editor.putInt("count_favorite", count_favorite + 1);
+                                            editor.commit();
+                                            favNames.add(holder.name.getText().toString());
+
+                                        }
+                                    })
+
+                                    // A null listener allows the button to dismiss the dialog and take no further action.
+                                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            buttonView.setChecked(false);
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .show();
+                        }
                     } else if (isChecked && count_favorite >= 3){
-                        Toast.makeText(context, "You have already chosen your favorites", Toast.LENGTH_SHORT).show();
-                        buttonView.setChecked(false);
+                        if(locked) {
+                            Toast.makeText(context, "Deine Favoriten wurden schon gespeichert!", Toast.LENGTH_SHORT).show();
+                            buttonView.setChecked(false);
+                        } else {
+                            Toast.makeText(context, "Du kannst nur 3 Favoriten wählen.", Toast.LENGTH_SHORT).show();
+                            buttonView.setChecked(false);
+                        }
+
+                    } else {
+                        if(locked) {
+                            Toast.makeText(context, "Deine Favoriten wurden schon gespeichert!", Toast.LENGTH_SHORT).show();
+                            buttonView.setChecked(true);
+                        } else {
+                            editor.putBoolean("CheckValue"+position, isChecked);
+                            editor.putInt("count_favorite", count_favorite-1);
+                            editor.commit();
+                            favNames.remove(holder.name.getText().toString());
+                        }
+
                     }
 
 

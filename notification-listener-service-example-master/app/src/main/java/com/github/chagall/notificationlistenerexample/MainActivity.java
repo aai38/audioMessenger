@@ -149,6 +149,10 @@ public class MainActivity extends AppCompatActivity {
     private int number_hearone;
     private int number_error;
     private static int number_falseContact;
+    private boolean firstTimeSlide = true;
+
+    private boolean firstTimeInfo = true;
+
 
     private ArrayList<String> favorites = new ArrayList();
     private int index;
@@ -224,7 +228,10 @@ public class MainActivity extends AppCompatActivity {
         answers_before = shared.getInt("answers", 0);
         speech_rate_answers = shared.getInt("rate_answers", 1);
         speech_rate_calls = shared.getInt("rate_calls", 1);
+        speech_rate_calls = shared.getInt("rate_calls", 1);
+        firstTimeSlide = sharedPreferences.getBoolean("firstTimeSlide", true);
 
+        firstTimeInfo = sharedPreferences.getBoolean("firstTimeInfo", true);
         editor = shared.edit();
 
 
@@ -329,13 +336,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 //tutorial-dialog
-                SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                boolean isFirstActiveStart = getPrefs.getBoolean("firstActiveStart", true);
+
                 //show the dialog only at the first time
-                if(isFirstActiveStart) {
+                if(firstTimeSlide) {
                     ActiveDialog activeDialog = new ActiveDialog();
                     activeDialog.show(getSupportFragmentManager(), "TAG");
-                    editor.putBoolean("firstActiveStart", false);
+                    firstTimeSlide = false;
+                    editor.putBoolean("firstTimeSlide", firstTimeSlide);
                     editor.apply();
                 }
                 if(isChecked){
@@ -352,13 +359,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //tutorial-dialog
-                SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                boolean isFirstInfoStart = getPrefs.getBoolean("firstInfoStart", true);
+
                 //show the dialog only at the first time
-                if(isFirstInfoStart) {
+                if(firstTimeInfo) {
                     InformationDialog informationDialog = new InformationDialog();
                     informationDialog.show(getSupportFragmentManager(), "TAG");
-                    editor.putBoolean("firstInfoStart", false);
+                    firstTimeInfo = false;
+                    editor.putBoolean("firstTimeInfo", firstTimeInfo);
                     editor.apply();
                 } else {
                     InformationDialogue informationDialogue = new InformationDialogue();
@@ -803,7 +810,7 @@ public class MainActivity extends AppCompatActivity {
 
     public int listenToKeyword() {
 
-        micro.startRecording(1500);
+        micro.startRecording(1800);
 
         while(micro.isRecording) {
             //wait until a keyword was spoken
