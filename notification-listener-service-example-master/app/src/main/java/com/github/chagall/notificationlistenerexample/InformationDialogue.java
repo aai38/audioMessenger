@@ -30,6 +30,9 @@ public class InformationDialogue extends AppCompatDialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         shared = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+
+
         int calls_before = shared.getInt("calls", 0);
         int answers_before = shared.getInt("answers", 0);
         int number_cancel = shared.getInt("number_cancel", 0);

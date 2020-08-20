@@ -150,10 +150,10 @@ public class MainActivity extends AppCompatActivity {
     private int number_error;
     private static int number_falseContact;
     private boolean firstTimeSlide = true;
-
+    private boolean firstTimeWrite = true;
     private boolean firstTimeInfo = true;
-
-
+    private boolean firstTimeAll = true;
+    private boolean firstTimeHear = true;
     private ArrayList<String> favorites = new ArrayList();
     private int index;
 
@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
 
     private BroadcastReceiver networkReceiver;
+    public static boolean waitForDialog = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -230,8 +231,10 @@ public class MainActivity extends AppCompatActivity {
         speech_rate_calls = shared.getInt("rate_calls", 1);
         speech_rate_calls = shared.getInt("rate_calls", 1);
         firstTimeSlide = sharedPreferences.getBoolean("firstTimeSlide", true);
-
+        firstTimeWrite = sharedPreferences.getBoolean("firstTimeWrite", true);
         firstTimeInfo = sharedPreferences.getBoolean("firstTimeInfo", true);
+        firstTimeAll = sharedPreferences.getBoolean("firstTimeAll", true);
+        firstTimeHear = sharedPreferences.getBoolean("firstTimeHear", true);
         editor = shared.edit();
 
 
@@ -359,7 +362,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //tutorial-dialog
-
+                InformationDialogue informationDialogue = new InformationDialogue();
+                informationDialogue.show(getSupportFragmentManager(), "TAG");
                 //show the dialog only at the first time
                 if(firstTimeInfo) {
                     InformationDialog informationDialog = new InformationDialog();
@@ -367,10 +371,9 @@ public class MainActivity extends AppCompatActivity {
                     firstTimeInfo = false;
                     editor.putBoolean("firstTimeInfo", firstTimeInfo);
                     editor.apply();
-                } else {
-                    InformationDialogue informationDialogue = new InformationDialogue();
-                    informationDialogue.show(getSupportFragmentManager(), "TAG");
+
                 }
+
             }
         });
 
@@ -829,24 +832,79 @@ public class MainActivity extends AppCompatActivity {
                 number_hearone++;
                 editor.putInt("number_hearone", number_hearone);
                 editor.apply();
-                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
+                if(firstTimeHear) {
+                    PlayingMessagesDialog msgDialog = new PlayingMessagesDialog();
+                    msgDialog.show(getSupportFragmentManager(), "TAG");
+                    while (waitForDialog){
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        //Do nothing and wait
+                    }
+
+                    firstTimeHear = false;
+                    editor.putBoolean("firstTimeHear", firstTimeHear);
+                    editor.apply();
+                }
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+                waitForDialog = true;
                 return 1;
             } else if(checkKeyword(micro.result, 2)){ //"schreibe"
                 showToastFeedback(2);
                 number_write++;
                 editor.putInt("number_write", number_write);
                 editor.apply();
-                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
+                if(firstTimeWrite) {
+                    WriteDialog writeDialog = new WriteDialog();
+                    writeDialog.show(getSupportFragmentManager(), "TAG");
+                    firstTimeWrite = false;
+                    editor.putBoolean("firstTimeWrite", firstTimeWrite);
+                    editor.apply();
+                    while (waitForDialog){
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        //Do nothing and wait
+                    }
+
+
+                }
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+
+                waitForDialog = true;
                 return 2;
             } else if(checkKeyword(micro.result, 3)){ //alle Nachrichten abhören
                 showToastFeedback(0);
                 number_hearall++;
                 editor.putInt("number_hearall", number_hearall);
                 editor.apply();
-                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
                 micro.stopRecording();
+                if(firstTimeAll) {
+                    PlayingAllMessagesDialog allDialog = new PlayingAllMessagesDialog();
+                    allDialog.show(getSupportFragmentManager(), "TAG");
+                    firstTimeAll = false;
+                    editor.putBoolean("firstTimeAll", firstTimeAll);
+                    editor.apply();
+                    while (waitForDialog){
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        //Do nothing and wait
+                    }
+
+
+                }
+                sp.play(answerModeActiveEarcon, 0.3f,0.3f,0,0,1.5f);
+
+                waitForDialog = true;
                 return 3;
             } else if(checkKeyword(micro.result, 4)) { //"abbruch"
                 showToastFeedback(10);
@@ -1052,6 +1110,9 @@ public class MainActivity extends AppCompatActivity {
                     t1.speak("Spreche die Nachricht nochmal ein.", TextToSpeech.QUEUE_ADD, null);
                 }
                 sp.play(errorEarcon,0.3f,0.3f,0,0,1.5f);
+                number_falseContact++;
+                editor.putInt("number_falseContact", number_falseContact);
+                editor.apply();
                 while(t1.isSpeaking()) {
                     //wait until message was played
                 }
@@ -1173,7 +1234,9 @@ public class MainActivity extends AppCompatActivity {
                 if(speech_rate_calls < 4) {
                     t1.speak("Spreche den Kontakt nochmal ein.", TextToSpeech.QUEUE_ADD, null);
                 }
-
+                number_falseContact++;
+                editor.putInt("number_falseContact", number_falseContact);
+                editor.apply();
                 while(t1.isSpeaking()) {
                     //wait until message was played
                 }

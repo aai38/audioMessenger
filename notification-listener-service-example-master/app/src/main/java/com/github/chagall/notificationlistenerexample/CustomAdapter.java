@@ -31,6 +31,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CustomAdapter extends ArrayAdapter<Contact> implements View.OnClickListener {
 
@@ -117,7 +119,13 @@ public class CustomAdapter extends ArrayAdapter<Contact> implements View.OnClick
 
 
             editor = sharedPrefs.edit();
-            holder.checkBox.setChecked(sharedPrefs.getBoolean("CheckValue"+position, false));
+            Set<String> checked = sharedPrefs.getStringSet("checked",new HashSet<>());
+            for (String s: checked) {
+                if(s.equals(holder.name.getText().toString())){
+                    holder.checkBox.setChecked(true);
+                }
+            }
+            //holder.checkBox.setChecked(sharedPrefs.getBoolean("CheckValue"+position, false));
             locked = sharedPrefs.getBoolean("locked",false);
 
 
@@ -193,7 +201,11 @@ public class CustomAdapter extends ArrayAdapter<Contact> implements View.OnClick
                                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
 
-                                            editor.putBoolean("CheckValue" + position, isChecked);
+                                            //editor.putBoolean("CheckValue" + position, isChecked);
+                                            Set<String> checked = sharedPrefs.getStringSet("checked",new HashSet<>());
+
+                                            checked.add(holder.name.getText().toString());
+                                            editor.putStringSet("checked", checked);
                                             editor.putInt("count_favorite", count_favorite + 1);
                                             editor.commit();
                                             favNames.add(holder.name.getText().toString());
@@ -225,7 +237,10 @@ public class CustomAdapter extends ArrayAdapter<Contact> implements View.OnClick
                             Toast.makeText(context, "Deine Favoriten wurden schon gespeichert!", Toast.LENGTH_SHORT).show();
                             buttonView.setChecked(true);
                         } else {
-                            editor.putBoolean("CheckValue"+position, isChecked);
+                            //editor.putBoolean("CheckValue"+position, isChecked);
+                            Set<String> checked = sharedPrefs.getStringSet("checked",new HashSet<>());
+                            checked.remove(holder.name.getText().toString());
+                            editor.putStringSet("checked", checked);
                             editor.putInt("count_favorite", count_favorite-1);
                             editor.commit();
                             favNames.remove(holder.name.getText().toString());
