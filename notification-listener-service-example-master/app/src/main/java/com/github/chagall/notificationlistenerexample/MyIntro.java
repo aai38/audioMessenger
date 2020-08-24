@@ -30,7 +30,7 @@ public class MyIntro extends AppIntro {
 
         addSlide(AppIntroFragment.newInstance(
                 "Nachricht schreiben",
-                "Anschließend gibst du per Sprachbefehl deinen Kontakt ein. Dieser wird dir ebenfalls nochmal vorgelesen. Falls der Kontakt falsch erkannt wurde, 'Nein' oder 'Stop' sagen." +
+                "Anschließend gibst du per Sprachbefehl deinen Kontakt ein. Dieser wird dir ebenfalls nochmal vorgelesen. Falls der Kontakt falsch erkannt wurde, sage 'Nein' oder 'Stop'." +
                         "Du kannst den Kontakt erneut eingeben. Wenn er dreimal falsch erkannt wurde, kannst du den Kontakt von Hand auswählen.",
                 R.drawable.iconfinder_mic_1055024,
                 Color.parseColor("black")));
@@ -51,7 +51,7 @@ public class MyIntro extends AppIntro {
 
         addSlide(AppIntroFragment.newInstance(
                 "Abbruch",
-                "Du hast bei jeder Aktion die Möglichkeit das Signalwort 'Abbruch' zu nennen. Daraufhin wird die laufende Aktion sofort abgebrochen.",
+                "Du hast bei jeder Spracheingabe die Möglichkeit das Signalwort 'Abbruch' zu nennen. Daraufhin wird die laufende Aktion sofort abgebrochen.",
                 R.drawable.baseline_clear_white,
                 Color.parseColor("black")));
 

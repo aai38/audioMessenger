@@ -165,12 +165,14 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver networkReceiver;
     public static boolean waitForDialog = true;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
         activateButtons();
 
         //initialization test
@@ -919,6 +921,7 @@ public class MainActivity extends AppCompatActivity {
 
         //no keyword
         showToastFeedback(11);
+        sp.play(errorEarcon, 0.3f, 0.3f, 0, 0, 1.5f);
         return -1;
     }
 
@@ -1104,8 +1107,10 @@ public class MainActivity extends AppCompatActivity {
                 //wait until message was played
             }
             if(confirmationCheck()) {
+                showToastFeedback(13);
                 return true;
             } else {
+                showToastFeedback(14);
                 if(speech_rate_calls < 4) {
                     t1.speak("Spreche die Nachricht nochmal ein.", TextToSpeech.QUEUE_ADD, null);
                 }
@@ -1174,6 +1179,7 @@ public class MainActivity extends AppCompatActivity {
         }
         long id = TelegramListener.checkContacts(contact);
         if(id == 0){
+            showToastFeedback(12);
             sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
             if(failCalls.fail1.equals("")) {
                 failCalls.fail1 = contact;
@@ -1212,9 +1218,11 @@ public class MainActivity extends AppCompatActivity {
                 //wait until message was played
             }
             if(confirmationCheck()) {
+                showToastFeedback(13);
                 countFails = 0;
                 return id;
             } else {
+                showToastFeedback(14);
                 sp.play(MainActivity.errorEarcon, 0.3f,0.3f,0,0,1.5f);
                 if(failCalls.fail1.equals("")) {
                     failCalls.fail1 = contact;
@@ -1302,6 +1310,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean containsCancel(String text){
         //is "abbruch" in given string?
         if(text.contains("abbruch")){
+            showToastFeedback(10);
             number_cancel++;
             editor.putInt("number_cancel", number_cancel);
             editor.apply();
@@ -1311,8 +1320,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
     public void showToastFeedback(int action){
-        Context context = getApplicationContext();
+
         int duration = Toast.LENGTH_LONG;
         String text;
         switch (action) {
@@ -1349,11 +1360,21 @@ public class MainActivity extends AppCompatActivity {
             case 11:
                 text = "Kein Schlüsselwort erkannt.";
                 break;
+            case 12:
+                text = "Kontakt wurde nicht verstanden oder existiert nicht.";
+                break;
+            case 13:
+                text = "Eingabe wurde bestätigt.";
+                break;
+            case 14:
+                text = "Eingabe wurde abgelehnt.";
+                break;
             default:
                 text = "Momentan keine Aktion möglich.";
                 break;
         }
-        Toast.makeText(context, text, duration).show();
+        runOnUiThread(() -> Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show());
+        //Toast.makeText(context, text, duration).show();
     }
 
     /*private void initializeAudioFocus(){
