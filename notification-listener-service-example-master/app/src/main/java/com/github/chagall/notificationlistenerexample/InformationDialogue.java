@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.util.Log;
@@ -51,18 +52,37 @@ public class InformationDialogue extends AppCompatDialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         writeStringAsFile(message, "data.txt", getContext());
-                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        /*Intent intent = new Intent(Intent.ACTION_SEND);
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                         intent.setType("message/rfc822");
-                        intent.putExtra(Intent.EXTRA_EMAIL  , new String[]{"karolin.bartlmae@uni-ulm.de"});
+                        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"karolin.bartlmae@uni-ulm.de"});
                         intent.putExtra(Intent.EXTRA_SUBJECT, "Daten für Studie");
-                        intent.putExtra(Intent.EXTRA_TEXT   , "Hallo, \n \n anbei die Daten von heute. \n \n Liebe Grüße\n");
+                        intent.putExtra(Intent.EXTRA_TEXT, "Hallo, \n \n anbei die Daten von heute. \n \n Liebe Grüße\n");*/
                         Uri u = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".provider", getContext().getFileStreamPath("data.txt"));
-                        intent.putExtra(Intent.EXTRA_STREAM   , u);
-                        try {
-                            startActivity(Intent.createChooser(intent, "Sende Mail..."));
-                        } catch (android.content.ActivityNotFoundException ex) {
-                            Toast.makeText(getContext(), "Es sind keine Mail-Clients installiert, weshalb die Mail nicht versendet werden kann.", Toast.LENGTH_LONG).show();
+                        if (u == null || u.equals("")) {
+                            Toast.makeText(getContext(), "Die Datei konnte nicht geladen werden", Toast.LENGTH_LONG).show();
+                        } else {
+                            Intent intent = ShareCompat.IntentBuilder.from(getActivity())
+                                    .setType("text/html")
+                                    .getIntent()
+                                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    .putExtra(Intent.EXTRA_STREAM, u)
+                                    .putExtra(Intent.EXTRA_EMAIL, new String[]{"karolin.bartlmae@uni-ulm.de"})
+                                    .putExtra(Intent.EXTRA_SUBJECT, "Daten für Studie")
+                                    .putExtra(Intent.EXTRA_TEXT, "Hallo, \n \n anbei die Daten von heute. \n \n Liebe Grüße\n ");
+                            //intent.putExtra(Intent.EXTRA_STREAM, u);
+
+
+
+                                try {
+                                    startActivity(Intent.createChooser(intent, "Sende Mail..."));
+                                } catch (android.content.ActivityNotFoundException ex) {
+                                    Toast.makeText(getContext(), "Es sind keine Mail-Clients installiert, weshalb die Mail nicht versendet werden kann.", Toast.LENGTH_LONG).show();
+                                }
+
+
+
                         }
                     }
                 })

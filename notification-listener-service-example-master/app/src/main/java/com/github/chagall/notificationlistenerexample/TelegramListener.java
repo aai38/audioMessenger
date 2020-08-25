@@ -1,6 +1,5 @@
 package com.github.chagall.notificationlistenerexample;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Intent;
@@ -9,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -1041,8 +1041,16 @@ public class TelegramListener extends Service {
                     }
                     if(!authorizationError){ //no error
                         mainActivity.setContentView(R.layout.authorization_login_code);
+                        ImageView backButton = mainActivity.findViewById(R.id.backButtonNumber);
                         EditText inputCode = (EditText) mainActivity.findViewById(R.id.loginCode);
                         Button codeButton = (Button) mainActivity.findViewById(R.id.codeButton);
+                        backButton.setOnClickListener(new View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View view) {
+                                showAuthorizationView();
+                            }
+                        });
                         codeButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -1082,4 +1090,6 @@ public class TelegramListener extends Service {
 
         return contactList;
     }
+
+
 }
