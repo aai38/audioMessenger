@@ -854,6 +854,7 @@ public class TelegramListener extends Service {
             case TdApi.AuthorizationStateWaitCode.CONSTRUCTOR: {
                 //String code = promptString("Please enter authentication code: ");
                 //client.send(new TdApi.CheckAuthenticationCode(code), new AuthorizationRequestHandler());
+                showAuthorizationView();
                 break;
             }
             case TdApi.AuthorizationStateWaitRegistration.CONSTRUCTOR: {

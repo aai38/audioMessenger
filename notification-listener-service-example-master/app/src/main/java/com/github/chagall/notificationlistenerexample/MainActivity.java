@@ -162,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager am;
     private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
 
-    private BroadcastReceiver networkReceiver;
     public static boolean waitForDialog = true;
 
 
@@ -408,8 +407,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         finish();
         super.onDestroy();
-        //unregisterReceiver(broadcastReceiver);
-        unregisterReceiver(networkReceiver);
     }
 
     @Override
