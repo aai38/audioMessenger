@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
+
         activateButtons();
 
         //initialization test
@@ -506,7 +507,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
-    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+    private boolean isPermissionToWriteAccepted = false;
+    private String [] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -514,9 +516,11 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode){
             case REQUEST_RECORD_AUDIO_PERMISSION:
                 permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                isPermissionToWriteAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
                 break;
+
         }
-        if (!permissionToRecordAccepted ) finish();
+        if (!permissionToRecordAccepted || !isPermissionToWriteAccepted) finish();
 
     }
 

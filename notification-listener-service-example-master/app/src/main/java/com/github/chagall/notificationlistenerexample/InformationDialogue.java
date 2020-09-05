@@ -59,24 +59,52 @@ public class InformationDialogue extends AppCompatDialogFragment {
                         intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"karolin.bartlmae@uni-ulm.de"});
                         intent.putExtra(Intent.EXTRA_SUBJECT, "Daten für Studie");
                         intent.putExtra(Intent.EXTRA_TEXT, "Hallo, \n \n anbei die Daten von heute. \n \n Liebe Grüße\n");*/
+
                         Uri u = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".provider", getContext().getFileStreamPath("data.txt"));
+                        getContext().grantUriPermission(getContext().getFileStreamPath("data.txt").getPath(),u, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        File f = new File(u.getPath());
+                        long size = f.length();
                         if (u == null || u.equals("")) {
                             Toast.makeText(getContext(), "Die Datei konnte nicht geladen werden", Toast.LENGTH_LONG).show();
-                        } else {
+                        } else if(size == 0) {
+                            Intent intent = ShareCompat.IntentBuilder.from(getActivity())
+                                    .setType("message/rfc822")
+                                    .getIntent()
+                                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    .setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                                    .putExtra(Intent.EXTRA_STREAM, u)
+                                    .putExtra(Intent.EXTRA_EMAIL, new String[]{"karolin.bartlmae@uni-ulm.de"})
+                                    .putExtra(Intent.EXTRA_SUBJECT, "Daten für Studie")
+                                    .putExtra(Intent.EXTRA_TEXT, "Hallo," + System.getProperty("line.separator")+ "anbei die Daten von heute." +System.getProperty("line.separator") + message + System.getProperty("line.separator")+ "Liebe Grüße ");
+                            //intent.putExtra(Intent.EXTRA_STREAM, u);
+
+
+
+                            try {
+                                startActivity(Intent.createChooser(intent, "Sende Mail..."));
+
+                            } catch (android.content.ActivityNotFoundException ex) {
+                                Toast.makeText(getContext(), "Es sind keine Mail-Clients installiert, weshalb die Mail nicht versendet werden kann.", Toast.LENGTH_LONG).show();
+                            }
+
+                        }
+                            else {
                             Intent intent = ShareCompat.IntentBuilder.from(getActivity())
                                     .setType("text/html")
                                     .getIntent()
                                     .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    .setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                                     .putExtra(Intent.EXTRA_STREAM, u)
                                     .putExtra(Intent.EXTRA_EMAIL, new String[]{"karolin.bartlmae@uni-ulm.de"})
                                     .putExtra(Intent.EXTRA_SUBJECT, "Daten für Studie")
-                                    .putExtra(Intent.EXTRA_TEXT, "Hallo, \n \n anbei die Daten von heute. \n \n Liebe Grüße\n ");
+                                    .putExtra(Intent.EXTRA_TEXT, "Hallo," +System.getProperty("line.separator") + "anbei die Daten von heute." + System.getProperty("line.separator")+ "Liebe Grüße ");
                             //intent.putExtra(Intent.EXTRA_STREAM, u);
 
 
 
                                 try {
                                     startActivity(Intent.createChooser(intent, "Sende Mail..."));
+
                                 } catch (android.content.ActivityNotFoundException ex) {
                                     Toast.makeText(getContext(), "Es sind keine Mail-Clients installiert, weshalb die Mail nicht versendet werden kann.", Toast.LENGTH_LONG).show();
                                 }
@@ -97,7 +125,7 @@ public class InformationDialogue extends AppCompatDialogFragment {
         return builder.create();
     }
 
-    public static void writeStringAsFile(final String fileContents, String fileName, Context context) {
+    public static void writeStringAsFile(String fileContents, String fileName, Context context) {
 
         try {
             FileOutputStream fos = new FileOutputStream(fileName);
