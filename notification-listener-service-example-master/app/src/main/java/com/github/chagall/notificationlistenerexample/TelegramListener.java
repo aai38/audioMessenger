@@ -251,17 +251,22 @@ public class TelegramListener extends Service {
     private static void addElementToSummarizedList(TdApi.Message msg){
         boolean isAnimation = false;
         boolean isSticker = false;
+        boolean isPicture = false;
+
         String content = msg.content.toString();
+        content = content.replaceAll("(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", " Eine URL.");
         if( content.contains("MessageSticker")) {
             isSticker = true;
         }
         if( content.contains("MessageAnimation")) {
             isAnimation = true;
         }
+        if( content.contains("MessagePhoto")) {
+            isPicture = true;
+        }
 
-        Pattern pattern = Pattern.compile("text = \"((.|\\n)*)\"");
 
-
+        Pattern pattern = Pattern.compile("text = \"((.|\\n)*)\"\\n(\\s)*entities");
 
         Matcher matcher = pattern.matcher(content);
         boolean isAlreadyInList = false;
@@ -285,6 +290,8 @@ public class TelegramListener extends Service {
                     rec.addText("Ein Sticker. ");
                 } else if(isAnimation) {
                     rec.addText("Ein Gif. ");
+                }else if(isPicture) {
+                    rec.addText("Ein Bild. ");
                 }else{
                     rec.addText(content+". ");
                 }
@@ -386,6 +393,9 @@ public class TelegramListener extends Service {
         String msg = message.content.toString();
         boolean isAnimation = false;
         boolean isSticker = false;
+        boolean isPicture = false;
+
+        msg = msg.replaceAll("(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", " Eine URL.");
 
         if( msg.contains("MessageSticker")) {
             isSticker = true;
@@ -393,8 +403,10 @@ public class TelegramListener extends Service {
         if( msg.contains("MessageAnimation")) {
             isAnimation = true;
         }
-
-        Pattern pattern = Pattern.compile("text = \"((.|\\n)*)\"");
+        if( msg.contains("MessagePhoto")) {
+            isPicture = true;
+        }
+        Pattern pattern = Pattern.compile("text = \"((.|\\n)*)\"\\n(\\s)*entities");
         Matcher matcher = pattern.matcher(msg);
         while (matcher.find()) {
             msg = matcher.group(1);
@@ -420,6 +432,8 @@ public class TelegramListener extends Service {
                         mainActivity.updateOutput(person + " hat dir einen Sticker geschickt.",true, chatID);
                     } else if(isAnimation){
                         mainActivity.updateOutput(person + " hat dir ein Gif geschickt." ,true, chatID);
+                    }else if(isPicture){
+                        mainActivity.updateOutput(person + " hat dir ein Bild geschickt." ,true, chatID);
                     } else {
                         mainActivity.updateOutput("Nachricht von " + person + "§" + msg ,true, chatID);
                     }
