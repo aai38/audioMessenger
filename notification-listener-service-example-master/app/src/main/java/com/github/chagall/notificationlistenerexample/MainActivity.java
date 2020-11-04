@@ -83,6 +83,8 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity {
 
+    public boolean maxSpeedUp = false;
+
     public static MainActivity reference;
     private String[] keywords = {"antworten", "abhören", "schreibe", "alle", "abbruch"};
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
@@ -233,9 +235,15 @@ public class MainActivity extends AppCompatActivity {
 
         calls_before = shared.getInt("calls", 0);
         answers_before = shared.getInt("answers", 0);
-        speech_rate_answers = shared.getInt("rate_answers", 1);
-        speech_rate_calls = shared.getInt("rate_calls", 1);
-        speech_rate_calls = shared.getInt("rate_calls", 1);
+        if(!maxSpeedUp && (speech_rate_calls < 4 && speech_rate_answers < 4)){
+            speech_rate_answers = shared.getInt("rate_answers", 1);
+            speech_rate_calls = shared.getInt("rate_calls", 1);
+        } else {
+            speech_rate_answers = 4;
+            speech_rate_calls = 4;
+        }
+
+
         firstTimeSlide = sharedPreferences.getBoolean("firstTimeSlide", true);
         firstTimeWrite = sharedPreferences.getBoolean("firstTimeWrite", true);
         firstTimeInfo = sharedPreferences.getBoolean("firstTimeInfo", true);
